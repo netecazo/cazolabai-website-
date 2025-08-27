@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - CazoLabAI Enterprise Laboratory Intelligence Platform</title>
+    <meta name="description" content="Choose the perfect CazoLabAI plan for your laboratory. Transparent pricing for Essential, Professional, Enterprise, and Enterprise Plus tiers.">
+    <meta property="og:title" content="CazoLabAI Pricing - Laboratory Intelligence Platform">
+    <meta property="og:description" content="Transform your laboratory operations with AI-powered analytics. Choose from our flexible pricing plans designed for labs of all sizes.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cazolabai.com/pricing">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafc;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            gap: 0.5rem;
+        }
+        
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #2563eb;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .pricing-section {
+            padding: 4rem 0;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .pricing-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .pricing-card.featured {
+            border: 2px solid #2563eb;
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.featured::before {
+            content: "Most Popular";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2563eb;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+        
+        .plan-price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 0.5rem;
+        }
+        
+        .plan-price span {
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+        
+        .plan-users {
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        
+        .plan-features li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .plan-features li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .cta-button {
+            width: 100%;
+            padding: 1rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .cta-button:hover {
+            background: #1d4ed8;
+        }
+        
+        .cta-button.secondary {
+            background: transparent;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+        }
+        
+        .cta-button.secondary:hover {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .features-comparison {
+            margin-top: 4rem;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #1e293b;
+        }
+        
+        footer {
+            background: #1e293b;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-card.featured {
+                transform: none;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="/" class="logo">
+                <img src="../cazolabai-logo.png" alt="CazoLabAI Logo">
+                <span class="logo-text">CazoLabAI</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/pricing" class="active">Pricing</a></li>
+                <li><a href="/dashboard">Dashboard</a></li>
+                <li><a href="/#features">Features</a></li>
+                <li><a href="/#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Simple, Transparent Pricing</h1>
+            <p>Choose the perfect plan for your laboratory. Scale as you grow with our flexible pricing designed for labs of all sizes.</p>
+        </div>
+    </section>
+
+    <section class="pricing-section">
+        <div class="container">
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3 class="plan-name">Essential</h3>
+                    <div class="plan-price">$102<span>/user/month</span></div>
+                    <div class="plan-users">Up to 15 users</div>
+                    <ul class="plan-features">
+                        <li>Basic laboratory analytics</li>
+                        <li>Sample tracking</li>
+                        <li>Standard reporting</li>
+                        <li>Email support</li>
+                        <li>Basic equipment integration</li>
+                        <li>Data export capabilities</li>
+                    </ul>
+                    <a href="/dashboard" class="cta-button secondary">Get Started</a>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h3 class="plan-name">Professional</h3>
+                    <div class="plan-price">$128<span>/user/month</span></div>
+                    <div class="plan-users">Up to 50 users</div>
+                    <ul class="plan-features">
+                        <li>Advanced AI-powered analytics</li>
+                        <li>Real-time monitoring</li>
+                        <li>Custom reporting</li>
+                        <li>Priority support</li>
+                        <li>Advanced equipment integration</li>
+                        <li>API access</li>
+                        <li>Quality control automation</li>
+                        <li>Workflow optimization</li>
+                    </ul>
+                    <a href="/dashboard" class="cta-button">Start Free Trial</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3 class="plan-name">Enterprise</h3>
+                    <div class="plan-price">$195<span>/user/month</span></div>
+                    <div class="plan-users">Up to 200 users</div>
+                    <ul class="plan-features">
+                        <li>Full AI laboratory intelligence</li>
+                        <li>Predictive analytics</li>
+                        <li>Custom integrations</li>
+                        <li>24/7 dedicated support</li>
+                        <li>Advanced security features</li>
+                        <li>Compliance tools</li>
+                        <li>Multi-location support</li>
+                        <li>Advanced user management</li>
+                        <li>Custom training</li>
+                    </ul>
+                    <a href="/dashboard" class="cta-button">Contact Sales</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3 class="plan-name">Enterprise Plus</h3>
+                    <div class="plan-price">$245<span>/user/month</span></div>
+                    <div class="plan-users">Up to 999 users</div>
+                    <ul class="plan-features">
+                        <li>Everything in Enterprise</li>
+                        <li>White-label solutions</li>
+                        <li>Custom AI model training</li>
+                        <li>Dedicated infrastructure</li>
+                        <li>SLA guarantees</li>
+                        <li>Advanced analytics platform</li>
+                        <li>Global deployment</li>
+                        <li>Dedicated account manager</li>
+                        <li>Custom development</li>
+                    </ul>
+                    <a href="/dashboard" class="cta-button">Contact Sales</a>
+                </div>
+            </div>
+
+            <div class="features-comparison">
+                <h2 class="comparison-title">All Plans Include</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">🔒</div>
+                        <h3>Enterprise Security</h3>
+                        <p>Bank-level encryption and security protocols</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">📊</div>
+                        <h3>Real-time Analytics</h3>
+                        <p>Live dashboards and performance metrics</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">🔧</div>
+                        <h3>Equipment Integration</h3>
+                        <p>Seamless connection with lab equipment</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 1rem;">🎯</div>
+                        <h3>99.9% Accuracy</h3>
+                        <p>Precise results with advanced quality control</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 CazoLabAI. All rights reserved. | Enterprise Laboratory Intelligence Platform</p>
+        </div>
+    </footer>
+</body>
+</html>
+
