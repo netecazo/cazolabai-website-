@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CazoLabAI Enterprise Laboratory Intelligence Platform</title>
+    <meta name="description" content="Access your CazoLabAI dashboard to manage laboratory operations, view analytics, and control your AI-powered laboratory intelligence platform.">
+    <meta property="og:title" content="CazoLabAI Dashboard - Laboratory Intelligence Platform">
+    <meta property="og:description" content="Manage your laboratory operations with AI-powered analytics and intelligent insights.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cazolabai.com/dashboard">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+        
+        .dashboard-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .logo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        
+        .subtitle {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .login-form {
+            padding: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1rem;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+            color: #6b7280;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+        
+        .divider span {
+            background: white;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .demo-button {
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            color: #2563eb;
+            border: 2px solid #2563eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-button:hover {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .links a {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin: 0 0.5rem;
+            transition: color 0.3s;
+        }
+        
+        .links a:hover {
+            color: #2563eb;
+        }
+        
+        .features-preview {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .features-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .features-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .feature-item::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .back-link {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            opacity: 0.9;
+            transition: opacity 0.3s;
+        }
+        
+        .back-link:hover {
+            opacity: 1;
+        }
+        
+        .alert {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .dashboard-container {
+                max-width: 100%;
+            }
+            
+            .back-link {
+                position: static;
+                display: block;
+                text-align: center;
+                margin-bottom: 1rem;
+                color: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">← Back to Home</a>
+    
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="header">
+                <div class="logo">
+                    <img src="../cazolabai-logo.png" alt="CazoLabAI Logo">
+                    <span>CazoLabAI</span>
+                </div>
+                <div class="subtitle">Laboratory Intelligence Platform</div>
+            </div>
+            
+            <div class="login-form">
+                <div class="alert">
+                    🚧 Dashboard is currently in development. Contact us for early access!
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="login-button">Access Dashboard</button>
+                </form>
+                
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                
+                <button class="demo-button" onclick="requestDemo()">Request Demo Access</button>
+                
+                <div class="links">
+                    <a href="#" onclick="forgotPassword()">Forgot Password?</a>
+                    <a href="#" onclick="requestAccess()">Request Access</a>
+                </div>
+            </div>
+            
+            <div class="features-preview">
+                <div class="features-title">What you'll get access to:</div>
+                <div class="features-list">
+                    <div class="feature-item">Real-time Analytics</div>
+                    <div class="feature-item">Sample Tracking</div>
+                    <div class="feature-item">Quality Control</div>
+                    <div class="feature-item">Equipment Integration</div>
+                    <div class="feature-item">Custom Reports</div>
+                    <div class="feature-item">24/7 Support</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (email && password) {
+                // Simulate login process
+                const button = document.querySelector('.login-button');
+                button.textContent = 'Connecting...';
+                button.disabled = true;
+                
+                setTimeout(() => {
+                    alert('Dashboard is currently in development. We\'ll contact you soon with access details!\n\nEmail: ' + email);
+                    button.textContent = 'Access Dashboard';
+                    button.disabled = false;
+                    
+                    // Send to contact form or email
+                    window.location.href = 'mailto:elie@cazolabai.com?subject=Dashboard Access Request&body=I would like to request access to the CazoLabAI dashboard.%0A%0AEmail: ' + encodeURIComponent(email);
+                }, 1500);
+            }
+        });
+        
+        function requestDemo() {
+            const email = document.getElementById('email').value || prompt('Please enter your email address:');
+            if (email) {
+                window.location.href = 'mailto:elie@cazolabai.com?subject=Demo Request - CazoLabAI&body=I would like to request a demo of the CazoLabAI platform.%0A%0AEmail: ' + encodeURIComponent(email) + '%0A%0APlease contact me to schedule a demonstration.';
+            }
+        }
+        
+        function forgotPassword() {
+            const email = prompt('Please enter your email address:');
+            if (email) {
+                alert('Password reset instructions will be sent to: ' + email);
+                window.location.href = 'mailto:elie@cazolabai.com?subject=Password Reset Request&body=Please help me reset my password for email: ' + encodeURIComponent(email);
+            }
+        }
+        
+        function requestAccess() {
+            window.location.href = 'mailto:elie@cazolabai.com?subject=Access Request - CazoLabAI&body=I would like to request access to the CazoLabAI platform.%0A%0APlease provide me with information about getting started.';
+        }
+    </script>
+</body>
+</html>
+
