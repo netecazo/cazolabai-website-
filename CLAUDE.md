@@ -17,37 +17,21 @@ triggers a Vercel deploy; the production domain is `cazolabai.com`.
 
 ```
 .
-├── index-3.html        # Homepage (hero, features, contact form)
+├── index.html          # Homepage (hero, features, contact form) — served at /
 ├── dashboard/
 │   └── index.html      # /dashboard — login/access-request page (in development)
 ├── pricing/
 │   └── index.html      # /pricing — four-tier pricing page
-├── dashboard-2.html    # DUPLICATE of dashboard/index.html (orphan, root level)
-├── pricing-2.html      # DUPLICATE of pricing/index.html (orphan, root level)
-├── cazolabai-logo.png  # Logo, referenced as /cazolabai-logo.png (or ../ from subdirs)
+├── cazolabai-logo.png  # Logo, referenced as cazolabai-logo.png (or ../ from subdirs)
 ├── vercel.json         # Static build config
 └── README.md           # One-line description
 ```
 
 ### Page routing
-Clean URLs come from the directory structure: `/dashboard` and `/pricing`
-resolve to their `index.html` files. Internal navigation links point to `/`,
-`/pricing`, and `/dashboard`.
-
-> **Known quirk — the homepage filename.** There is **no root `index.html`**.
-> The homepage content lives in `index-3.html`. Nav links and CTAs point to
-> `/`, which on a static host normally maps to `/index.html`. If the homepage
-> ever fails to load at the domain root, this is why. When making homepage
-> changes, edit `index-3.html`, and be aware the canonical fix is to rename/copy
-> it to `index.html` (confirm with the maintainer before doing so, since the
-> current deploy may rely on a Vercel-side mapping).
-
-### Duplicate files
-`dashboard-2.html` and `pricing-2.html` at the repo root are **byte-identical
-copies** of `dashboard/index.html` and `pricing/index.html`. They are not
-linked from anywhere. If you change a page, the directory version
-(`dashboard/index.html`, `pricing/index.html`) is the live one. Avoid editing
-only the `-2` copies. Consider proposing their removal if asked to clean up.
+Clean URLs come from the directory structure: the domain root `/` serves the
+root `index.html`, and `/dashboard` and `/pricing` resolve to their respective
+`index.html` files. Internal navigation links point to `/`, `/pricing`, and
+`/dashboard`.
 
 ## Conventions
 
@@ -104,12 +88,12 @@ editing a page, update these tags to match its content.
 
 - **Run locally:** open the HTML file directly in a browser, or serve the repo
   root with any static server, e.g. `python3 -m http.server 8000` then visit
-  `http://localhost:8000/index-3.html`, `/dashboard/`, `/pricing/`.
+  `http://localhost:8000/`, `/dashboard/`, `/pricing/`.
 - **No build, no tests, no linters.** There is nothing to compile or install.
   Verify changes by eye in a browser at desktop and mobile widths.
 - **Editing checklist:**
-  1. Edit the live file (directory `index.html` for subpages, `index-3.html`
-     for the homepage).
+  1. Edit the live file (root `index.html` for the homepage, directory
+     `index.html` for subpages).
   2. Keep shared styles/nav/footer/contact-email consistent across pages.
   3. Check the `@media (max-width: 768px)` block still looks right.
   4. Update SEO meta tags if content changed.
