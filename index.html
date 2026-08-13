@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CazoTask - AI Automation for Growing Businesses</title>
+    <meta name="description" content="CazoTask builds custom AI automations that eliminate manual busywork — from lead follow-up to back-office ops — so your team can focus on growth. Join the waitlist.">
+    <meta name="keywords" content="AI automation, business automation, workflow automation, AI agents, process automation, CazoTask">
+    <meta property="og:title" content="CazoTask - AI Automation for Growing Businesses">
+    <meta property="og:description" content="Custom AI automations that eliminate manual busywork, cut costs, and free your team to focus on growth.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cazotask.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CazoTask - AI Automation for Growing Businesses">
+    <meta name="twitter:description" content="Custom AI automations that eliminate manual busywork, cut costs, and free your team to focus on growth.">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="canonical" href="https://cazotask.com">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --ink: #0f172a;
+            --slate: #475569;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --bg: #f8fafc;
+            --brand: #2563eb;
+            --brand-dark: #1d4ed8;
+            --accent: #10b981;
+            --accent-dark: #059669;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--ink);
+            background: var(--bg);
+        }
+
+        .container { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
+
+        .logo { display: flex; align-items: center; text-decoration: none; gap: 0.6rem; }
+
+        .logo-mark {
+            width: 36px; height: 36px; border-radius: 9px;
+            background: linear-gradient(135deg, var(--brand) 0%, #7c3aed 100%);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 1.05rem;
+        }
+
+        .logo-text { font-size: 1.35rem; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+
+        .nav-links { display: flex; list-style: none; gap: 2rem; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--muted); font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--brand); }
+        .nav-cta {
+            background: var(--ink); color: white !important; padding: 0.6rem 1.2rem;
+            border-radius: 8px; font-weight: 600 !important;
+        }
+        .nav-cta:hover { background: #1e293b !important; }
+
+        .hero {
+            text-align: center;
+            padding: 5.5rem 0 5rem;
+            background:
+                radial-gradient(1000px 500px at 50% -10%, rgba(37,99,235,0.15), transparent),
+                linear-gradient(180deg, #0b1120 0%, #0f172a 100%);
+            color: white;
+        }
+
+        .eyebrow {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+            padding: 0.4rem 0.9rem; border-radius: 999px; font-size: 0.85rem;
+            color: #cbd5e1; margin-bottom: 1.5rem;
+        }
+        .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+
+        .hero h1 { font-size: 3.1rem; margin-bottom: 1.1rem; font-weight: 800; letter-spacing: -0.03em; }
+        .hero h1 span { color: #93c5fd; }
+
+        .hero p { font-size: 1.2rem; opacity: 0.85; max-width: 620px; margin: 0 auto 2.5rem; }
+
+        .waitlist-form {
+            display: flex; gap: 0.6rem; max-width: 480px; margin: 0 auto;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .waitlist-form input[type="email"] {
+            flex: 1 1 260px; padding: 0.95rem 1.1rem; border-radius: 8px; border: none;
+            font-size: 1rem; min-width: 220px;
+        }
+        .waitlist-form button {
+            padding: 0.95rem 1.6rem; border-radius: 8px; border: none;
+            background: var(--accent); color: white; font-weight: 700; font-size: 1rem;
+            cursor: pointer; transition: background 0.2s, transform 0.2s;
+        }
+        .waitlist-form button:hover { background: var(--accent-dark); transform: translateY(-1px); }
+        .form-note { font-size: 0.85rem; color: #94a3b8; margin-top: 0.9rem; }
+        .form-success {
+            display: none; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4);
+            color: #d1fae5; padding: 0.9rem 1.2rem; border-radius: 8px; max-width: 480px; margin: 0 auto;
+        }
+
+        .social-proof {
+            padding: 2.5rem 0; background: white; border-bottom: 1px solid var(--line);
+        }
+        .social-proof p { text-align: center; color: var(--muted); font-size: 0.95rem; }
+
+        .problem-section { padding: 5rem 0; background: var(--bg); }
+        .section-title { text-align: center; font-size: 2.3rem; font-weight: 800; margin-bottom: 0.8rem; color: var(--ink); letter-spacing: -0.02em; }
+        .section-subtitle { text-align: center; font-size: 1.1rem; color: var(--muted); max-width: 620px; margin: 0 auto 3rem; }
+
+        .problem-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem; margin-top: 2.5rem;
+        }
+        .problem-card {
+            background: white; border: 1px solid var(--line); border-radius: 14px; padding: 1.75rem;
+        }
+        .problem-card .num { font-weight: 800; color: #cbd5e1; font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .problem-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--ink); }
+        .problem-card p { color: var(--muted); font-size: 0.98rem; }
+
+        .features-section { padding: 5rem 0; background: white; }
+
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.75rem; margin-top: 3rem;
+        }
+
+        .feature-card {
+            padding: 2rem; border-radius: 14px; background: var(--bg);
+            border: 1px solid var(--line); transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(15,23,42,0.08); }
+        .feature-icon { font-size: 2.2rem; margin-bottom: 1rem; }
+        .feature-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--ink); }
+        .feature-description { color: var(--muted); line-height: 1.6; font-size: 0.98rem; }
+
+        .how-section { padding: 5rem 0; background: var(--bg); }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .step { text-align: center; }
+        .step-num {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--ink); color: white;
+            display: flex; align-items: center; justify-content: center; font-weight: 700;
+            margin: 0 auto 1rem; font-size: 1.1rem;
+        }
+        .step h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+        .step p { color: var(--muted); font-size: 0.95rem; }
+
+        .final-cta { padding: 5rem 0; background: linear-gradient(135deg, var(--brand) 0%, #4f46e5 100%); color: white; text-align: center; }
+        .final-cta h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; }
+        .final-cta p { opacity: 0.9; max-width: 560px; margin: 0 auto 2rem; font-size: 1.1rem; }
+
+        footer { background: #0f172a; color: #94a3b8; padding: 3rem 0 2rem; }
+        .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+        .footer-links a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+        .footer-links a:hover { color: white; }
+        .footer-bottom { text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #1e293b; font-size: 0.85rem; }
+
+        .mobile-menu { display: none; }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.1rem; }
+            .features-grid, .problem-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .mobile-menu {
+                display: block; background: none; border: none; color: var(--muted);
+                font-size: 1.5rem; cursor: pointer;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="/" class="logo">
+                <div class="logo-mark">CT</div>
+                <span class="logo-text">CazoTask</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#problem">Why</a></li>
+                <li><a href="#features">What We Do</a></li>
+                <li><a href="#how">How It Works</a></li>
+                <li><a href="#waitlist" class="nav-cta">Join Waitlist</a></li>
+            </ul>
+            <button class="mobile-menu">☰</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="waitlist">
+            <div class="container">
+                <div class="eyebrow"><span class="dot"></span> Now booking early-access clients</div>
+                <h1>Stop paying people to do<br><span>what software should do.</span></h1>
+                <p>CazoTask builds custom AI automations that handle your lead follow-up, data entry, scheduling, and back-office busywork — so your team spends time on work that actually grows the business.</p>
+
+                <form class="waitlist-form" id="waitlistForm">
+                    <input type="email" id="waitlistEmail" name="email" placeholder="you@company.com" required>
+                    <button type="submit">Join the Waitlist</button>
+                </form>
+                <div class="form-success" id="formSuccess">You're on the list. We'll be in touch shortly — thanks for your interest in CazoTask.</div>
+                <p class="form-note">No spam. Just early access, launch pricing, and the occasional automation idea worth stealing.</p>
+            </div>
+        </section>
+
+        <section class="social-proof">
+            <div class="container">
+                <p>Built for founders, agencies, and operations teams tired of copy-pasting between tools all day.</p>
+            </div>
+        </section>
+
+        <section id="problem" class="problem-section">
+            <div class="container">
+                <h2 class="section-title">Your team is drowning in busywork</h2>
+                <p class="section-subtitle">Every hour spent on manual, repetitive tasks is an hour not spent closing deals, serving customers, or building the business.</p>
+
+                <div class="problem-grid">
+                    <div class="problem-card">
+                        <div class="num">01</div>
+                        <h3>Leads go cold</h3>
+                        <p>New inquiries sit unanswered for hours because someone has to manually follow up, qualify, and route them.</p>
+                    </div>
+                    <div class="problem-card">
+                        <div class="num">02</div>
+                        <h3>Data lives everywhere</h3>
+                        <p>Your CRM, inbox, spreadsheets, and invoicing tool don't talk to each other, so someone re-types the same info five times.</p>
+                    </div>
+                    <div class="problem-card">
+                        <div class="num">03</div>
+                        <h3>Growth means more headcount</h3>
+                        <p>Right now, scaling the business means hiring more people to do the same repetitive tasks — instead of automating them once.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features-section">
+            <div class="container">
+                <h2 class="section-title">What CazoTask automates</h2>
+                <p class="section-subtitle">We design, build, and maintain AI-powered workflows tailored to how your business actually operates.</p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3 class="feature-title">Lead Response &amp; Qualification</h3>
+                        <p class="feature-description">Instantly respond to inbound leads, qualify them against your criteria, and route hot prospects straight to sales.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📥</div>
+                        <h3 class="feature-title">Inbox &amp; Ticket Triage</h3>
+                        <p class="feature-description">AI reads, categorizes, and drafts responses to support and sales emails so your team only handles what needs a human.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔗</div>
+                        <h3 class="feature-title">System-to-System Sync</h3>
+                        <p class="feature-description">Connect your CRM, spreadsheets, invoicing, and scheduling tools so data flows automatically, no copy-paste required.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3 class="feature-title">Reporting &amp; Alerts</h3>
+                        <p class="feature-description">Automated daily and weekly reports pulled straight from your live data, delivered wherever your team already works.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗓️</div>
+                        <h3 class="feature-title">Scheduling &amp; Follow-Up</h3>
+                        <p class="feature-description">Automated booking, reminders, and follow-up sequences that keep prospects and clients moving without manual nudges.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🛠️</div>
+                        <h3 class="feature-title">Custom Workflows</h3>
+                        <p class="feature-description">Have a process that's unique to your business? We build bespoke automations for whatever's eating your team's time.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="how" class="how-section">
+            <div class="container">
+                <h2 class="section-title">How it works</h2>
+                <p class="section-subtitle">From first call to live automation, most engagements go live in 1-3 weeks.</p>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <h3>Free Process Audit</h3>
+                        <p>We map where your team is losing the most time to manual work.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <h3>Build &amp; Integrate</h3>
+                        <p>We design and build the automation directly into your existing tools.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <h3>Launch</h3>
+                        <p>Your workflow goes live, monitored and refined during a trial period.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">4</div>
+                        <h3>Support &amp; Scale</h3>
+                        <p>We maintain and expand your automations as your business grows.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="final-cta">
+            <div class="container">
+                <h2>Be first in line for CazoTask</h2>
+                <p>We're onboarding a limited number of early-access clients with founding-member pricing. Join the waitlist to lock in your spot.</p>
+                <form class="waitlist-form" id="waitlistFormBottom" style="margin: 0 auto;">
+                    <input type="email" id="waitlistEmailBottom" name="email" placeholder="you@company.com" required>
+                    <button type="submit">Join the Waitlist</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-inner">
+                <a href="/" class="logo">
+                    <div class="logo-mark">CT</div>
+                    <span class="logo-text" style="color: white;">CazoTask</span>
+                </a>
+                <ul class="footer-links">
+                    <li><a href="mailto:hello@cazotask.com">hello@cazotask.com</a></li>
+                    <li><a href="#waitlist">Join Waitlist</a></li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 CazoTask. All rights reserved. | AI Automation for Growing Businesses
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Replace WAITLIST_ENDPOINT with a real form backend (Formspree, Google Sheets via Apps Script, etc.)
+        // to actually collect emails. Until then, entries fall back to opening a pre-filled email.
+        const WAITLIST_ENDPOINT = ""; // e.g. "https://formspree.io/f/yourFormId"
+
+        async function handleWaitlistSubmit(email, formEl, successEl) {
+            if (WAITLIST_ENDPOINT) {
+                try {
+                    const res = await fetch(WAITLIST_ENDPOINT, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                        body: JSON.stringify({ email })
+                    });
+                    if (!res.ok) throw new Error("Request failed");
+                } catch (err) {
+                    window.location.href = `mailto:hello@cazotask.com?subject=Waitlist%20Signup&body=Please add me to the CazoTask waitlist: ${encodeURIComponent(email)}`;
+                }
+            } else {
+                window.location.href = `mailto:hello@cazotask.com?subject=Waitlist%20Signup&body=Please add me to the CazoTask waitlist: ${encodeURIComponent(email)}`;
+            }
+            formEl.style.display = "none";
+            if (successEl) successEl.style.display = "block";
+        }
+
+        document.getElementById('waitlistForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('waitlistEmail').value;
+            handleWaitlistSubmit(email, this, document.getElementById('formSuccess'));
+        });
+
+        document.getElementById('waitlistFormBottom').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const email = document.getElementById('waitlistEmailBottom').value;
+            handleWaitlistSubmit(email, this, null);
+            alert("You're on the list! We'll be in touch shortly.");
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+</html>
