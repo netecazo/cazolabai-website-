@@ -346,23 +346,25 @@
     </footer>
 
     <script>
-        // Replace WAITLIST_ENDPOINT with a real form backend (Formspree, Google Sheets via Apps Script, etc.)
-        // to actually collect emails. Until then, entries fall back to opening a pre-filled email.
-        const WAITLIST_ENDPOINT = ""; // e.g. "https://formspree.io/f/yourFormId"
+        // Waitlist signups are stored in Supabase (table: cazotask_waitlist).
+        // The anon key below only has INSERT access via row-level security — it's safe to expose client-side.
+        const SUPABASE_URL = "https://weyxewesdowmknygynys.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndleXhld2VzZG93bWtueWd5bnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwMjY2MTQsImV4cCI6MjA2ODYwMjYxNH0.izfGRHcNwZEHLlXu8QPOgC4qsjtw65Ue6LZFU2nMMgk";
 
         async function handleWaitlistSubmit(email, formEl, successEl) {
-            if (WAITLIST_ENDPOINT) {
-                try {
-                    const res = await fetch(WAITLIST_ENDPOINT, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                        body: JSON.stringify({ email })
-                    });
-                    if (!res.ok) throw new Error("Request failed");
-                } catch (err) {
-                    window.location.href = `mailto:hello@cazotask.com?subject=Waitlist%20Signup&body=Please add me to the CazoTask waitlist: ${encodeURIComponent(email)}`;
-                }
-            } else {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/cazotask_waitlist`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "apikey": SUPABASE_ANON_KEY,
+                        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                        "Prefer": "return=minimal"
+                    },
+                    body: JSON.stringify({ email, source: "landing_page" })
+                });
+                if (!res.ok && res.status !== 409) throw new Error("Request failed");
+            } catch (err) {
                 window.location.href = `mailto:hello@cazotask.com?subject=Waitlist%20Signup&body=Please add me to the CazoTask waitlist: ${encodeURIComponent(email)}`;
             }
             formEl.style.display = "none";
