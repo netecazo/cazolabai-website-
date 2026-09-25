@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QC Troubleshooting Assistant - LabReady Pro</title>
+    <meta name="description" content="A guided QC failure investigation that every technologist follows the same way, ending in a printable investigation and corrective-action record.">
+    <link rel="stylesheet" href="../assets/labready.css">
+    <style>
+        .step { display: none; }
+        .step.active { display: block; }
+        .level-row { display: grid; grid-template-columns: 90px 1fr 1fr 1fr; gap: 0.6rem; align-items: end; padding: 0.6rem 0; border-top: 1px solid var(--line); }
+        .level-row:first-of-type { border-top: none; }
+        .level-row b { padding-bottom: 0.6rem; }
+        .group-title { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1.2rem; }
+        .group-title h3 { margin: 0; }
+        .prio { font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; background: var(--brand-soft); color: var(--brand); }
+        #record { display: none; }
+        #record.show { display: block; }
+        #record h2 { font-size: 1.3rem; margin-bottom: 0.2rem; }
+        #record .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 1rem; }
+        #record h3 { font-size: 1rem; margin: 1.2rem 0 0.4rem; }
+        .sig { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+        .sig div { border-top: 1px solid var(--ink); padding-top: 0.3rem; font-size: 0.85rem; }
+        @media (max-width: 700px) {
+            .level-row { grid-template-columns: 1fr 1fr; }
+            .level-row b { grid-column: 1 / -1; padding-bottom: 0; }
+        }
+        @media print {
+            .step, .page-head { display: none !important; }
+            #record { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site">
+        <nav class="container">
+            <a href="../" class="logo"><div class="logo-mark">LR</div><span class="logo-text">LabReady <span>Pro</span></span></a>
+            <a href="../" class="back">← Back to LabReady Pro</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-head">
+            <span class="tag">Demo · QC Troubleshooting Assistant</span>
+            <h1>Work through a QC failure, step by step</h1>
+            <p>Every tech investigates the same way, in the same order, and it ends in a signed record you can put in front of an inspector. Your draft saves in this browser only. Don't enter patient identifiers.</p>
+        </div>
+
+        <div class="steps-nav no-print" id="stepsNav"></div>
+
+        <!-- Step 1: event -->
+        <section class="step" data-title="1. The event">
+            <div class="card">
+                <h2>What happened?</h2>
+                <p class="hint">Record the QC event exactly as you saw it.</p>
+                <div class="field-grid">
+                    <div><label class="lbl" for="analyte">Analyte / test</label><input type="text" id="analyte" placeholder="e.g. Glucose"></div>
+                    <div><label class="lbl" for="instrument">Instrument</label><input type="text" id="instrument" placeholder="e.g. Cobas Pure 1 (c303)"></div>
+                    <div><label class="lbl" for="evDate">Date</label><input type="date" id="evDate"></div>
+                    <div><label class="lbl" for="evTime">Time</label><input type="time" id="evTime"></div>
+                    <div><label class="lbl" for="ctrlMaterial">Control material &amp; lot</label><input type="text" id="ctrlMaterial" placeholder="e.g. MultiQual lot 45870"></div>
+                    <div><label class="lbl" for="reagentLot">Reagent lot / pack</label><input type="text" id="reagentLot"></div>
+                    <div><label class="lbl" for="lastCal">Last calibration (date)</label><input type="date" id="lastCal"></div>
+                    <div><label class="lbl" for="tech">Performed by (initials)</label><input type="text" id="tech"></div>
+                </div>
+                <h3>Control results</h3>
+                <div id="levels"></div>
+            </div>
+        </section>
+
+        <!-- Step 2: pattern -->
+        <section class="step" data-title="2. Pattern">
+            <div class="card">
+                <h2>Which rule, which pattern?</h2>
+                <p class="hint">The rule that fired tells you whether to think random or systematic first.</p>
+                <label class="lbl">Rule violated</label>
+                <div class="radio-row" id="ruleRow"></div>
+                <h3>Which levels are affected?</h3>
+                <div class="radio-row" id="levelsRow"></div>
+                <h3>Direction</h3>
+                <div class="radio-row" id="dirRow"></div>
+                <div id="interpretation"></div>
+            </div>
+        </section>
+
+        <!-- Step 3: immediate actions -->
+        <section class="step" data-title="3. Immediate actions">
+            <div class="card">
+                <h2>Before you touch anything</h2>
+                <p class="hint">Protect patients first. Then investigate.</p>
+                <div id="immediateList"></div>
+                <div class="callout warn"><b>Don't rerun controls until they pass.</b>A single repeat with fresh control may be reasonable when random error is suspected and your procedure allows it. Repeating again and again hides the problem and isn't an investigation.</div>
+            </div>
+        </section>
+
+        <!-- Step 4: investigation -->
+        <section class="step" data-title="4. Investigate">
+            <div class="card">
+                <h2>Structured investigation</h2>
+                <p class="hint">Ordered for the pattern you picked. Tick what you checked and write what you found, including "no issue found".</p>
+                <div id="investigation"></div>
+            </div>
+        </section>
+
+        <!-- Step 5: resolution -->
+        <section class="step" data-title="5. Resolve">
+            <div class="card">
+                <h2>Root cause and corrective action</h2>
+                <div class="field-grid">
+                    <div class="full"><label class="lbl" for="rootCause">Most likely root cause</label>
+                        <select id="rootCause">
+                            <option value="">Select…</option>
+                            <option>Control material (deteriorated, mis-reconstituted, evaporated, wrong level)</option>
+                            <option>Reagent (deteriorated, on-board stability exceeded, new lot, contamination)</option>
+                            <option>Calibration (expired, failed, shifted, wrong calibrator lot)</option>
+                            <option>Instrument (probe, mixer, lamp, cuvette, electrode, temperature)</option>
+                            <option>Maintenance overdue or incomplete</option>
+                            <option>Environment (temperature, humidity, water quality, power)</option>
+                            <option>Operator / procedural error</option>
+                            <option>Random error, no assignable cause after investigation</option>
+                            <option>Other (describe below)</option>
+                        </select>
+                    </div>
+                    <div class="full"><label class="lbl" for="actionTaken">Corrective action taken</label><textarea id="actionTaken" rows="3" placeholder="e.g. Opened new control vial, recalibrated glucose, verified with both levels."></textarea></div>
+                    <div><label class="lbl" for="repeatQc">Repeat QC after correction</label>
+                        <select id="repeatQc"><option value="">Select…</option><option>Acceptable, all levels</option><option>Still unacceptable, escalated</option></select>
+                    </div>
+                    <div><label class="lbl" for="resumeTime">Patient testing resumed at</label><input type="time" id="resumeTime"></div>
+                </div>
+                <h3>Patient look-back</h3>
+                <p class="hint">Patients run since the last acceptable QC may be affected.</p>
+                <div class="field-grid">
+                    <div><label class="lbl" for="lastGoodQc">Last acceptable QC (date/time)</label><input type="text" id="lastGoodQc" placeholder="e.g. 25 Sep 02:10"></div>
+                    <div><label class="lbl" for="nPatients">Patient samples in that window</label><input type="number" id="nPatients" min="0"></div>
+                    <div><label class="lbl" for="nRerun">Samples rerun</label><input type="number" id="nRerun" min="0"></div>
+                    <div><label class="lbl" for="lookbackOutcome">Outcome</label>
+                        <select id="lookbackOutcome">
+                            <option value="">Select…</option>
+                            <option>No patient results released in window</option>
+                            <option>Reruns within allowable difference, no corrections</option>
+                            <option>Reruns exceeded allowable difference, corrected reports issued</option>
+                            <option>Referred to supervisor/director for decision</option>
+                        </select>
+                    </div>
+                    <div class="full"><label class="lbl" for="notified">Who was notified (clinicians, supervisor, director)</label><input type="text" id="notified"></div>
+                    <div class="full"><label class="lbl" for="followUp">Follow-up / prevention</label><textarea id="followUp" rows="2" placeholder="e.g. Review glucose Level 3 on LJ chart for 5 days; remind staff of control open-vial stability."></textarea></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 6: record -->
+        <section class="step" data-title="6. Record">
+            <div class="card">
+                <h2>Your investigation record</h2>
+                <p class="hint">Check it, print it or save it as PDF, then pass it to your supervisor for review.</p>
+                <div class="actions" style="margin-bottom:0">
+                    <button class="btn primary" id="printBtn" type="button">Print / Save as PDF</button>
+                    <button class="btn ghost" id="loadExample" type="button">Load the example case</button>
+                    <button class="btn ghost" id="resetBtn" type="button">Start a new investigation</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="actions no-print">
+            <button class="btn ghost" id="prevBtn" type="button">← Back</button>
+            <button class="btn" id="nextBtn" type="button">Next →</button>
+        </div>
+
+        <section id="record" class="card"></section>
+
+        <p class="disclaimer">LabReady Pro is a training and documentation-support tool. It doesn't replace your laboratory's procedures, the manufacturer's instructions, or the judgement of your supervisor and laboratory director, and it makes no patient-care decisions.</p>
+    </main>
+
+    <footer class="site">LabReady Pro · Clinical Laboratory Training. Competency. Compliance. · <a href="../">labready</a></footer>
+
+    <script>
+    (function () {
+        const LEVELS = ["Level 1", "Level 2", "Level 3"];
+
+        const RULES = {
+            "1-2s": { type: "warning", text: "1-2s is a warning in a multirule procedure, not a rejection by itself. Inspect the other rules and the LJ chart before deciding. If your lab uses 1-2s as a rejection rule, follow your procedure." },
+            "1-3s": { type: "random", text: "1-3s usually points to random error, or a large systematic shift. Think of something that affected this one measurement: bubble, clot, short sample, a bad control vial." },
+            "2-2s": { type: "systematic", text: "2-2s points to systematic error: something has shifted everything in one direction. Think calibration, reagent, control lot or instrument drift." },
+            "R-4s": { type: "random", text: "R-4s (one control above +2 SD, another below -2 SD in the same run) points to random error. Look at precision: pipetting, probe, mixing, bubbles, reagent or sample handling." },
+            "4-1s": { type: "systematic", text: "4-1s is a smaller systematic shift building up over time. Look at what changed recently: reagent or calibrator lot, calibration age, maintenance, lamp or electrode ageing." },
+            "10x": { type: "systematic", text: "10x (ten results on one side of the mean) is a sustained systematic shift. Check whether a lot change or recalibration lines up with where the shift began." },
+            "Other": { type: "unknown", text: "Describe the failure in the notes and work through every investigation group below." }
+        };
+
+        const LEVEL_PATTERNS = {
+            "One level only": "Only one level affected: suspect that control vial or material first (reconstitution, open-vial stability, evaporation, storage). If it's only the high or low level, also consider a concentration-dependent problem such as calibration at the extremes of the range.",
+            "Some levels": "More than one level, but not all: look for a concentration-dependent effect (slope or calibration problem) and plot the levels together.",
+            "All levels": "All levels affected: the problem is probably common to the whole test. Reagent, calibration or instrument come before control material."
+        };
+
+        const IMMEDIATE = [
+            ["hold", "Stop reporting patient results for this test on this instrument", "Hold results from the run that failed."],
+            ["flag", "Flag or hold patient results already in the run", "Nothing from this run goes out until QC is acceptable."],
+            ["notify", "Notify the charge tech or supervisor", "Especially if stat or critical testing is delayed."],
+            ["backup", "Move urgent testing to a backup instrument or method if available", "Confirm the backup's QC is in."],
+            ["lj", "Look at the Levey-Jennings chart, not just today's point", "Trend? Shift? When did it start?"]
+        ];
+
+        const GROUPS = {
+            control: { title: "Control material", items: [
+                ["Correct control and level loaded / correct position", ""],
+                ["Reconstitution: correct diluent, volume, mixing, wait time", ""],
+                ["Open-vial stability and expiry", ""],
+                ["Storage temperature and thawing", ""],
+                ["Evaporation (cap left off, sat on board too long)", ""],
+                ["Fresh vial or new aliquot tested", ""]
+            ]},
+            reagent: { title: "Reagent", items: [
+                ["Reagent lot changed recently", ""],
+                ["On-board stability / open-pack expiry", ""],
+                ["Reagent volume, bubbles, precipitate or contamination", ""],
+                ["Storage conditions before loading", ""],
+                ["Fresh reagent pack tested", ""]
+            ]},
+            calibration: { title: "Calibration", items: [
+                ["Calibration status and age", ""],
+                ["Calibrator lot, reconstitution and expiry", ""],
+                ["Calibration curve / factor compared with previous", ""],
+                ["Recalibration performed and passed", ""]
+            ]},
+            instrument: { title: "Instrument & maintenance", items: [
+                ["Error flags, alarms or instrument messages", ""],
+                ["Maintenance log: daily/weekly/monthly up to date", ""],
+                ["Sample and reagent probes, mixers, wash stations", ""],
+                ["Cuvettes, lamp, electrodes or detector checks", ""],
+                ["Incubator / reaction temperature", ""]
+            ]},
+            environment: { title: "Environment", items: [
+                ["Room temperature and humidity", ""],
+                ["Water quality (if applicable)", ""],
+                ["Power interruptions or recent service", ""]
+            ]},
+            operator: { title: "Operator & procedure", items: [
+                ["Correct procedure followed", ""],
+                ["Recent changes in staff, workflow or SOP", ""],
+                ["Other tests on the same instrument also affected", ""]
+            ]}
+        };
+
+        const ORDER = {
+            random: ["control", "instrument", "reagent", "operator", "calibration", "environment"],
+            systematic: ["calibration", "reagent", "control", "instrument", "environment", "operator"],
+            warning: ["control", "calibration", "reagent", "instrument", "environment", "operator"],
+            unknown: ["control", "reagent", "calibration", "instrument", "environment", "operator"]
+        };
+
+        const EXAMPLE = {
+            analyte: "Glucose", instrument: "Cobas Pure 1 (c303)", evDate: "2026-09-25", evTime: "03:40",
+            ctrlMaterial: "MultiQual lot 45870", reagentLot: "GLU3 lot 7712, pack opened 18 Sep", lastCal: "2026-09-19", tech: "EC",
+            lv0: "92", lv0sd: "0.4", lv0st: "In", lv1: "", lv1sd: "", lv1st: "", lv2: "318", lv2sd: "2.4", lv2st: "Out",
+            rule: "1-2s", levels: "One level only", dir: "High",
+            rootCause: "Control material (deteriorated, mis-reconstituted, evaporated, wrong level)",
+            actionTaken: "Level 3 vial had been left uncapped on the bench. Opened fresh Level 3 vial, reran both levels.",
+            repeatQc: "Acceptable, all levels", resumeTime: "04:05", lastGoodQc: "25 Sep 00:15", nPatients: "0", nRerun: "0",
+            lookbackOutcome: "No patient results released in window", notified: "Charge tech (JM)",
+            followUp: "Reminder to night shift on capping controls between runs. Watch Level 3 on LJ chart for 5 days."
+        };
+
+        const STORAGE_KEY = "labready.qc-assistant.draft";
+        let state = {};
+        let current = 0;
+        const steps = Array.from(document.querySelectorAll(".step"));
+
+        function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+        function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch (e) { return {}; } }
+        function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+        function buildLevels() {
+            document.getElementById("levels").innerHTML = LEVELS.map((name, i) => `
+                <div class="level-row">
+                    <b>${name}</b>
+                    <div><label class="lbl" for="lv${i}">Result</label><input type="text" id="lv${i}"></div>
+                    <div><label class="lbl" for="lv${i}sd">SD from mean</label><input type="text" id="lv${i}sd" placeholder="e.g. 2.4"></div>
+                    <div><label class="lbl" for="lv${i}st">Status</label>
+                        <select id="lv${i}st"><option value="">Not run</option><option>In</option><option>Out</option><option>Warning</option></select>
+                    </div>
+                </div>`).join("");
+        }
+
+        function radios(containerId, name, options) {
+            document.getElementById(containerId).innerHTML = options.map(o =>
+                `<label><input type="radio" name="${name}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join("");
+        }
+
+        function buildImmediate() {
+            document.getElementById("immediateList").innerHTML = IMMEDIATE.map(([id, title, sub]) => `
+                <label class="check"><input type="checkbox" id="im_${id}"><div class="body"><b>${title}</b><span>${sub}</span></div></label>`).join("");
+        }
+
+        function errorType() { return (RULES[state.rule] || { type: "unknown" }).type; }
+
+        function buildInvestigation() {
+            const order = ORDER[errorType()];
+            document.getElementById("investigation").innerHTML = order.map((key, gi) => {
+                const g = GROUPS[key];
+                return `<div class="group-title"><h3>${g.title}</h3>${gi < 2 ? '<span class="prio">Check first</span>' : ""}</div>` +
+                    g.items.map(([t], ii) => `
+                        <div class="check"><input type="checkbox" id="inv_${key}_${ii}"><div class="body"><b>${esc(t)}</b>
+                        <input type="text" id="invn_${key}_${ii}" placeholder="Finding"></div></div>`).join("");
+            }).join("");
+            bindFields(document.getElementById("investigation"));
+        }
+
+        function renderInterpretation() {
+            const out = [];
+            const r = RULES[state.rule];
+            if (r) {
+                const cls = r.type === "systematic" ? "warn" : r.type === "random" ? "info" : "info";
+                const label = { random: "Think random error first", systematic: "Think systematic error first", warning: "Warning rule", unknown: "Unclassified" }[r.type];
+                out.push(`<div class="callout ${cls}"><b>${label}</b>${r.text}</div>`);
+            }
+            if (LEVEL_PATTERNS[state.levels]) out.push(`<div class="callout info"><b>${esc(state.levels)}</b>${LEVEL_PATTERNS[state.levels]}</div>`);
+            if (state.dir === "Opposite directions") out.push(`<div class="callout info"><b>Opposite directions</b>Levels moving apart suggests imprecision (random error) rather than a shift.</div>`);
+            document.getElementById("interpretation").innerHTML = out.join("");
+        }
+
+        function bindFields(root) {
+            root.querySelectorAll("input, select, textarea").forEach(el => {
+                const key = el.type === "radio" ? el.name : el.id;
+                if (!key) return;
+                if (el.type === "checkbox") el.checked = !!state[key];
+                else if (el.type === "radio") el.checked = state[key] === el.value;
+                else if (state[key] != null) el.value = state[key];
+                const handler = () => {
+                    state[key] = el.type === "checkbox" ? el.checked : el.value;
+                    save();
+                    if (key === "rule" || key === "levels" || key === "dir") renderInterpretation();
+                };
+                el.oninput = handler; el.onchange = handler;
+            });
+        }
+
+        function renderNav() {
+            document.getElementById("stepsNav").innerHTML = steps.map((s, i) =>
+                `<button type="button" data-i="${i}" class="${i === current ? "active" : i < current ? "done" : ""}">${s.dataset.title}</button>`).join("");
+            document.querySelectorAll("#stepsNav button").forEach(b => b.onclick = () => go(+b.dataset.i));
+        }
+
+        function go(i) {
+            current = Math.max(0, Math.min(steps.length - 1, i));
+            steps.forEach((s, j) => s.classList.toggle("active", j === current));
+            if (current === 3) buildInvestigation();
+            if (current === steps.length - 1) renderRecord();
+            document.getElementById("record").classList.toggle("show", current === steps.length - 1);
+            document.getElementById("prevBtn").style.visibility = current === 0 ? "hidden" : "visible";
+            document.getElementById("nextBtn").style.visibility = current === steps.length - 1 ? "hidden" : "visible";
+            renderNav();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function renderRecord() {
+            const s = state;
+            const levelRows = LEVELS.map((n, i) => s[`lv${i}st`] ? `<tr><td>${n}</td><td>${esc(s["lv" + i])}</td><td>${esc(s["lv" + i + "sd"])}</td><td>${esc(s["lv" + i + "st"])}</td></tr>` : "").join("");
+            const imm = IMMEDIATE.map(([id, t]) => `<li>${s["im_" + id] ? "☑" : "☐"} ${t}</li>`).join("");
+            const inv = ORDER[errorType()].map(key => {
+                const rows = GROUPS[key].items.map(([t], ii) => s[`inv_${key}_${ii}`] || s[`invn_${key}_${ii}`]
+                    ? `<tr><td>${GROUPS[key].title}</td><td>${esc(t)}</td><td>${esc(s[`invn_${key}_${ii}`] || "Checked")}</td></tr>` : "").join("");
+                return rows;
+            }).join("");
+            const r = RULES[s.rule];
+            document.getElementById("record").innerHTML = `
+                <h2>QC Investigation &amp; Corrective Action Record</h2>
+                <p class="meta">${esc(s.analyte) || "Test"} · ${esc(s.instrument) || "Instrument"} · ${esc(s.evDate)} ${esc(s.evTime)} · Tech ${esc(s.tech)}</p>
+                <div class="table-wrap"><table class="doc">
+                    <tr><th>Control material &amp; lot</th><td>${esc(s.ctrlMaterial)}</td><th>Reagent lot</th><td>${esc(s.reagentLot)}</td></tr>
+                    <tr><th>Last calibration</th><td>${esc(s.lastCal)}</td><th>Rule violated</th><td>${esc(s.rule)}${r ? " (" + r.type + ")" : ""}</td></tr>
+                    <tr><th>Levels affected</th><td>${esc(s.levels)}</td><th>Direction</th><td>${esc(s.dir)}</td></tr>
+                </table></div>
+                <h3>Control results</h3>
+                <div class="table-wrap"><table class="doc"><tr><th>Level</th><th>Result</th><th>SD</th><th>Status</th></tr>${levelRows || '<tr><td colspan="4">Not recorded</td></tr>'}</table></div>
+                <h3>Immediate actions</h3><ul style="list-style:none">${imm}</ul>
+                <h3>Investigation</h3>
+                <div class="table-wrap"><table class="doc"><tr><th>Area</th><th>Check</th><th>Finding</th></tr>${inv || '<tr><td colspan="3">No checks recorded</td></tr>'}</table></div>
+                <h3>Resolution</h3>
+                <div class="table-wrap"><table class="doc">
+                    <tr><th>Root cause</th><td>${esc(s.rootCause)}</td></tr>
+                    <tr><th>Corrective action</th><td>${esc(s.actionTaken)}</td></tr>
+                    <tr><th>Repeat QC</th><td>${esc(s.repeatQc)}</td></tr>
+                    <tr><th>Patient testing resumed</th><td>${esc(s.resumeTime)}</td></tr>
+                    <tr><th>Look-back window</th><td>Since ${esc(s.lastGoodQc)}: ${esc(s.nPatients)} samples, ${esc(s.nRerun)} rerun</td></tr>
+                    <tr><th>Look-back outcome</th><td>${esc(s.lookbackOutcome)}</td></tr>
+                    <tr><th>Notified</th><td>${esc(s.notified)}</td></tr>
+                    <tr><th>Follow-up</th><td>${esc(s.followUp)}</td></tr>
+                </table></div>
+                <div class="sig"><div>Performed by / date</div><div>Supervisor review / date</div></div>
+                <p class="disclaimer">Generated with LabReady Pro. Follow your laboratory's procedures and the manufacturer's instructions.</p>`;
+        }
+
+        function init() {
+            state = load();
+            buildLevels();
+            radios("ruleRow", "rule", Object.keys(RULES));
+            radios("levelsRow", "levels", Object.keys(LEVEL_PATTERNS));
+            radios("dirRow", "dir", ["High", "Low", "Opposite directions", "Mixed / unclear"]);
+            buildImmediate();
+            document.querySelectorAll(".step").forEach(s => bindFields(s));
+            renderInterpretation();
+
+            document.getElementById("prevBtn").onclick = () => go(current - 1);
+            document.getElementById("nextBtn").onclick = () => go(current + 1);
+            document.getElementById("printBtn").onclick = () => { renderRecord(); window.print(); };
+            document.getElementById("loadExample").onclick = () => {
+                state = Object.assign({}, EXAMPLE, { im_hold: true, im_flag: true, im_notify: true, im_lj: true,
+                    inv_control_0: true, inv_control_2: true, inv_control_4: true, invn_control_4: "Level 3 vial found uncapped on bench since 00:15",
+                    inv_control_5: true, invn_control_5: "Fresh Level 3 vial: 291 mg/dL (+0.3 SD)" });
+                save(); document.querySelectorAll(".step").forEach(s => bindFields(s)); renderInterpretation(); go(0);
+            };
+            document.getElementById("resetBtn").onclick = () => {
+                if (!confirm("Clear this investigation and start a new one?")) return;
+                state = {}; save();
+                document.querySelectorAll(".step input, .step select, .step textarea").forEach(el => {
+                    if (el.type === "checkbox" || el.type === "radio") el.checked = false; else el.value = "";
+                });
+                renderInterpretation(); go(0);
+            };
+            go(0);
+        }
+
+        init();
+    })();
+    </script>
+</body>
+</html>

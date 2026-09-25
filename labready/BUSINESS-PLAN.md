@@ -7,6 +7,21 @@ The course is the entry product. The competency system is the recurring product.
 
 ---
 
+## Build status
+
+| Piece | Where | State |
+|---|---|---|
+| Landing page with pilot form | `labready/index.html` | Live on branch; form needs `supabase-schema.sql` run |
+| QC Troubleshooting Assistant (demo) | `labready/qc-assistant/` | Working in-browser; drafts saved locally, prints a signed record |
+| QC Failure Investigation Checklist (lead magnet) | `labready/resources/qc-failure-checklist.html` | Ready to print / share |
+| Six-element competency record | `labready/forms/competency-record.html` | Ready; fill on screen or print blank |
+| Module 1: QC Fundamentals & Westgard Rules | `labready/content/module-01-qc-fundamentals.md` | Draft v0.1, needs Elie's review of **[CHECK]** items |
+| Module 2: QC Failure Investigation | `labready/content/module-02-qc-failure-investigation.md` | Draft v0.1, needs Elie's review of **[CHECK]** items |
+| Modules 3–10 | — | Not started |
+| Multi-user app (logins, dashboard, sign-off) | — | Not started; build after 2–3 pilots use the concierge version |
+
+---
+
 ## 1. Positioning
 
 | | |

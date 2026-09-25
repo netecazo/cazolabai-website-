@@ -171,6 +171,9 @@
         .addons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.4rem 1.5rem; font-size: 0.93rem; color: var(--slate); }
         .addons-grid b { color: var(--ink); }
 
+        a.try-card { text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; }
+        a.try-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(11,31,46,0.08); }
+
         .roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.8rem; }
         .road { border: 1px solid var(--line); border-radius: 12px; padding: 1rem; background: var(--bg); }
         .road b { display: block; }
@@ -204,7 +207,7 @@
 
         footer { background: #06141f; color: #94a3b8; padding: 3rem 0 2rem; }
         .footer-inner { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
-        .footer-links { display: flex; gap: 1.5rem; list-style: none; }
+        .footer-links { display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; list-style: none; }
         .footer-links a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
         .footer-links a:hover { color: white; }
         .disclaimer { font-size: 0.78rem; color: #64748b; margin-top: 1.8rem; line-height: 1.5; }
@@ -230,6 +233,7 @@
                 <li><a href="#problem">Why</a></li>
                 <li><a href="#system">The System</a></li>
                 <li><a href="#modules">Chemistry V1</a></li>
+                <li><a href="#try">Try It</a></li>
                 <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#pilot" class="nav-cta">Request a Pilot</a></li>
             </ul>
@@ -244,7 +248,7 @@
                 <p class="lead">LabReady Pro is a competency, training and compliance system for clinical laboratories. It's built by a medical laboratory technologist with nearly 40 years at the bench, so it's written for what actually happens when QC fails at 2 AM and the ER is waiting.</p>
                 <div class="hero-actions">
                     <a href="#pilot" class="btn btn-primary">Request a founding-lab pilot</a>
-                    <a href="#system" class="btn btn-ghost">See what's inside</a>
+                    <a href="qc-assistant/" class="btn btn-ghost">Try the QC assistant</a>
                 </div>
             </div>
 
@@ -395,6 +399,30 @@
                 <div class="card"><div class="num">08</div><h3>Critical Values, Delta Checks &amp; Result Review</h3><p>Notification, read-back, documentation and suspicious results.</p></div>
                 <div class="card"><div class="num">09</div><h3>Pre-Analytical &amp; Specimen Integrity</h3><p>Haemolysis, icterus, lipaemia, mislabels, contamination and rejection.</p></div>
                 <div class="card"><div class="num">10</div><h3>Maintenance, Troubleshooting &amp; Downtime</h3><p>Daily to annual maintenance, common failures and backup procedures.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="try">
+        <div class="container">
+            <h2 class="section-title">Try it now, free</h2>
+            <p class="section-subtitle">Working pieces of the system you can use today. No sign-up.</p>
+            <div class="grid">
+                <a class="card try-card" href="qc-assistant/">
+                    <span class="tag">Interactive</span>
+                    <h3>QC Troubleshooting Assistant</h3>
+                    <p>Walk a QC failure from "hold patients" to a signed investigation record. Load the 03:40 glucose case to see how it works.</p>
+                </a>
+                <a class="card try-card" href="resources/qc-failure-checklist.html">
+                    <span class="tag">Printable</span>
+                    <h3>QC Failure Investigation Checklist</h3>
+                    <p>One page to pin by the analyser: what to do first, how to read the pattern, what to check, what to document.</p>
+                </a>
+                <a class="card try-card" href="forms/competency-record.html">
+                    <span class="tag">Template</span>
+                    <h3>Six-Element Competency Record</h3>
+                    <p>One employee, one test system, all six assessment methods, with chemistry evidence pre-filled and sign-off lines.</p>
+                </a>
             </div>
         </div>
     </section>
@@ -564,6 +592,8 @@
                 <ul class="footer-links">
                     <li><a href="#system">The System</a></li>
                     <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="qc-assistant/">QC Assistant</a></li>
+                    <li><a href="resources/qc-failure-checklist.html">Free Checklist</a></li>
                     <li><a href="#pilot">Pilot</a></li>
                     <li><a href="/">CazoTask</a></li>
                 </ul>

@@ -1,0 +1,133 @@
+/* Shared styles for LabReady Pro tool and resource pages. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --ink: #0b1f2e;
+    --slate: #3f5566;
+    --muted: #5f7482;
+    --line: #dde6ec;
+    --bg: #f5f8fa;
+    --card: #ffffff;
+    --brand: #0e7490;
+    --brand-soft: #e0f2f7;
+    --accent: #16a34a;
+    --accent-dark: #15803d;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --danger: #b91c1c;
+    --danger-soft: #fee2e2;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--bg);
+}
+
+.container { max-width: 900px; margin: 0 auto; padding: 0 16px; }
+
+header.site {
+    background: white; border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 100;
+}
+header.site nav { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 0; gap: 1rem; }
+.logo { display: flex; align-items: center; text-decoration: none; gap: 0.6rem; }
+.logo-mark {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 800; font-size: 0.95rem;
+}
+.logo-text { font-size: 1.2rem; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+.logo-text span { color: var(--brand); }
+header.site a.back { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+header.site a.back:hover { color: var(--brand); }
+
+.page-head { padding: 2.5rem 0 1.5rem; }
+.page-head .tag {
+    display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--brand); margin-bottom: 0.4rem;
+}
+.page-head h1 { font-size: 2rem; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 0.6rem; }
+.page-head p { color: var(--slate); max-width: 680px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.2rem; }
+.card h2 { font-size: 1.2rem; margin-bottom: 0.3rem; }
+.card h3 { font-size: 1rem; margin: 1rem 0 0.4rem; }
+.card p.hint { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.field-grid .full { grid-column: 1 / -1; }
+label.lbl { font-size: 0.82rem; font-weight: 600; color: var(--slate); display: block; margin-bottom: 0.25rem; }
+input[type=text], input[type=date], input[type=time], input[type=number], select, textarea {
+    width: 100%; padding: 0.65rem 0.8rem; border-radius: 8px; border: 1px solid var(--line);
+    font-size: 0.95rem; font-family: inherit; background: white; color: var(--ink);
+}
+textarea { resize: vertical; }
+
+.check { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.65rem 0; border-top: 1px solid var(--line); }
+.check:first-of-type { border-top: none; }
+.check input[type=checkbox] { margin-top: 0.3rem; width: 18px; height: 18px; flex: none; accent-color: var(--brand); }
+.check .body { flex: 1; }
+.check .body b { display: block; font-size: 0.95rem; }
+.check .body span { color: var(--muted); font-size: 0.88rem; }
+.check .body input[type=text] { margin-top: 0.4rem; font-size: 0.88rem; padding: 0.45rem 0.7rem; }
+
+.radio-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.radio-row label {
+    border: 1px solid var(--line); border-radius: 999px; padding: 0.4rem 0.9rem;
+    font-size: 0.88rem; cursor: pointer; background: white;
+}
+.radio-row input { display: none; }
+.radio-row input:checked + span { color: var(--brand); font-weight: 700; }
+.radio-row label:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+
+.callout { border-radius: 10px; padding: 0.9rem 1.1rem; font-size: 0.92rem; margin: 0.8rem 0; }
+.callout.info { background: var(--brand-soft); color: #0b4a5c; }
+.callout.warn { background: var(--warn-soft); color: #7c3d06; }
+.callout.danger { background: var(--danger-soft); color: #7f1d1d; }
+.callout b { display: block; margin-bottom: 0.2rem; }
+
+.btn {
+    display: inline-block; padding: 0.8rem 1.4rem; border-radius: 8px; font-weight: 700;
+    text-decoration: none; font-size: 0.95rem; border: none; cursor: pointer;
+    background: var(--ink); color: white; font-family: inherit;
+}
+.btn:hover { background: #16324a; }
+.btn.primary { background: var(--accent); }
+.btn.primary:hover { background: var(--accent-dark); }
+.btn.ghost { background: white; color: var(--ink); border: 1px solid var(--line); }
+.btn.ghost:hover { background: var(--bg); }
+.actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 1rem 0 2rem; }
+
+.steps-nav { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+.steps-nav button {
+    border: 1px solid var(--line); background: white; border-radius: 999px; padding: 0.35rem 0.8rem;
+    font-size: 0.8rem; cursor: pointer; color: var(--muted); font-family: inherit;
+}
+.steps-nav button.active { background: var(--ink); color: white; border-color: var(--ink); }
+.steps-nav button.done { color: var(--accent-dark); border-color: #bbf7d0; background: #f0fdf4; }
+
+table.doc { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table.doc th, table.doc td { border: 1px solid var(--line); padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+table.doc th { background: var(--bg); font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+
+.disclaimer { font-size: 0.78rem; color: var(--muted); margin: 1.5rem 0 2.5rem; line-height: 1.5; }
+
+footer.site { background: #06141f; color: #94a3b8; padding: 1.6rem 0; font-size: 0.85rem; text-align: center; }
+footer.site a { color: #cbd5e1; }
+
+@media (max-width: 700px) {
+    .field-grid { grid-template-columns: 1fr; }
+    .page-head h1 { font-size: 1.6rem; }
+}
+
+@media print {
+    header.site, footer.site, .no-print, .actions, .steps-nav { display: none !important; }
+    body { background: white; font-size: 11pt; }
+    .card { border: 1px solid #999; break-inside: avoid; page-break-inside: avoid; }
+    .container { max-width: none; padding: 0; }
+    a { color: inherit; text-decoration: none; }
+}

@@ -53,7 +53,7 @@ For lab managers, chemistry supervisors, lab directors and quality managers. Per
 
 > Hi [First Name],
 >
-> Quick follow-up. If it helps, here's a free QC Failure Investigation Checklist I use when training new techs: [link]. No sign-up needed.
+> Quick follow-up. If it helps, here's a free QC Failure Investigation Checklist I use when training new techs: [site]/labready/resources/qc-failure-checklist.html. No sign-up needed.
 >
 > If competency paperwork is eating your time, the pilot offer's still open.
 >
