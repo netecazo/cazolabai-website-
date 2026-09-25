@@ -42,8 +42,8 @@ For lab managers, chemistry supervisors, lab directors and quality managers. Per
 > Worth a 20-minute call to see if it fits how [Lab] works?
 >
 > Elie
-> LabReady Pro · [phone] · [website]
-> [Mailing address] · Reply "no thanks" and I won't write again.
+> LabReady Pro · (954) 419-6691 · elie.c@flowmaxpros.com · labreadypro.com
+> [Street address or PO box], Tamarac, FL 33321 · Reply "no thanks" and I won't write again.
 
 ---
 
@@ -53,7 +53,7 @@ For lab managers, chemistry supervisors, lab directors and quality managers. Per
 
 > Hi [First Name],
 >
-> Quick follow-up. If it helps, here's a free QC Failure Investigation Checklist I use when training new techs: [site]/labready/resources/qc-failure-checklist.html. No sign-up needed.
+> Quick follow-up. If it helps, here's a free QC Failure Investigation Checklist I use when training new techs: https://www.labreadypro.com/labready/resources/qc-failure-checklist.html. No sign-up needed.
 >
 > If competency paperwork is eating your time, the pilot offer's still open.
 >

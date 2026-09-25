@@ -1,5 +1,6 @@
--- LabReady Pro pilot requests, written by the form on /labready/.
--- Run once in the Supabase SQL editor (same project as cazotask_waitlist).
+-- LabReady Pro pilot requests, written by the pilot form on the home page (index.html).
+-- Lives in the "LabReady Pro" Supabase project. Visitors can submit; nobody can read via the public API.
+-- View requests in the Supabase dashboard: Table Editor > labready_pilot_requests.
 
 create table if not exists public.labready_pilot_requests (
     id          bigint generated always as identity primary key,
@@ -17,9 +18,24 @@ create table if not exists public.labready_pilot_requests (
 
 alter table public.labready_pilot_requests enable row level security;
 
--- The public site may only insert. Reading happens from the dashboard / service role.
+drop policy if exists "anon can submit pilot requests" on public.labready_pilot_requests;
 create policy "anon can submit pilot requests"
     on public.labready_pilot_requests
     for insert
-    to anon
-    with check (true);
+    to anon, authenticated
+    with check (
+        status = 'new'
+        and char_length(name) between 1 and 200
+        and char_length(email) between 3 and 320
+        and position('@' in email) > 1
+        and char_length(lab) between 1 and 300
+        and char_length(coalesce(role, '')) <= 100
+        and char_length(coalesce(size, '')) <= 50
+        and char_length(coalesce(analyzers, '')) <= 100
+        and char_length(coalesce(pain, '')) <= 4000
+        and char_length(coalesce(source, '')) <= 50
+    );
+
+-- Insert only: no select/update/delete for API roles.
+revoke all on public.labready_pilot_requests from anon, authenticated;
+grant insert (name, role, email, lab, size, analyzers, pain, source) on public.labready_pilot_requests to anon, authenticated;

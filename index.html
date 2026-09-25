@@ -216,6 +216,9 @@
         .footer-links { display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; list-style: none; }
         .footer-links a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
         .footer-links a:hover { color: white; }
+        .footer-contact { font-style: normal; font-size: 0.85rem; margin-top: 0.8rem; line-height: 1.6; }
+        .footer-contact a { color: #cbd5e1; text-decoration: none; }
+        .footer-contact a:hover { color: white; }
         .disclaimer { font-size: 0.78rem; color: #64748b; margin-top: 1.8rem; line-height: 1.5; }
         .footer-bottom { text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #16324a; font-size: 0.85rem; }
 
@@ -604,6 +607,10 @@
                     <strong style="color:white;">LabReady Pro</strong><br>
                     Clinical Laboratory Training. Competency. Compliance.<br>
                     <span style="font-size:0.85rem;">Built by laboratory professionals, for laboratory professionals.</span>
+                    <address class="footer-contact">
+                        Tamarac, FL 33321<br>
+                        <a href="tel:+19544196691">(954) 419-6691</a> · <a href="mailto:elie.c@flowmaxpros.com">elie.c@flowmaxpros.com</a>
+                    </address>
                 </div>
                 <ul class="footer-links">
                     <li><a href="#system">The System</a></li>
@@ -620,12 +627,11 @@
     </footer>
 
     <script>
-        // Pilot requests are stored in Supabase (table: labready_pilot_requests — see labready/supabase-schema.sql).
-        // The anon key only has INSERT access via row-level security, so it's safe to expose client-side.
-        const SUPABASE_URL = "https://weyxewesdowmknygynys.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndleXhld2VzZG93bWtueWd5bnlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwMjY2MTQsImV4cCI6MjA2ODYwMjYxNH0.izfGRHcNwZEHLlXu8QPOgC4qsjtw65Ue6LZFU2nMMgk";
-        // TODO: replace with the LabReady Pro inbox once the domain is set up.
-        const CONTACT_EMAIL = "hello@labreadypro.com";
+        // Pilot requests go to the LabReady Pro Supabase project (table labready_pilot_requests,
+        // see labready/supabase-schema.sql). The publishable key can only insert, never read.
+        const SUPABASE_URL = "https://wshmcrkutgglomdadtoj.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_YiM5Dem-s0FlVqTfZCXmHw_Dqr-tovF";
+        const CONTACT_EMAIL = "elie.c@flowmaxpros.com";
 
         document.getElementById('pilotForm').addEventListener('submit', async function (e) {
             e.preventDefault();
