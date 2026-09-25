@@ -187,7 +187,7 @@ Launch prices, to be validated with the first customers.
 
 ## 8. Website structure
 
-Live now: `/labready/` (single landing page with pilot request form).
+Live now: the site root `/` (LabReady Pro landing page with pilot request form; CazoTask moved to `/cazotask/`).
 
 Planned pages:
 - `/labready/` — Home: promise, problem, system, sample dashboard, founder story, modules, pricing, pilot form, FAQ
