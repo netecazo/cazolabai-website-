@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competency Record - LabReady Pro</title>
+    <meta name="description" content="A printable six-element competency assessment record for one employee and one test system.">
+    <link rel="stylesheet" href="../assets/labready.css">
+    <style>
+        table.doc input[type=text], table.doc input[type=date], table.doc select, table.doc textarea {
+            border: none; border-bottom: 1px dashed var(--line); border-radius: 0; padding: 0.3rem 0.2rem; font-size: 0.88rem;
+        }
+        table.doc td.el { width: 30%; }
+        table.doc td.el b { display: block; }
+        table.doc td.el span { color: var(--muted); font-size: 0.82rem; }
+        .sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 2rem; margin-top: 1rem; }
+        .sig-grid div { border-top: 1px solid var(--ink); padding-top: 0.3rem; font-size: 0.85rem; min-height: 2.6rem; }
+        @media (max-width: 700px) {
+            .sig-grid { grid-template-columns: 1fr; }
+            table.doc, table.doc tbody, table.doc tr, table.doc td, table.doc th { display: block; width: 100% !important; }
+            table.doc tr.head { display: none; }
+            table.doc tr { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 0.8rem; }
+            table.doc td { border: none; }
+        }
+        @media print {
+            body { font-size: 9pt; }
+            .page-head { padding: 0 0 0.4rem; }
+            .page-head p { display: none; }
+            table.doc td, table.doc th { padding: 0.25rem 0.35rem; }
+            table.doc input, table.doc select, table.doc textarea { font-size: 8.5pt; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site">
+        <nav class="container">
+            <a href="../" class="logo"><div class="logo-mark">LR</div><span class="logo-text">LabReady <span>Pro</span></span></a>
+            <a href="../" class="back">← Back to LabReady Pro</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-head">
+            <span class="tag">Template · Chemistry</span>
+            <h1>Competency Assessment Record</h1>
+            <p>One employee, one test system, all six assessment methods. Fill it in on screen or print it blank. Suggested evidence is pre-filled for chemistry; change it to match your procedures.</p>
+        </div>
+
+        <div class="actions no-print">
+            <button class="btn primary" type="button" onclick="window.print()">Print / Save as PDF</button>
+            <button class="btn ghost" type="button" id="clearBtn">Clear form</button>
+        </div>
+
+        <div class="card">
+            <div class="field-grid">
+                <div><label class="lbl" for="emp">Employee name</label><input type="text" id="emp"></div>
+                <div><label class="lbl" for="pos">Position / credential</label><input type="text" id="pos" placeholder="e.g. MLS(ASCP)"></div>
+                <div><label class="lbl" for="lab">Laboratory / section</label><input type="text" id="lab" placeholder="e.g. Core Lab · Chemistry"></div>
+                <div><label class="lbl" for="sys">Test system / instrument</label><input type="text" id="sys" placeholder="e.g. Cobas Pure c303 · general chemistry"></div>
+                <div><label class="lbl" for="type">Assessment type</label>
+                    <select id="type">
+                        <option>Initial training verification</option>
+                        <option>6-month (first year)</option>
+                        <option>12-month (first year)</option>
+                        <option>Annual</option>
+                        <option>Retraining / reassessment</option>
+                    </select>
+                </div>
+                <div><label class="lbl" for="period">Assessment period</label><input type="text" id="period" placeholder="e.g. Sep 2026"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Six assessment methods</h2>
+            <p class="hint">Each method must be assessed for each test system the employee performs, unless it doesn't apply. Record N/A with a reason.</p>
+            <div class="table-wrap">
+                <table class="doc" id="elements">
+                    <tr class="head"><th>Method</th><th>Evidence reviewed / observed</th><th>Date</th><th>Assessor</th><th>Result</th></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Outcome</h2>
+            <div class="field-grid">
+                <div><label class="lbl" for="overall">Overall result</label>
+                    <select id="overall"><option value="">Select…</option><option>Competent: may perform testing independently</option><option>Not yet competent: remediation required</option></select>
+                </div>
+                <div><label class="lbl" for="next">Next assessment due</label><input type="date" id="next"></div>
+                <div class="full"><label class="lbl" for="remed">Remediation plan (if any): retraining, who, by when, how it will be reassessed</label><textarea id="remed" rows="3"></textarea></div>
+            </div>
+            <div class="sig-grid">
+                <div>Employee signature / date</div>
+                <div>Assessor signature / date</div>
+                <div>Technical supervisor or consultant / date</div>
+                <div>Laboratory director or designee / date</div>
+            </div>
+        </div>
+
+        <p class="disclaimer">Template provided by LabReady Pro. The six methods follow the CLIA competency assessment requirements (42 CFR 493.1413 and 493.1451). Confirm current requirements with your accrediting body's official materials; your laboratory director is responsible for approving competency content and assessors.</p>
+    </main>
+
+    <footer class="site">LabReady Pro · Clinical Laboratory Training. Competency. Compliance. · <a href="../">labready</a></footer>
+
+    <script>
+    (function () {
+        const ELEMENTS = [
+            ["1. Direct observation of routine testing", "Including patient identification, specimen handling, processing and testing",
+             "Observed running patient samples: ID check, specimen acceptability (HIL), loading, result review."],
+            ["2. Monitoring recording and reporting of results", "Including critical values",
+             "Reviewed 10 reported results and 2 critical value notifications for read-back and documentation."],
+            ["3. Review of intermediate results or worksheets, QC, PT and maintenance records", "",
+             "Reviewed 1 month of QC records, 1 QC failure investigation and maintenance logs for completeness."],
+            ["4. Direct observation of instrument maintenance and function checks", "",
+             "Observed daily maintenance and startup checks; weekly probe cleaning."],
+            ["5. Testing previously analysed specimens, blind samples or PT samples", "",
+             "3 previously analysed samples within the lab's acceptable difference."],
+            ["6. Assessment of problem-solving skills", "",
+             "LabReady Module 2 case (QC failure) and quiz score ___%."]
+        ];
+        const KEY = "labready.competency-record.draft";
+        let state = {};
+        try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+        function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+        const table = document.getElementById("elements");
+        ELEMENTS.forEach(([title, sub, ev], i) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="el"><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</td>
+                <td><textarea id="ev${i}" rows="2"></textarea></td>
+                <td><input type="date" id="dt${i}"></td>
+                <td><input type="text" id="as${i}" placeholder="Initials"></td>
+                <td><select id="rs${i}"><option value=""></option><option>Satisfactory</option><option>Unsatisfactory</option><option>N/A</option></select></td>`;
+            table.appendChild(tr);
+            if (state["ev" + i] == null) state["ev" + i] = ev;
+        });
+
+        function bind() {
+            document.querySelectorAll("main input, main select, main textarea").forEach(el => {
+                el.value = state[el.id] != null ? state[el.id] : (el.tagName === "SELECT" ? el.options[0].value : "");
+                el.oninput = el.onchange = () => { state[el.id] = el.value; save(); };
+            });
+        }
+        bind();
+
+        document.getElementById("clearBtn").onclick = () => {
+            if (!confirm("Clear this record?")) return;
+            state = {};
+            ELEMENTS.forEach(([, , ev], i) => state["ev" + i] = ev);
+            save(); bind();
+        };
+    })();
+    </script>
+</body>
+</html>

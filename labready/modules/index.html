@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Modules - LabReady Pro</title>
+    <meta name="description" content="LabReady Pro Chemistry Competency System training modules: lessons, question banks, cases and assessor checklists.">
+    <link rel="stylesheet" href="../assets/labready.css">
+    <style>
+        .layout { display: grid; grid-template-columns: 250px 1fr; gap: 1.5rem; padding: 2rem 0 3rem; align-items: start; }
+        .toc { position: sticky; top: 80px; background: white; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; }
+        .toc h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.6rem; }
+        .toc a { display: block; padding: 0.45rem 0.6rem; border-radius: 8px; text-decoration: none; color: var(--ink); font-size: 0.9rem; }
+        .toc a:hover { background: var(--bg); }
+        .toc a.active { background: var(--brand-soft); color: var(--brand); font-weight: 700; }
+        .toc a.soon { color: var(--muted); pointer-events: none; }
+        .toc a small { display: block; font-size: 0.72rem; color: var(--muted); font-weight: 400; }
+        .toc-toggle { display: none; }
+
+        article { background: white; border: 1px solid var(--line); border-radius: 14px; padding: 2rem; min-width: 0; }
+        article h1 { font-size: 1.8rem; line-height: 1.2; letter-spacing: -0.02em; margin-bottom: 0.8rem; }
+        article h2 { font-size: 1.35rem; margin: 2rem 0 0.6rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+        article h3 { font-size: 1.08rem; margin: 1.4rem 0 0.4rem; }
+        article p, article li { color: var(--slate); margin-bottom: 0.6rem; }
+        article ul, article ol { padding-left: 1.4rem; margin-bottom: 0.8rem; }
+        article li p { margin-bottom: 0.3rem; }
+        article hr { border: none; border-top: 1px solid var(--line); margin: 1.5rem 0; }
+        article blockquote { background: var(--warn-soft); border-radius: 10px; padding: 0.8rem 1rem; margin: 1rem 0; }
+        article blockquote p { color: #7c3d06; margin: 0; }
+        article table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.8rem 0 1.2rem; display: block; overflow-x: auto; }
+        article th, article td { border: 1px solid var(--line); padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+        article th { background: var(--bg); }
+        article code { background: var(--bg); padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.88em; }
+        article a { color: var(--brand); }
+        mark.review-note { background: #fde68a; color: #7c3d06; padding: 0 0.25rem; border-radius: 4px; font-weight: 700; font-size: 0.85em; }
+        .review-bar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; font-size: 0.85rem; color: var(--muted); }
+        .review-bar label { display: flex; align-items: center; gap: 0.4rem; cursor: pointer; }
+        body.hide-checks mark.review-note { display: none; }
+        body.hide-checks article blockquote:first-of-type { display: none; }
+        .loading { color: var(--muted); }
+        article pre { white-space: pre-wrap; word-break: break-word; }
+
+        @media (max-width: 800px) {
+            .layout { grid-template-columns: 1fr; padding-top: 1rem; }
+            .toc { position: static; }
+            .toc-toggle { display: block; width: 100%; margin-bottom: 0.4rem; }
+            .toc nav.collapsed { display: none; }
+            article { padding: 1.2rem; }
+            article h1 { font-size: 1.45rem; }
+        }
+        @media print {
+            .layout { display: block; padding: 0; }
+            .toc, .review-bar { display: none !important; }
+            article { border: none; padding: 0; }
+            article table { display: table; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site">
+        <nav class="container" style="max-width:1160px">
+            <a href="../" class="logo"><div class="logo-mark">LR</div><span class="logo-text">LabReady <span>Pro</span></span></a>
+            <a href="../" class="back">← Back to LabReady Pro</a>
+        </nav>
+    </header>
+
+    <main class="container" style="max-width:1160px">
+        <div class="layout">
+            <aside class="toc">
+                <button class="btn ghost toc-toggle" type="button" id="tocToggle">Modules ▾</button>
+                <nav id="tocNav">
+                    <h2>Chemistry Competency</h2>
+                    <div id="tocList"></div>
+                </nav>
+            </aside>
+            <article id="content"><p class="loading">Loading module…</p></article>
+        </div>
+    </main>
+
+    <footer class="site">LabReady Pro · Clinical Laboratory Training. Competency. Compliance. · <a href="../">labready</a></footer>
+
+    <script src="../assets/marked.min.js"></script>
+    <script>
+    (function () {
+        const MODULES = [
+            ["01", "QC Fundamentals & Westgard Rules", "module-01-qc-fundamentals.md"],
+            ["02", "QC Failure Investigation", "module-02-qc-failure-investigation.md"],
+            ["03", "Calibration & Calibration Verification", "module-03-calibration.md"],
+            ["04", "AMR, Reportable Range & Dilutions", "module-04-amr-dilutions.md"],
+            ["05", "Reagent Management & Lot-to-Lot", "module-05-reagent-lot-to-lot.md"],
+            ["06", "Instrument Correlation & Method Comparison", "module-06-correlation.md"],
+            ["07", "Proficiency Testing", "module-07-proficiency-testing.md"],
+            ["08", "Critical Values, Delta Checks & Result Review", "module-08-critical-values.md"],
+            ["09", "Pre-Analytical & Specimen Integrity", "module-09-pre-analytical.md"],
+            ["10", "Maintenance, Troubleshooting & Downtime", "module-10-maintenance-downtime.md"]
+        ];
+        const REVIEW_KEY = "labready.modules.showChecks";
+
+        const params = new URLSearchParams(location.search);
+        const available = MODULES.filter(m => m[2]);
+        let current = MODULES.find(m => m[0] === params.get("m") && m[2]) || available[0];
+
+        document.getElementById("tocList").innerHTML = MODULES.map(([n, title, file]) =>
+            `<a href="?m=${n}" class="${file ? (n === current[0] ? "active" : "") : "soon"}">${n}. ${title}${file ? "" : "<small>Coming soon</small>"}</a>`).join("");
+
+        const nav = document.getElementById("tocNav");
+        if (window.matchMedia("(max-width: 800px)").matches) nav.classList.add("collapsed");
+        document.getElementById("tocToggle").onclick = () => nav.classList.toggle("collapsed");
+
+        let showChecks = true;
+        try { showChecks = localStorage.getItem(REVIEW_KEY) !== "0"; } catch (e) {}
+
+        const el = document.getElementById("content");
+        fetch("../content/" + current[2])
+            .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+            .then(md => {
+                const html = window.marked ? marked.parse(md, { breaks: true }) : "<pre>" + md.replace(/</g, "&lt;") + "</pre>";
+                const idx = available.indexOf(current);
+                const prev = available[idx - 1], next = available[idx + 1];
+                el.innerHTML = `
+                    <div class="review-bar">
+                        <span>Module ${current[0]} of 10</span>
+                        <label><input type="checkbox" id="showChecks"> Show author review notes</label>
+                    </div>
+                    ${html.replace(/\[CHECK[^\]]*\]/g, m => `<mark class="review-note">${m}</mark>`)}
+                    <div class="actions">
+                        ${prev ? `<a class="btn ghost" href="?m=${prev[0]}">← ${prev[1]}</a>` : ""}
+                        ${next ? `<a class="btn" href="?m=${next[0]}">${next[1]} →</a>` : ""}
+                        <button class="btn ghost" type="button" onclick="window.print()">Print module</button>
+                    </div>`;
+                document.title = `Module ${current[0]}: ${current[1]} - LabReady Pro`;
+                const box = document.getElementById("showChecks");
+                box.checked = showChecks;
+                document.body.classList.toggle("hide-checks", !showChecks);
+                box.onchange = () => {
+                    document.body.classList.toggle("hide-checks", !box.checked);
+                    try { localStorage.setItem(REVIEW_KEY, box.checked ? "1" : "0"); } catch (e) {}
+                };
+            })
+            .catch(() => { el.innerHTML = '<p>Couldn\'t load this module. Please refresh, or contact us.</p>'; });
+    })();
+    </script>
+</body>
+</html>

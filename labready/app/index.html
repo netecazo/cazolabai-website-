@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabReady Pro App</title>
+    <meta name="description" content="LabReady Pro competency tracking: staff, test systems, six-element competency records, sign-off and a supervisor dashboard.">
+    <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="../assets/labready.css">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <header class="site">
+        <nav class="container app-nav">
+            <a href="#/dashboard" class="logo"><div class="logo-mark">LR</div><span class="logo-text">LabReady <span>Pro</span></span></a>
+            <div class="nav-right" id="navRight"></div>
+        </nav>
+        <div class="container tabs no-print" id="tabs" hidden>
+            <a href="#/dashboard" data-tab="dashboard">Dashboard</a>
+            <a href="#/staff" data-tab="staff">Staff</a>
+            <a href="#/systems" data-tab="systems">Test systems</a>
+            <a href="#/schedule" data-tab="schedule">Schedule</a>
+            <a href="#/settings" data-tab="settings">Settings</a>
+        </div>
+    </header>
+
+    <div class="demo-banner no-print" id="demoBanner" hidden>
+        Demo lab with sample data. Changes are saved in this browser only. <a href="#/settings">Reset demo</a> · <a href="../#pilot">Request a pilot</a>
+    </div>
+
+    <main class="container" id="view"><p class="muted" style="padding:3rem 0">Loading…</p></main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <footer class="site no-print">LabReady Pro · Training and documentation support. No patient data is stored. · <a href="../">labready</a></footer>
+
+    <script src="config.js"></script>
+    <script src="../assets/supabase-2.117.1.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

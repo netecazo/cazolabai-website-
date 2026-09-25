@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QC Failure Checklist - LabReady Pro</title>
+    <meta name="description" content="A free, printable one-page checklist for investigating a chemistry QC failure: what to do first, what to check, and what to document.">
+    <link rel="stylesheet" href="../assets/labready.css">
+    <style>
+        .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+        .cols .card { margin-bottom: 0; }
+        .card ul { list-style: none; }
+        .card li { padding: 0.35rem 0 0.35rem 1.6rem; position: relative; font-size: 0.93rem; border-top: 1px solid var(--line); }
+        .card li:first-child { border-top: none; }
+        .card li::before { content: "☐"; position: absolute; left: 0; color: var(--brand); }
+        .num-h { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+        .num-h span { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex: none; }
+        .num-h h2 { margin: 0; }
+        table.doc td:first-child { font-weight: 700; white-space: nowrap; }
+        @media (max-width: 700px) { .cols { grid-template-columns: 1fr; } }
+        @media print {
+            body { font-size: 9.5pt; }
+            .page-head { padding: 0 0 0.5rem; }
+            .page-head h1 { font-size: 16pt; }
+            .card { padding: 0.6rem 0.8rem; margin-bottom: 0.5rem; }
+            .cols { gap: 0.5rem; }
+            .card li { padding: 0.15rem 0 0.15rem 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site">
+        <nav class="container">
+            <a href="../" class="logo"><div class="logo-mark">LR</div><span class="logo-text">LabReady <span>Pro</span></span></a>
+            <a href="../" class="back">← Back to LabReady Pro</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-head">
+            <span class="tag">Free resource · Print it, pin it by the analyser</span>
+            <h1>QC Failure Investigation Checklist</h1>
+            <p>The order I've taught new techs for years. It won't replace your SOP, but it'll stop anyone reaching for "just rerun it".</p>
+        </div>
+
+        <div class="actions no-print">
+            <button class="btn primary" type="button" onclick="window.print()">Print / Save as PDF</button>
+            <a class="btn ghost" href="../qc-assistant/">Try the interactive version</a>
+        </div>
+
+        <div class="card">
+            <div class="num-h"><span>1</span><h2>Stop and protect patients</h2></div>
+            <ul>
+                <li>Stop reporting this test on this instrument</li>
+                <li>Hold patient results from the failed run</li>
+                <li>Tell the charge tech or supervisor; move stats to a backup if you have one</li>
+                <li>Look at the Levey-Jennings chart, not just today's point</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="num-h"><span>2</span><h2>Read the pattern</h2></div>
+            <div class="table-wrap"><table class="doc">
+                <tr><td>1-2s</td><td>Warning only. Check the other rules and the chart before rejecting (unless your lab uses it to reject).</td></tr>
+                <tr><td>1-3s · R-4s</td><td>Think <b>random</b> error first: bubble, clot, short sample, probe, mixing, a bad vial.</td></tr>
+                <tr><td>2-2s · 4-1s · 10x</td><td>Think <b>systematic</b> error first: calibration, reagent or calibrator lot, drift, ageing lamp or electrode.</td></tr>
+                <tr><td>One level only</td><td>Suspect that control vial. If only the high or low level, also consider calibration at the ends of the range.</td></tr>
+                <tr><td>All levels, same way</td><td>Common cause: reagent, calibration, instrument.</td></tr>
+            </table></div>
+        </div>
+
+        <div class="cols">
+            <div class="card">
+                <div class="num-h"><span>3</span><h2>Control material</h2></div>
+                <ul>
+                    <li>Right control, right level, right position</li>
+                    <li>Reconstituted correctly: diluent, volume, mixing, wait</li>
+                    <li>Within open-vial stability and expiry</li>
+                    <li>Stored and thawed properly</li>
+                    <li>Not evaporated (cap off, left on board)</li>
+                    <li>Try a fresh vial</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="num-h"><span>4</span><h2>Reagent</h2></div>
+                <ul>
+                    <li>Lot changed recently?</li>
+                    <li>On-board stability not exceeded</li>
+                    <li>No bubbles, precipitate, contamination</li>
+                    <li>Stored correctly before loading</li>
+                    <li>Try a fresh pack</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="num-h"><span>5</span><h2>Calibration</h2></div>
+                <ul>
+                    <li>When was it last calibrated?</li>
+                    <li>Calibrator lot, reconstitution, expiry</li>
+                    <li>Compare curve or factor with the last good one</li>
+                    <li>Recalibrate if indicated, then run all QC levels</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="num-h"><span>6</span><h2>Instrument &amp; environment</h2></div>
+                <ul>
+                    <li>Flags, alarms, error messages</li>
+                    <li>Maintenance up to date</li>
+                    <li>Probes, mixers, wash, cuvettes, lamp, electrodes</li>
+                    <li>Reaction temperature, room temperature, water</li>
+                    <li>Other tests on this analyser affected too?</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:1.2rem">
+            <div class="num-h"><span>7</span><h2>Fix, verify, look back, document</h2></div>
+            <ul>
+                <li>Correct the cause and run <b>all</b> QC levels. Resume only when acceptable</li>
+                <li>Find the last acceptable QC; rerun selected patients from that window</li>
+                <li>If reruns differ beyond your allowable limit, follow your corrected-report procedure and notify</li>
+                <li>Document: what failed, what you checked, root cause, action, repeat QC, look-back, who you told</li>
+                <li>Hand it to your supervisor for review</li>
+            </ul>
+            <div class="callout warn"><b>Never rerun controls until they pass.</b>One repeat with fresh control can be reasonable for suspected random error if your SOP allows it. Anything beyond that is hiding a problem.</div>
+        </div>
+
+        <p class="disclaimer">© 2026 LabReady Pro. Free to print and use within your laboratory. This is a training aid; follow your laboratory's procedures, the manufacturer's instructions and your accrediting body's requirements.</p>
+    </main>
+
+    <footer class="site">LabReady Pro · Clinical Laboratory Training. Competency. Compliance. · <a href="../">labready</a></footer>
+</body>
+</html>
