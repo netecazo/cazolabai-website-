@@ -17,7 +17,9 @@ The course is the entry product. The competency system is the recurring product.
 | Six-element competency record | `labready/forms/competency-record.html` | Ready; fill on screen or print blank |
 | Module viewer | `labready/modules/` | Renders modules as web pages; toggle hides the **[CHECK]** review notes |
 | Modules 1–10 (full Chemistry Competency System curriculum) | `labready/content/module-*.md` | Draft v0.1, needs Elie's review of **[CHECK]** items |
-| Multi-user app (logins, dashboard, sign-off) | — | Not started; build after 2–3 pilots use the concierge version |
+| Multi-user app: dashboard, staff, test systems, scheduling, six-method records, sign-off, CSV/JSON export | `labready/app/` | Demo mode working now. Live mode needs `supabase-app-schema.sql` run and keys in `app/config.js` |
+| Email reminders before competencies fall due | — | Not started; needs a scheduled Supabase Edge Function |
+| Tech self-service (staff log in to complete quizzes) | — | Not started; staff are tracked without logins for now |
 
 ---
 
