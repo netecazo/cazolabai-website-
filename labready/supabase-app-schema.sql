@@ -68,15 +68,25 @@ create table if not exists public.competencies (
 create index if not exists staff_lab_idx on public.staff(lab_id);
 create index if not exists test_systems_lab_idx on public.test_systems(lab_id);
 create index if not exists competencies_lab_due_idx on public.competencies(lab_id, due_date);
+create index if not exists competencies_staff_lab_idx on public.competencies(staff_id, lab_id);
+create index if not exists competencies_system_lab_idx on public.competencies(test_system_id, lab_id);
+create index if not exists lab_members_user_idx on public.lab_members(user_id);
+create index if not exists labs_created_by_idx on public.labs(created_by);
 
 -- ---------- Helpers ----------
+-- Internal helpers live in a "private" schema, which the Supabase API doesn't expose,
+-- so they can't be called directly over /rest/v1/rpc.
 
-create or replace function public.is_lab_member(p_lab uuid)
+create schema if not exists private;
+revoke all on schema private from public, anon;
+grant usage on schema private to authenticated;
+
+create or replace function private.is_lab_member(p_lab uuid)
 returns boolean language sql stable security definer set search_path = public as $$
     select exists (select 1 from lab_members where lab_id = p_lab and user_id = auth.uid());
 $$;
 
-create or replace function public.is_lab_admin(p_lab uuid)
+create or replace function private.is_lab_admin(p_lab uuid)
 returns boolean language sql stable security definer set search_path = public as $$
     select exists (select 1 from lab_members where lab_id = p_lab and user_id = auth.uid() and role = 'admin');
 $$;
@@ -99,7 +109,7 @@ create or replace function public.add_lab_member(p_lab uuid, p_email text, p_rol
 returns void language plpgsql security definer set search_path = public as $$
 declare target uuid;
 begin
-    if not is_lab_admin(p_lab) then raise exception 'only lab admins can add members'; end if;
+    if not private.is_lab_admin(p_lab) then raise exception 'only lab admins can add members'; end if;
     select id into target from auth.users where lower(email) = lower(p_email);
     if target is null then raise exception 'no LabReady account for that email yet: ask them to sign up first'; end if;
     insert into lab_members (lab_id, user_id, role, display_name)
@@ -114,14 +124,14 @@ returns void language sql security definer set search_path = public as $$
     update lab_members set display_name = p_name where lab_id = p_lab and user_id = auth.uid();
 $$;
 
-create or replace function public.touch_updated_at()
-returns trigger language plpgsql as $$
+create or replace function private.touch_updated_at()
+returns trigger language plpgsql set search_path = public as $$
 begin new.updated_at = now(); return new; end;
 $$;
 
 drop trigger if exists competencies_touch on public.competencies;
 create trigger competencies_touch before update on public.competencies
-    for each row execute function public.touch_updated_at();
+    for each row execute function private.touch_updated_at();
 
 -- ---------- Row-level security ----------
 
@@ -133,19 +143,19 @@ alter table public.competencies  enable row level security;
 
 drop policy if exists "members read lab" on public.labs;
 create policy "members read lab" on public.labs
-    for select to authenticated using (is_lab_member(id));
+    for select to authenticated using (private.is_lab_member(id));
 
 drop policy if exists "admins rename lab" on public.labs;
 create policy "admins rename lab" on public.labs
-    for update to authenticated using (is_lab_admin(id)) with check (is_lab_admin(id));
+    for update to authenticated using (private.is_lab_admin(id)) with check (private.is_lab_admin(id));
 
 drop policy if exists "members read members" on public.lab_members;
 create policy "members read members" on public.lab_members
-    for select to authenticated using (is_lab_member(lab_id));
+    for select to authenticated using (private.is_lab_member(lab_id));
 
 drop policy if exists "admins manage members" on public.lab_members;
 create policy "admins manage members" on public.lab_members
-    for delete to authenticated using (is_lab_admin(lab_id) and user_id <> auth.uid());
+    for delete to authenticated using (private.is_lab_admin(lab_id) and user_id <> (select auth.uid()));
 
 -- staff, test_systems, competencies: full access for members of the owning lab.
 do $$
@@ -155,7 +165,7 @@ begin
         execute format('drop policy if exists "lab members all" on public.%I', t);
         execute format(
             'create policy "lab members all" on public.%I for all to authenticated
-             using (is_lab_member(lab_id)) with check (is_lab_member(lab_id))', t);
+             using (private.is_lab_member(lab_id)) with check (private.is_lab_member(lab_id))', t);
     end loop;
 end $$;
 
@@ -183,26 +193,27 @@ create table if not exists public.competency_events (
     at             timestamptz not null default now()
 );
 create index if not exists competency_events_comp_idx on public.competency_events(competency_id, at);
+create index if not exists competency_events_lab_idx on public.competency_events(lab_id);
 
 alter table public.competency_events enable row level security;
 drop policy if exists "members read events" on public.competency_events;
 create policy "members read events" on public.competency_events
-    for select to authenticated using (is_lab_member(lab_id));
+    for select to authenticated using (private.is_lab_member(lab_id));
 -- No insert/update/delete policies: only the triggers below can write history.
 
-create or replace function public.member_name(p_lab uuid)
+create or replace function private.member_name(p_lab uuid)
 returns text language sql stable security definer set search_path = public as $$
     select coalesce(nullif(display_name, ''), (select email from auth.users where id = auth.uid()))
     from lab_members where lab_id = p_lab and user_id = auth.uid();
 $$;
 
-create or replace function public.member_role(p_lab uuid)
+create or replace function private.member_role(p_lab uuid)
 returns text language sql stable security definer set search_path = public as $$
     select role from lab_members where lab_id = p_lab and user_id = auth.uid();
 $$;
 
 -- Before update/delete: lock completed records and stamp signatures server-side.
-create or replace function public.competencies_guard()
+create or replace function private.competencies_guard()
 returns trigger language plpgsql security definer set search_path = public as $$
 declare k text;
 begin
@@ -227,7 +238,7 @@ begin
     for k in select jsonb_object_keys(coalesce(new.signoffs, '{}'::jsonb)) loop
         if (old.signoffs -> k) is null or (old.signoffs -> k) is distinct from (new.signoffs -> k) then
             new.signoffs := jsonb_set(new.signoffs, array[k], jsonb_build_object(
-                'name', member_name(new.lab_id), 'role', member_role(new.lab_id),
+                'name', private.member_name(new.lab_id), 'role', private.member_role(new.lab_id),
                 'user_id', auth.uid(), 'at', now()));
         end if;
     end loop;
@@ -246,18 +257,18 @@ $$;
 
 drop trigger if exists competencies_guard_upd on public.competencies;
 create trigger competencies_guard_upd before update on public.competencies
-    for each row execute function public.competencies_guard();
+    for each row execute function private.competencies_guard();
 drop trigger if exists competencies_guard_del on public.competencies;
 create trigger competencies_guard_del before delete on public.competencies
-    for each row execute function public.competencies_guard();
+    for each row execute function private.competencies_guard();
 
 -- After insert/update/delete: write the history.
-create or replace function public.competencies_log()
+create or replace function private.competencies_log()
 returns trigger language plpgsql security definer set search_path = public as $$
 declare
     k text;
     lab uuid := coalesce(new.lab_id, old.lab_id);
-    who text := member_name(lab);
+    who text := private.member_name(lab);
     ev jsonb[] := '{}';
     e jsonb;
 begin
@@ -303,7 +314,7 @@ $$;
 
 drop trigger if exists competencies_log on public.competencies;
 create trigger competencies_log after insert or update or delete on public.competencies
-    for each row execute function public.competencies_log();
+    for each row execute function private.competencies_log();
 
 -- =====================================================================
 -- Email reminders (see supabase/functions/competency-reminders)
@@ -317,3 +328,18 @@ returns void language sql security definer set search_path = public as $$
 $$;
 revoke execute on function public.set_my_reminders(uuid, boolean) from public, anon;
 grant execute on function public.set_my_reminders(uuid, boolean) to authenticated;
+
+-- ---------- Private helper permissions ----------
+-- Row-level security policies run as the signed-in user, so they need EXECUTE on the two membership checks.
+revoke execute on all functions in schema private from public, anon;
+grant execute on function private.is_lab_member(uuid) to authenticated;
+grant execute on function private.is_lab_admin(uuid) to authenticated;
+
+-- Earlier versions of this file created the helpers in public; remove them.
+drop function if exists public.is_lab_member(uuid);
+drop function if exists public.is_lab_admin(uuid);
+drop function if exists public.member_name(uuid);
+drop function if exists public.member_role(uuid);
+drop function if exists public.competencies_guard();
+drop function if exists public.competencies_log();
+drop function if exists public.touch_updated_at();

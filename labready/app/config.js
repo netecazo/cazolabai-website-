@@ -1,10 +1,7 @@
-// LabReady Pro app configuration.
-// Leave these empty to run in demo mode only. To turn on live accounts:
-//   1. Run labready/supabase-app-schema.sql in your Supabase project.
-//   2. Paste the project URL and its anon (publishable) key below.
-// The anon key is safe to expose: row-level security limits every signed-in
-// user to the labs they belong to.
+// LabReady Pro app configuration (Supabase project "LabReady Pro").
+// The publishable key is safe to expose: row-level security limits every
+// signed-in user to the labs they belong to. Leave both empty to run demo-only.
 window.LABREADY_CONFIG = {
-    supabaseUrl: "",
-    supabaseAnonKey: ""
+    supabaseUrl: "https://wshmcrkutgglomdadtoj.supabase.co",
+    supabaseAnonKey: "sb_publishable_YiM5Dem-s0FlVqTfZCXmHw_Dqr-tovF"
 };
