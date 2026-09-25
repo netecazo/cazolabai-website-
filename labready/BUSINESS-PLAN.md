@@ -16,8 +16,7 @@ The course is the entry product. The competency system is the recurring product.
 | QC Failure Investigation Checklist (lead magnet) | `labready/resources/qc-failure-checklist.html` | Ready to print / share |
 | Six-element competency record | `labready/forms/competency-record.html` | Ready; fill on screen or print blank |
 | Module viewer | `labready/modules/` | Renders modules as web pages; toggle hides the **[CHECK]** review notes |
-| Modules 1–6 (QC fundamentals, QC failure investigation, calibration, AMR & dilutions, reagents & lot-to-lot, correlation) | `labready/content/module-0[1-6]-*.md` | Draft v0.1, needs Elie's review of **[CHECK]** items |
-| Modules 7–10 | — | Not started |
+| Modules 1–10 (full Chemistry Competency System curriculum) | `labready/content/module-*.md` | Draft v0.1, needs Elie's review of **[CHECK]** items |
 | Multi-user app (logins, dashboard, sign-off) | — | Not started; build after 2–3 pilots use the concierge version |
 
 ---
