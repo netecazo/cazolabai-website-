@@ -438,7 +438,7 @@
         const who = S.member ? esc(S.member.display_name || S.user.email) + ' · ' + esc(ROLES[S.member.role] || S.member.role) : '';
         $('#navRight').innerHTML = S.backend
             ? '<span class="who">' + who + '</span><button class="btn ghost" type="button" id="signOutBtn">' + (S.backend.mode === 'demo' ? 'Exit demo' : 'Sign out') + '</button>'
-            : '<a class="back" href="../">← LabReady Pro</a>';
+            : '<a class="back" href="/">← LabReady Pro</a>';
         const so = $('#signOutBtn');
         if (so) so.onclick = signOut;
     }
@@ -513,7 +513,7 @@
             '<button class="btn primary" type="button" id="demoBtn">Open the demo lab</button></div>';
         if (!LIVE_AVAILABLE) {
             view.innerHTML = '<div class="auth-wrap">' + demoCard +
-                '<p class="muted" style="font-size:0.85rem;text-align:center">Live lab accounts open to founding labs soon. <a href="../#pilot">Request a pilot</a>.</p></div>';
+                '<p class="muted" style="font-size:0.85rem;text-align:center">Live lab accounts open to founding labs soon. <a href="/#pilot">Request a pilot</a>.</p></div>';
         } else {
             view.innerHTML = '<div class="auth-wrap"><div class="card">' +
                 '<h1 id="authTitle">Sign in to LabReady Pro</h1><p class="muted" id="authSub" style="margin-bottom:1rem">For laboratory supervisors, assessors and directors.</p>' +
