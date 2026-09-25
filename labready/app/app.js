@@ -888,6 +888,9 @@
                     '<div><label class="lbl" for="as' + i + '">Assessor</label><input type="text" id="as' + i + '" value="' + esc(e.assessor) + '" placeholder="Initials"' + dis + '></div>' +
                     '<div><label class="lbl" for="rs' + i + '">Result</label><select id="rs' + i + '"' + dis + '><option value=""></option>' +
                     RESULTS.map(r => '<option' + (e.result === r ? ' selected' : '') + '>' + r + '</option>').join('') + '</select></div>' +
+                    (i === 5 && !locked && window.LABREADY_QUIZZES
+                        ? '<div class="full no-print"><button class="btn ghost small" type="button" id="runQuiz">Run a module quiz</button> <span class="muted" style="font-size:0.82rem">The tech answers on this screen; the score fills in this method.</span></div>'
+                        : '') +
                     '</div></div>';
             }).join('') + '</div>' +
             '<div class="form-card"><h2>Outcome</h2><div class="form-row">' +
@@ -940,6 +943,19 @@
                 S.dirty = true; collect();
                 $('#saveState').textContent = 'Unsaved changes · edit the suggestions to match what was actually assessed';
             };
+            const rq = $('#runQuiz');
+            if (rq) rq.onclick = () => openQuiz(s, result => {
+                const line = 'LabReady Module ' + result.moduleId + ' quiz (' + result.title + '): ' + result.correct + '/' + result.total +
+                    ' (' + result.percent + '%), pass mark ' + result.passMark + '%, taken ' + fmtStamp(result.completedAt) + '.';
+                const ev = $('#ev5');
+                ev.value = ev.value.trim() ? ev.value.trim() + '\n' + line : line;
+                $('#dt5').value = result.completedAt.slice(0, 10);
+                $('#rs5').value = result.passed ? 'Satisfactory' : 'Unsatisfactory';
+                S.dirty = true; collect();
+                $('#saveState').textContent = 'Unsaved changes · quiz result added to method 6. Add assessor initials and save.';
+                toast(result.passed ? 'Quiz passed: added to method 6' : 'Quiz below pass mark: recorded as Unsatisfactory', !result.passed);
+                ev.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         }
 
         $$('[data-sign]', view).forEach(b => b.onclick = async () => {
@@ -987,6 +1003,34 @@
                 location.hash = '#/competency/' + created.id;
             };
         }
+    }
+
+    // Proctored quiz for competency method 6. The tech answers on the supervisor's screen.
+    function openQuiz(staff, onDone) {
+        const mods = window.LABREADY_QUIZZES.modules;
+        const wrap = document.createElement('div');
+        wrap.className = 'modal-backdrop';
+        wrap.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="quizTitle">' +
+            '<div class="modal-head"><h2 id="quizTitle">Module quiz' + (staff && staff.name ? ' · ' + esc(staff.name) : '') + '</h2>' +
+            '<button class="linkish" type="button" id="quizClose">Close</button></div>' +
+            '<div class="form-row" id="quizPick"><div><label class="lbl" for="quizModule">Module</label><select id="quizModule">' +
+            Object.keys(mods).map(k => '<option value="' + k + '"' + (k === '02' ? ' selected' : '') + '>' + k + '. ' + esc(mods[k].title) + '</option>').join('') +
+            '</select></div><button class="btn" type="button" id="quizStart">Start quiz</button></div>' +
+            '<div id="quizBody"></div></div>';
+        document.body.appendChild(wrap);
+        document.body.style.overflow = 'hidden';
+        const close = () => { wrap.remove(); document.body.style.overflow = ''; };
+        $('#quizClose', wrap).onclick = () => {
+            if ($('#quizBody', wrap).innerHTML && !confirm('Close the quiz? Answers so far will be lost.')) return;
+            close();
+        };
+        $('#quizStart', wrap).onclick = () => {
+            $('#quizPick', wrap).hidden = true;
+            LabReadyQuiz.mount($('#quizBody', wrap), $('#quizModule', wrap).value, {
+                finishLabel: 'Add to method 6',
+                onFinish: result => { close(); onDone(result); }
+            });
+        };
     }
 
     const EVENT_TEXT = {

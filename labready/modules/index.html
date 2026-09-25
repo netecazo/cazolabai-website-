@@ -39,6 +39,17 @@
         body.hide-checks article blockquote:first-of-type { display: none; }
         .loading { color: var(--muted); }
         article pre { white-space: pre-wrap; word-break: break-word; }
+        details.answer-key { margin: 2rem 0 0.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+        details.answer-key > summary { font-size: 1.1rem; font-weight: 700; cursor: pointer; color: var(--ink); }
+        details.answer-key[open] > summary { margin-bottom: 0.8rem; }
+        .quiz-section { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+        .quiz-section .quiz-q legend { color: var(--ink); }
+        @media print {
+            details.answer-key { display: block; } details.answer-key > summary { display: none; }
+            body:not(.print-quiz-only) .quiz-section { display: none; }
+            body.print-quiz-only article > :not(.quiz-section) { display: none !important; }
+            body.print-quiz-only .quiz-section { border: none; margin: 0; padding: 0; }
+        }
 
         @media (max-width: 800px) {
             .layout { grid-template-columns: 1fr; padding-top: 1rem; }
@@ -80,6 +91,8 @@
     <footer class="site">LabReady Pro · Clinical Laboratory Training. Competency. Compliance. · <a href="/">labready</a></footer>
 
     <script src="../assets/marked.min.js"></script>
+    <script src="../content/quizzes.js"></script>
+    <script src="../assets/quiz.js"></script>
     <script>
     (function () {
         const MODULES = [
@@ -107,6 +120,18 @@
         if (window.matchMedia("(max-width: 800px)").matches) nav.classList.add("collapsed");
         document.getElementById("tocToggle").onclick = () => nav.classList.toggle("collapsed");
 
+        // The written question bank includes answers, so fold it away for assessors.
+        function foldAnswerKey(root) {
+            const h = Array.from(root.querySelectorAll("h2")).find(x => /^question bank/i.test(x.textContent.trim()));
+            if (!h) return;
+            const details = document.createElement("details");
+            details.className = "answer-key";
+            details.innerHTML = "<summary>Question bank &amp; answer key (for assessors)</summary>";
+            let n = h.nextSibling;
+            while (n && !(n.nodeType === 1 && n.tagName === "H2")) { const nx = n.nextSibling; details.appendChild(n); n = nx; }
+            h.replaceWith(details);
+        }
+
         let showChecks = true;
         try { showChecks = localStorage.getItem(REVIEW_KEY) !== "0"; } catch (e) {}
 
@@ -123,12 +148,19 @@
                         <label><input type="checkbox" id="showChecks"> Show author review notes</label>
                     </div>
                     ${html.replace(/\[CHECK[^\]]*\]/g, m => `<mark class="review-note">${m}</mark>`)}
+                    <section class="quiz-section" id="quiz">
+                        <h2>Check your understanding</h2>
+                        <p>Answer all the questions, then submit to see your score and why each answer is right. Answer order changes every attempt.</p>
+                        <div id="quizMount"></div>
+                    </section>
                     <div class="actions">
                         ${prev ? `<a class="btn ghost" href="?m=${prev[0]}">← ${prev[1]}</a>` : ""}
                         ${next ? `<a class="btn" href="?m=${next[0]}">${next[1]} →</a>` : ""}
                         <button class="btn ghost" type="button" onclick="window.print()">Print module</button>
                     </div>`;
                 document.title = `Module ${current[0]}: ${current[1]} - LabReady Pro`;
+                foldAnswerKey(el);
+                if (window.LabReadyQuiz) LabReadyQuiz.mount(document.getElementById("quizMount"), current[0], { showPrint: true });
                 const box = document.getElementById("showChecks");
                 box.checked = showChecks;
                 document.body.classList.toggle("hide-checks", !showChecks);

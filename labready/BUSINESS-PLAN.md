@@ -20,7 +20,8 @@ The course is the entry product. The competency system is the recurring product.
 | Multi-user app: dashboard, staff, test systems, scheduling, six-method records, sign-off, CSV/JSON export | `labready/app/` | Live on Supabase project "LabReady Pro" (wshmcrkutgglomdadtoj). Schema applied and security-tested on the live database |
 | Record integrity: server-stamped signatures, lock on sign-off, no deleting signed records, tamper-proof history | `labready/supabase-app-schema.sql`, `labready/app/` | Built and tested on a local Postgres; mirrored in demo mode |
 | Weekly email reminders (overdue + due in 30 days) to admins/supervisors | `labready/supabase/functions/competency-reminders/`, `labready/supabase/reminders-cron.sql` | Code written, email logic unit-tested; needs Supabase project, Resend account and deploy |
-| Tech self-service (staff log in to complete quizzes) | — | Not started; staff are tracked without logins for now |
+| Module quizzes: 80 multiple-choice questions (8 per module), shuffled answers, pass mark 80% | `labready/content/quizzes.js`, `labready/assets/quiz.js` | On every module page for self-study; in the app, "Run a module quiz" fills competency method 6. Draft v0.1, review with the modules |
+| Tech self-service (staff log in to take quizzes themselves) | — | Not started; quizzes are proctored on the supervisor's screen for now |
 
 ---
 
