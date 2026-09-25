@@ -18,7 +18,8 @@ The course is the entry product. The competency system is the recurring product.
 | Module viewer | `labready/modules/` | Renders modules as web pages; toggle hides the **[CHECK]** review notes |
 | Modules 1–10 (full Chemistry Competency System curriculum) | `labready/content/module-*.md` | Draft v0.1, needs Elie's review of **[CHECK]** items |
 | Multi-user app: dashboard, staff, test systems, scheduling, six-method records, sign-off, CSV/JSON export | `labready/app/` | Demo mode working now. Live mode needs `supabase-app-schema.sql` run and keys in `app/config.js` |
-| Email reminders before competencies fall due | — | Not started; needs a scheduled Supabase Edge Function |
+| Record integrity: server-stamped signatures, lock on sign-off, no deleting signed records, tamper-proof history | `labready/supabase-app-schema.sql`, `labready/app/` | Built and tested on a local Postgres; mirrored in demo mode |
+| Weekly email reminders (overdue + due in 30 days) to admins/supervisors | `labready/supabase/functions/competency-reminders/`, `labready/supabase/reminders-cron.sql` | Code written, email logic unit-tested; needs Supabase project, Resend account and deploy |
 | Tech self-service (staff log in to complete quizzes) | — | Not started; staff are tracked without logins for now |
 
 ---

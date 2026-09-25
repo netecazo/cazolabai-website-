@@ -11,7 +11,7 @@
     const CFG = window.LABREADY_CONFIG || {};
     const LIVE_AVAILABLE = !!(CFG.supabaseUrl && CFG.supabaseAnonKey && window.supabase);
     const MODE_KEY = 'labready.app.mode';
-    const DEMO_KEY = 'labready.app.demo.v1';
+    const DEMO_KEY = 'labready.app.demo.v2';
 
     const ELEMENTS = [
         { title: 'Direct observation of routine testing', sub: 'Including patient identification, specimen handling, processing and testing',
@@ -148,7 +148,8 @@
         }));
 
         const comps = [];
-        const signed = (who, daysAgo) => ({ name: who, at: new Date(Date.now() - daysAgo * 86400000).toISOString(), user_id: 'demo-user' });
+        const ROLE_OF = { 'Leila Haddad': 'assessor', 'Demo Supervisor': 'admin', 'Dr P. Rao': 'director' };
+        const signed = (who, daysAgo) => ({ name: who, role: ROLE_OF[who], at: new Date(Date.now() - daysAgo * 86400000).toISOString(), user_id: 'demo-user' });
         const fullElements = daysAgo => ELEMENTS.map(e => ({ evidence: e.hint.replace('___', '92'), date: addDays(t, -daysAgo), assessor: 'LH', result: 'Satisfactory' }));
         const partial = n => ELEMENTS.map((e, i) => i < n ? { evidence: e.hint.replace('___', '88'), date: addDays(t, -5 + i), assessor: 'LH', result: 'Satisfactory' } : { evidence: '', date: '', assessor: '', result: '' });
         const add = (s, sy, kind, dueOffset, extra) => comps.push(Object.assign({
@@ -183,7 +184,24 @@
         add(ruth, sys[1], 'initial', 10);
 
 
+        const events = [];
+        comps.forEach(c => {
+            // Completed sample records were scheduled about two months before they were signed.
+            const createdAt = c.completed_at ? new Date(Date.parse(c.signoffs.assessor.at) - 60 * 86400000).toISOString() : c.created_at;
+            events.push({ competency_id: c.id, actor: 'demo-user', actor_name: 'Demo Supervisor', action: 'created', detail: { kind: c.kind, due_date: c.due_date }, at: createdAt });
+            if (c.completed_at) {
+                const so = c.signoffs;
+                events.push({ competency_id: c.id, actor: 'demo-lh', actor_name: 'Leila Haddad', action: 'edited', detail: { methods_recorded: 6 }, at: so.assessor.at });
+                events.push({ competency_id: c.id, actor: 'demo-lh', actor_name: 'Leila Haddad', action: 'signed', detail: { as: 'assessor' }, at: so.assessor.at });
+                events.push({ competency_id: c.id, actor: 'demo-user', actor_name: 'Demo Supervisor', action: 'signed', detail: { as: 'supervisor' }, at: so.supervisor.at });
+                events.push({ competency_id: c.id, actor: 'demo-user', actor_name: 'Demo Supervisor', action: 'completed', detail: { overall: 'competent' }, at: c.completed_at });
+                if (so.director) events.push({ competency_id: c.id, actor: 'demo-pr', actor_name: 'Dr P. Rao', action: 'signed', detail: { as: 'director' }, at: so.director.at });
+            }
+        });
+        events.sort((a, b) => a.at.localeCompare(b.at)).forEach((e, i) => { e.id = i + 1; });
+
         return {
+            events,
             labs: [lab],
             members: [
                 { user_id: 'demo-user', role: 'admin', display_name: 'Demo Supervisor', email: 'you@yourlab.org' },
@@ -192,6 +210,39 @@
             ],
             staff, test_systems: sys, competencies: comps
         };
+    }
+
+    // Mirrors the competencies_guard / competencies_log triggers in supabase-app-schema.sql
+    // so the demo behaves like the live system.
+    function guardCompetency(old, next, me) {
+        const recorded = els => (els || []).filter(e => e && e.result).length;
+        const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+        if (old.completed_at && next.completed_at &&
+            ['elements', 'overall', 'remediation', 'due_date', 'kind', 'staff_id', 'test_system_id'].some(k => !same(old[k], next[k]))) {
+            throw new Error('This record is signed off and locked. Reopen it to make changes.');
+        }
+        const now = new Date().toISOString();
+        const signoffs = Object.assign({}, next.signoffs || {});
+        Object.keys(signoffs).forEach(k => {
+            if (!same((old.signoffs || {})[k], signoffs[k])) signoffs[k] = { name: me.display_name, role: me.role, user_id: me.user_id, at: now };
+        });
+        next.signoffs = signoffs;
+        if (next.completed_at && !old.completed_at) {
+            if (!signoffs.supervisor || !next.overall || recorded(next.elements) < 6) {
+                throw new Error('A record can only be completed with all six methods, an overall result and supervisor sign-off.');
+            }
+            next.completed_at = now;
+        }
+        const ev = [];
+        if (old.due_date !== next.due_date) ev.push(['due_changed', { from: old.due_date, to: next.due_date }]);
+        if (!same(old.elements, next.elements) || old.overall !== next.overall || (old.remediation || '') !== (next.remediation || '')) {
+            ev.push(['edited', { methods_recorded: recorded(next.elements), overall: next.overall }]);
+        }
+        Object.keys(signoffs).forEach(k => { if (!same((old.signoffs || {})[k], signoffs[k])) ev.push(['signed', { as: k }]); });
+        Object.keys(old.signoffs || {}).forEach(k => { if (!signoffs[k]) ev.push(['unsigned', { as: k, was: old.signoffs[k].name }]); });
+        if (next.completed_at && !old.completed_at) ev.push(['completed', { overall: next.overall }]);
+        if (!next.completed_at && old.completed_at) ev.push(['reopened', {}]);
+        return ev;
     }
 
     const Demo = {
@@ -217,6 +268,7 @@
             if (table === 'competencies') Object.assign(r, { updated_at: now, signoffs: r.signoffs || {}, elements: r.elements || emptyElements() });
             if (table === 'staff' || table === 'test_systems') r.active = r.active !== false;
             this.db[table].push(r);
+            if (table === 'competencies') this.log(r.id, 'created', { kind: r.kind, due_date: r.due_date });
             this.persist();
             return clone(r);
         },
@@ -228,17 +280,38 @@
         async update(table, id, patch) {
             const r = this.db[table].find(x => x.id === id);
             if (!r) throw new Error('Record not found');
-            Object.assign(r, patch);
-            if (table === 'competencies') r.updated_at = new Date().toISOString();
+            if (table === 'competencies') {
+                const next = Object.assign(clone(r), clone(patch));
+                const events = guardCompetency(r, next, this.db.members[0]);
+                Object.assign(r, next, { updated_at: new Date().toISOString() });
+                events.forEach(([action, detail]) => this.log(id, action, detail));
+            } else {
+                Object.assign(r, patch);
+            }
             this.persist();
             return clone(r);
         },
         async remove(table, id) {
+            const doomed = this.db.competencies.filter(c =>
+                (table === 'competencies' && c.id === id) || (table === 'staff' && c.staff_id === id) || (table === 'test_systems' && c.test_system_id === id));
+            if (doomed.some(c => c.completed_at)) {
+                throw new Error(table === 'competencies'
+                    ? 'Completed competency records can\'t be deleted. Reopen the record first.'
+                    : 'This has signed-off competency records, which must be kept. Mark it inactive instead.');
+            }
+            doomed.forEach(c => this.log(c.id, 'deleted', { kind: c.kind, due_date: c.due_date }));
             this.db[table] = this.db[table].filter(x => x.id !== id);
             if (table === 'staff') this.db.competencies = this.db.competencies.filter(c => c.staff_id !== id);
             if (table === 'test_systems') this.db.competencies = this.db.competencies.filter(c => c.test_system_id !== id);
             this.persist();
         },
+        log(competencyId, action, detail) {
+            const me = this.db.members[0];
+            this.db.events = this.db.events || [];
+            this.db.events.push({ id: this.db.events.length + 1, competency_id: competencyId, actor: me.user_id, actor_name: me.display_name, action, detail, at: new Date().toISOString() });
+        },
+        async events(competencyId) { return clone((this.db.events || []).filter(e => e.competency_id === competencyId)); },
+        async setMyReminders(on) { this.db.members[0].email_reminders = on; this.persist(); },
         async updateLab(patch) { Object.assign(this.lab, patch); this.persist(); return clone(this.lab); },
         async members() { return clone(this.db.members); },
         async addMember(email, role, name) {
@@ -270,7 +343,7 @@
         async signOut() { await this.client.auth.signOut(); },
         async memberships(userId) {
             return this.check(await this.client.from('lab_members')
-                .select('lab_id, role, display_name, labs(id, name, created_at)').eq('user_id', userId));
+                .select('lab_id, role, display_name, email_reminders, labs(id, name, created_at)').eq('user_id', userId));
         },
         async createLab(name, displayName) {
             return this.check(await this.client.rpc('create_lab', { p_name: name, p_display_name: displayName }));
@@ -282,7 +355,7 @@
             if (!ms.length) return { user, lab: null, member: null, memberships: [] };
             const m = ms.find(x => x.lab_id === preferredLabId) || ms[0];
             this.lab = m.labs;
-            return { user, lab: m.labs, member: { user_id: user.id, role: m.role, display_name: m.display_name, email: user.email }, memberships: ms };
+            return { user, lab: m.labs, member: { user_id: user.id, role: m.role, display_name: m.display_name, email: user.email, email_reminders: m.email_reminders !== false }, memberships: ms };
         },
         async list(table) {
             return this.check(await this.client.from(table).select('*').eq('lab_id', this.lab.id));
@@ -298,6 +371,12 @@
             return this.check(await this.client.from(table).update(patch).eq('id', id).select().single());
         },
         async remove(table, id) { this.check(await this.client.from(table).delete().eq('id', id)); },
+        async events(competencyId) {
+            return this.check(await this.client.from('competency_events').select('*').eq('competency_id', competencyId).order('at'));
+        },
+        async setMyReminders(on) {
+            this.check(await this.client.rpc('set_my_reminders', { p_lab: this.lab.id, p_on: on }));
+        },
         async updateLab(patch) { return this.check(await this.client.from('labs').update(patch).eq('id', this.lab.id).select().single()); },
         async members() {
             return this.check(await this.client.from('lab_members').select('user_id, role, display_name').eq('lab_id', this.lab.id));
@@ -655,8 +734,9 @@
             viewStaffDetail(view, id);
         };
         $('#delStaff').onclick = async () => {
-            if (!confirm('Delete ' + s.name + ' and all ' + comps.length + ' of their competency records? This can\'t be undone. To keep records, mark them inactive instead.')) return;
-            await run(() => S.backend.remove('staff', id), 'Deleted');
+            if (comps.some(c => c.completed_at)) { toast(s.name + ' has signed-off competency records, which must be kept. Mark them inactive instead.', true); return; }
+            if (!confirm('Delete ' + s.name + ' and all ' + comps.length + ' of their open competency records? This can\'t be undone.')) return;
+            try { await run(() => S.backend.remove('staff', id), 'Deleted'); } catch (e) { return; }
             S.staff = S.staff.filter(x => x.id !== id);
             S.comps = S.comps.filter(c => c.staff_id !== id);
             location.hash = '#/staff';
@@ -699,8 +779,9 @@
         $$('[data-del]').forEach(b => b.onclick = async () => {
             const s = systemById(b.dataset.del);
             const n = S.comps.filter(c => c.test_system_id === s.id).length;
-            if (!confirm('Delete ' + s.name + (n ? ' and its ' + n + ' competency records' : '') + '? This can\'t be undone. To keep records, deactivate it instead.')) return;
-            await run(() => S.backend.remove('test_systems', s.id), 'Deleted');
+            if (S.comps.some(c => c.test_system_id === s.id && c.completed_at)) { toast(s.name + ' has signed-off competency records, which must be kept. Deactivate it instead.', true); return; }
+            if (!confirm('Delete ' + s.name + (n ? ' and its ' + n + ' open competency records' : '') + '? This can\'t be undone.')) return;
+            try { await run(() => S.backend.remove('test_systems', s.id), 'Deleted'); } catch (e) { return; }
             S.systems = S.systems.filter(x => x.id !== s.id);
             S.comps = S.comps.filter(c => c.test_system_id !== s.id);
             viewSystems(view);
@@ -818,17 +899,18 @@
             SIGNERS.map(([key, label]) => {
                 const so = c.signoffs[key];
                 return '<div class="signoff"><h3>' + label + '</h3>' + (so
-                    ? '<div class="signed">✓ ' + esc(so.name) + '<small>' + fmtStamp(so.at) + '</small></div>' + (locked ? '' : '<button class="linkish no-print" type="button" data-unsign="' + key + '">Remove</button>')
-                    : (locked ? '<span class="muted">Not signed</span>' : '<button class="btn small no-print" type="button" data-sign="' + key + '">Sign as ' + esc(S.member.display_name || S.user.email) + '</button>')) + '</div>';
+                    ? '<div class="signed">✓ ' + esc(so.name) + '<small>' + (so.role ? esc(ROLES[so.role] || so.role) + ' · ' : '') + fmtStamp(so.at) + '</small></div>' + (locked ? '' : '<button class="linkish no-print" type="button" data-unsign="' + key + '">Remove</button>')
+                    : '<span class="muted print-only">Not signed</span><button class="btn small no-print" type="button" data-sign="' + key + '">Sign as ' + esc(S.member.display_name || S.user.email) + '</button>') + '</div>';
             }).join('') + '</div>' +
-            '<p class="muted" style="font-size:0.82rem;margin-top:0.8rem">The record is complete once every method has a result, an overall result is chosen and the technical supervisor has signed. Director sign-off follows your lab\'s policy.</p></div>' +
+            '<p class="muted" style="font-size:0.82rem;margin-top:0.8rem">The record is complete once every method has a result, an overall result is chosen and the technical supervisor has signed. It then locks. The director can countersign afterwards. Signatures are stamped with the signer\'s name, role and time.</p></div>' +
+            '<div class="form-card"><h2>History</h2><div id="history" class="muted" style="font-size:0.88rem">Loading…</div></div>' +
             '<div class="sticky-save no-print" id="saveBar">' +
             (locked
                 ? '<span class="muted">Completed ' + fmtStamp(c.completed_at) + '.</span>' +
                   (nextAssessment(c, s) ? '<button class="btn primary" type="button" id="nextBtn">Schedule next (' + esc(KINDS[nextAssessment(c, s).kind]) + ')</button>' : '') +
                   '<button class="btn ghost" type="button" id="reopenBtn">Reopen</button>'
                 : '<button class="btn" type="button" id="saveBtn">Save</button><span class="muted" id="saveState">' + elementsDone(c) + ' of 6 methods recorded</span>') +
-            '<span style="flex:1"></span><button class="btn danger small" type="button" id="delComp">Delete</button></div>';
+            (locked ? '' : '<span style="flex:1"></span><button class="btn danger small" type="button" id="delComp">Delete</button>') + '</div>';
 
         const collect = () => {
             if (locked) return;
@@ -838,7 +920,8 @@
             c.remediation = $('#remed').value;
         };
         const persist = async (patch, msg) => {
-            const saved = await run(() => S.backend.update('competencies', id, patch), msg);
+            let saved;
+            try { saved = await run(() => S.backend.update('competencies', id, patch), msg); } catch (e) { return; }
             Object.assign(c0, saved, { elements: saved.elements && saved.elements.length === 6 ? saved.elements : c.elements, signoffs: saved.signoffs || {} });
             S.dirty = false;
             viewCompetency(view, id);
@@ -864,8 +947,9 @@
             const key = b.dataset.sign;
             if (key === 'assessor' && elementsDone(c) < 6) { toast('Record a result for all six methods before the assessor signs.', true); return; }
             if (key === 'supervisor' && (elementsDone(c) < 6 || !c.overall)) { toast('All six methods and an overall result are needed before supervisor sign-off.', true); return; }
+            // The server re-stamps name, role and time; these values are only a placeholder.
             const signoffs = Object.assign({}, c.signoffs, { [key]: { name: S.member.display_name || S.user.email, at: new Date().toISOString(), user_id: S.user.id } });
-            const patch = Object.assign(fields(), { signoffs });
+            const patch = locked ? { signoffs } : Object.assign(fields(), { signoffs });
             if (key === 'supervisor') patch.completed_at = new Date().toISOString();
             await persist(patch, key === 'supervisor' ? 'Signed off: record complete' : 'Signed');
         });
@@ -877,9 +961,10 @@
         });
 
         $('#printBtn').onclick = () => window.print();
-        $('#delComp').onclick = async () => {
-            if (!confirm('Delete this competency record? This can\'t be undone.')) return;
-            await run(() => S.backend.remove('competencies', id), 'Deleted');
+        loadHistory(id);
+        if (!locked) $('#delComp').onclick = async () => {
+            if (!confirm('Delete this competency record? This can\'t be undone. The deletion is kept in the history.')) return;
+            try { await run(() => S.backend.remove('competencies', id), 'Deleted'); } catch (e) { return; }
             S.comps = S.comps.filter(x => x.id !== id);
             S.dirty = false;
             location.hash = '#/dashboard';
@@ -904,6 +989,30 @@
         }
     }
 
+    const EVENT_TEXT = {
+        created: d => 'Scheduled (' + (KINDS[d.kind] || d.kind || '') + ', due ' + fmtDate(d.due_date) + ')',
+        edited: d => 'Record edited · ' + (d.methods_recorded != null ? d.methods_recorded + ' of 6 methods recorded' : ''),
+        due_changed: d => 'Due date changed from ' + fmtDate(d.from) + ' to ' + fmtDate(d.to),
+        signed: d => 'Signed as ' + ((SIGNERS.find(x => x[0] === d.as) || [0, d.as])[1]).toLowerCase(),
+        unsigned: d => 'Removed ' + ((SIGNERS.find(x => x[0] === d.as) || [0, d.as])[1]).toLowerCase() + ' signature' + (d.was ? ' (' + d.was + ')' : ''),
+        completed: d => 'Completed · ' + (d.overall === 'not_competent' ? 'not yet competent' : 'competent'),
+        reopened: () => 'Reopened for changes',
+        deleted: () => 'Deleted'
+    };
+
+    async function loadHistory(id) {
+        const el = $('#history');
+        try {
+            const events = (await S.backend.events(id)).sort((a, b) => String(a.at).localeCompare(String(b.at)));
+            if (!$('#history') || el !== $('#history')) return;
+            el.innerHTML = events.length
+                ? '<ol class="history">' + events.map(e => '<li class="ev-' + esc(e.action) + '"><b>' +
+                      esc((EVENT_TEXT[e.action] || (() => e.action))(e.detail || {})) + '</b><span>' +
+                      esc(e.actor_name || 'Unknown') + ' · ' + fmtStamp(e.at) + '</span></li>').join('') + '</ol>'
+                : 'No history yet.';
+        } catch (e) { el.textContent = 'Couldn\'t load history: ' + e.message; }
+    }
+
     // ---------------------------------------------------------------- settings
 
     async function viewSettings(view) {
@@ -918,6 +1027,10 @@
             '<form class="form-card" id="meForm"><h2>Your signature name</h2><div class="form-row">' +
             '<div><label class="lbl" for="meName">Shown on sign-offs</label><input type="text" id="meName" value="' + esc(S.member.display_name) + '"></div>' +
             '<button class="btn" type="submit">Save</button></div></form>' +
+            '<div class="form-card"><h2>Email reminders</h2><label style="display:flex;gap:0.6rem;align-items:flex-start;cursor:pointer">' +
+            '<input type="checkbox" id="remind" style="margin-top:0.3rem;accent-color:var(--brand)"' + (S.member.email_reminders !== false ? ' checked' : '') + '>' +
+            '<span>Email me every Monday with competencies that are overdue or due in the next 30 days.' +
+            '<br><span class="muted" style="font-size:0.85rem">Sent to admins and supervisors' + (demo ? '. In the demo nothing is sent.' : ' at ' + esc(S.user.email) + '.') + '</span></span></label></div>' +
             '<div class="form-card"><h2>People who can sign in</h2><div id="members" class="muted">Loading…</div>' +
             (canAdmin() ? '<form id="memberForm" style="margin-top:1rem"><p class="muted" style="font-size:0.85rem;margin-bottom:0.6rem">' +
                 (demo ? 'In the demo this just adds a name to the list.' : 'Ask your colleague to create a LabReady account first, then add them by email.') + '</p><div class="form-row">' +
@@ -944,6 +1057,11 @@
             await run(() => S.backend.setMyName(name), 'Saved');
             S.member.display_name = name;
             renderChrome();
+        };
+        $('#remind').onchange = async e => {
+            const on = e.target.checked;
+            try { await run(() => S.backend.setMyReminders(on), on ? 'Weekly reminders on' : 'Weekly reminders off'); S.member.email_reminders = on; }
+            catch (err) { e.target.checked = !on; }
         };
         const mf = $('#memberForm');
         if (mf) mf.onsubmit = async e => {

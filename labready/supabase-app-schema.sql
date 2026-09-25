@@ -166,3 +166,154 @@ revoke execute on function public.set_my_display_name(uuid, text) from public, a
 grant execute on function public.create_lab(text, text) to authenticated;
 grant execute on function public.add_lab_member(uuid, text, text, text) to authenticated;
 grant execute on function public.set_my_display_name(uuid, text) to authenticated;
+
+-- =====================================================================
+-- Record integrity and audit history
+-- Enforced in the database so it can't be bypassed from the browser.
+-- =====================================================================
+
+create table if not exists public.competency_events (
+    id             bigint generated always as identity primary key,
+    lab_id         uuid not null references public.labs(id) on delete cascade,
+    competency_id  uuid not null,          -- no FK: history outlives a deleted record
+    actor          uuid,
+    actor_name     text,
+    action         text not null,          -- created, edited, due_changed, signed, unsigned, completed, reopened, deleted
+    detail         jsonb not null default '{}'::jsonb,
+    at             timestamptz not null default now()
+);
+create index if not exists competency_events_comp_idx on public.competency_events(competency_id, at);
+
+alter table public.competency_events enable row level security;
+drop policy if exists "members read events" on public.competency_events;
+create policy "members read events" on public.competency_events
+    for select to authenticated using (is_lab_member(lab_id));
+-- No insert/update/delete policies: only the triggers below can write history.
+
+create or replace function public.member_name(p_lab uuid)
+returns text language sql stable security definer set search_path = public as $$
+    select coalesce(nullif(display_name, ''), (select email from auth.users where id = auth.uid()))
+    from lab_members where lab_id = p_lab and user_id = auth.uid();
+$$;
+
+create or replace function public.member_role(p_lab uuid)
+returns text language sql stable security definer set search_path = public as $$
+    select role from lab_members where lab_id = p_lab and user_id = auth.uid();
+$$;
+
+-- Before update/delete: lock completed records and stamp signatures server-side.
+create or replace function public.competencies_guard()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare k text;
+begin
+    if tg_op = 'DELETE' then
+        if old.completed_at is not null then
+            raise exception 'Completed competency records can''t be deleted. Reopen the record first.';
+        end if;
+        return old;
+    end if;
+
+    -- A completed record may only be reopened (completed_at cleared); nothing else changes.
+    if old.completed_at is not null and new.completed_at is not null and (
+        new.elements is distinct from old.elements or new.overall is distinct from old.overall or
+        new.remediation is distinct from old.remediation or new.due_date is distinct from old.due_date or
+        new.kind is distinct from old.kind or new.staff_id is distinct from old.staff_id or
+        new.test_system_id is distinct from old.test_system_id)
+    then
+        raise exception 'This record is signed off and locked. Reopen it to make changes.';
+    end if;
+
+    -- Any new or changed signature is re-stamped with the real signer, their role and the server time.
+    for k in select jsonb_object_keys(coalesce(new.signoffs, '{}'::jsonb)) loop
+        if (old.signoffs -> k) is null or (old.signoffs -> k) is distinct from (new.signoffs -> k) then
+            new.signoffs := jsonb_set(new.signoffs, array[k], jsonb_build_object(
+                'name', member_name(new.lab_id), 'role', member_role(new.lab_id),
+                'user_id', auth.uid(), 'at', now()));
+        end if;
+    end loop;
+
+    -- Completion is only valid with a supervisor signature, an overall result and six recorded methods.
+    if new.completed_at is not null and old.completed_at is null then
+        if (new.signoffs -> 'supervisor') is null or new.overall is null or
+           (select count(*) from jsonb_array_elements(new.elements) e where coalesce(e ->> 'result', '') <> '') < 6 then
+            raise exception 'A record can only be completed with all six methods, an overall result and supervisor sign-off.';
+        end if;
+        new.completed_at := now();
+    end if;
+    return new;
+end;
+$$;
+
+drop trigger if exists competencies_guard_upd on public.competencies;
+create trigger competencies_guard_upd before update on public.competencies
+    for each row execute function public.competencies_guard();
+drop trigger if exists competencies_guard_del on public.competencies;
+create trigger competencies_guard_del before delete on public.competencies
+    for each row execute function public.competencies_guard();
+
+-- After insert/update/delete: write the history.
+create or replace function public.competencies_log()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+    k text;
+    lab uuid := coalesce(new.lab_id, old.lab_id);
+    who text := member_name(lab);
+    ev jsonb[] := '{}';
+    e jsonb;
+begin
+    if not exists (select 1 from labs where id = lab) then return null; end if;  -- whole lab being deleted
+    if tg_op = 'INSERT' then
+        ev := ev || jsonb_build_object('action', 'created', 'detail', jsonb_build_object('kind', new.kind, 'due_date', new.due_date));
+    elsif tg_op = 'DELETE' then
+        ev := ev || jsonb_build_object('action', 'deleted', 'detail', jsonb_build_object(
+            'kind', old.kind, 'due_date', old.due_date, 'staff_id', old.staff_id, 'test_system_id', old.test_system_id));
+    else
+        if new.due_date is distinct from old.due_date then
+            ev := ev || jsonb_build_object('action', 'due_changed', 'detail', jsonb_build_object('from', old.due_date, 'to', new.due_date));
+        end if;
+        if new.elements is distinct from old.elements or new.overall is distinct from old.overall or new.remediation is distinct from old.remediation then
+            ev := ev || jsonb_build_object('action', 'edited', 'detail', jsonb_build_object(
+                'methods_recorded', (select count(*) from jsonb_array_elements(new.elements) x where coalesce(x ->> 'result', '') <> ''),
+                'overall', new.overall));
+        end if;
+        for k in select jsonb_object_keys(coalesce(new.signoffs, '{}'::jsonb)) loop
+            if (old.signoffs -> k) is distinct from (new.signoffs -> k) then
+                ev := ev || jsonb_build_object('action', 'signed', 'detail', jsonb_build_object('as', k));
+            end if;
+        end loop;
+        for k in select jsonb_object_keys(coalesce(old.signoffs, '{}'::jsonb)) loop
+            if (new.signoffs -> k) is null then
+                ev := ev || jsonb_build_object('action', 'unsigned', 'detail', jsonb_build_object('as', k, 'was', old.signoffs -> k -> 'name'));
+            end if;
+        end loop;
+        if new.completed_at is not null and old.completed_at is null then
+            ev := ev || jsonb_build_object('action', 'completed', 'detail', jsonb_build_object('overall', new.overall));
+        elsif new.completed_at is null and old.completed_at is not null then
+            ev := ev || jsonb_build_object('action', 'reopened', 'detail', '{}'::jsonb);
+        end if;
+    end if;
+
+    foreach e in array ev loop
+        insert into competency_events (lab_id, competency_id, actor, actor_name, action, detail)
+        values (lab, coalesce(new.id, old.id), auth.uid(), who, e ->> 'action', e -> 'detail');
+    end loop;
+    return null;
+end;
+$$;
+
+drop trigger if exists competencies_log on public.competencies;
+create trigger competencies_log after insert or update or delete on public.competencies
+    for each row execute function public.competencies_log();
+
+-- =====================================================================
+-- Email reminders (see supabase/functions/competency-reminders)
+-- =====================================================================
+
+alter table public.lab_members add column if not exists email_reminders boolean not null default true;
+
+create or replace function public.set_my_reminders(p_lab uuid, p_on boolean)
+returns void language sql security definer set search_path = public as $$
+    update lab_members set email_reminders = p_on where lab_id = p_lab and user_id = auth.uid();
+$$;
+revoke execute on function public.set_my_reminders(uuid, boolean) from public, anon;
+grant execute on function public.set_my_reminders(uuid, boolean) to authenticated;

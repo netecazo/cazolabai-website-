@@ -104,6 +104,14 @@ table.list td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 .print-only { display: none; }
 
+.history { list-style: none; border-left: 2px solid var(--line); margin-left: 0.3rem; }
+.history li { position: relative; padding: 0 0 0.8rem 1rem; }
+.history li::before { content: ""; position: absolute; left: -6px; top: 0.4rem; width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.history li.ev-signed::before, .history li.ev-completed::before { background: var(--accent); }
+.history li.ev-unsigned::before, .history li.ev-reopened::before, .history li.ev-deleted::before { background: var(--warn); }
+.history li b { display: block; color: var(--ink); font-size: 0.9rem; font-weight: 600; }
+.history li span { color: var(--muted); font-size: 0.8rem; }
+
 @media (max-width: 800px) {
     .stats { grid-template-columns: repeat(2, 1fr); }
     .element { grid-template-columns: 1fr; gap: 0.5rem; }
