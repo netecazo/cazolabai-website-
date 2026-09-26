@@ -22,6 +22,7 @@ The course is the entry product. The competency system is the recurring product.
 | Weekly email reminders (overdue + due in 30 days) to admins/supervisors | `labready/supabase/functions/competency-reminders/`, `labready/supabase/reminders-cron.sql` | Code written, email logic unit-tested; needs Supabase project, Resend account and deploy |
 | Module quizzes: 80 multiple-choice questions (8 per module), shuffled answers, pass mark 80% | `labready/content/quizzes.js`, `labready/assets/quiz.js` | On every module page for self-study; in the app, "Run a module quiz" fills competency method 6. Draft v0.1, review with the modules |
 | Reports: competency matrix and inspection packet (cover + one page per signed-off record with methods, signatures and history) | `labready/app/` (Reports tab) | Built; prints one record per Letter page |
+| Spreadsheet import for staff and test systems (paste from Excel/Sheets or CSV, preview, duplicate and date checks) | `labready/app/` (Staff and Test systems pages) | Built; up to 500 rows per import |
 | Tech self-service (staff log in to take quizzes themselves) | — | Not started; quizzes are proctored on the supervisor's screen for now |
 
 ---

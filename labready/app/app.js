@@ -684,7 +684,8 @@
     // ---------------------------------------------------------------- staff
 
     function viewStaff(view) {
-        view.innerHTML = head('Staff', 'Everyone whose competency you track. They don\'t need a login.') +
+        view.innerHTML = head('Staff', 'Everyone whose competency you track. They don\'t need a login.',
+            '<button class="btn ghost" type="button" id="importStaff">Import from spreadsheet</button>') +
             '<form class="form-card no-print" id="staffForm"><h2>Add a staff member</h2><div class="form-row">' +
             '<div><label class="lbl" for="sName">Name</label><input type="text" id="sName" required></div>' +
             '<div><label class="lbl" for="sPos">Position / credential</label><input type="text" id="sPos" placeholder="e.g. MLS(ASCP)"></div>' +
@@ -693,6 +694,7 @@
             '<button class="btn" type="submit">Add</button></div></form>' +
             '<div id="staffList"></div>';
 
+        $('#importStaff').onclick = () => openImport('staff', () => viewStaff(view));
         $('#staffForm').onsubmit = async e => {
             e.preventDefault();
             const row = { name: $('#sName').value.trim(), position: $('#sPos').value.trim(), hire_date: $('#sHire').value || null, email: $('#sEmail').value.trim() };
@@ -758,13 +760,15 @@
     // ---------------------------------------------------------------- test systems
 
     function viewSystems(view) {
-        view.innerHTML = head('Test systems', 'Competency is assessed for each test system a person performs.') +
+        view.innerHTML = head('Test systems', 'Competency is assessed for each test system a person performs.',
+            '<button class="btn ghost" type="button" id="importSys">Import from spreadsheet</button>') +
             '<form class="form-card no-print" id="sysForm"><h2>Add a test system</h2><div class="form-row">' +
             '<div><label class="lbl" for="tName">Name</label><input type="text" id="tName" required placeholder="e.g. General chemistry"></div>' +
             '<div><label class="lbl" for="tInst">Instrument</label><input type="text" id="tInst" placeholder="e.g. Cobas Pure c303 (Cobas Pure 1)"></div>' +
             '<div><label class="lbl" for="tSec">Section</label><input type="text" id="tSec" placeholder="e.g. Chemistry"></div>' +
             '<button class="btn" type="submit">Add</button></div></form><div id="sysList"></div>';
 
+        $('#importSys').onclick = () => openImport('test_systems', () => viewSystems(view));
         $('#sysForm').onsubmit = async e => {
             e.preventDefault();
             const row = { name: $('#tName').value.trim(), instrument: $('#tInst').value.trim(), section: $('#tSec').value.trim() };
@@ -1015,6 +1019,163 @@
                 location.hash = '#/competency/' + created.id;
             };
         }
+    }
+
+    // ---------------------------------------------------------------- spreadsheet import
+
+    // Parses CSV (commas) or a paste from Excel/Sheets (tabs). Handles quoted fields and "" escapes.
+    function parseDelimited(text) {
+        text = text.replace(/^﻿/, '');
+        const first = text.split(/\r?\n/)[0] || '';
+        const delim = first.includes('\t') ? '\t' : (first.split(';').length > first.split(',').length ? ';' : ',');
+        const rows = [];
+        let row = [], field = '', inQ = false;
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            if (inQ) {
+                if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+                else if (ch === '"') inQ = false;
+                else field += ch;
+            } else if (ch === '"' && field === '') inQ = true;
+            else if (ch === delim) { row.push(field); field = ''; }
+            else if (ch === '\n' || ch === '\r') {
+                if (ch === '\r' && text[i + 1] === '\n') i++;
+                row.push(field); field = '';
+                if (row.some(c => c.trim() !== '')) rows.push(row);
+                row = [];
+            } else field += ch;
+        }
+        row.push(field);
+        if (row.some(c => c.trim() !== '')) rows.push(row);
+        return rows.map(r => r.map(c => c.trim()));
+    }
+
+    // Accepts 2024-04-09, 4/9/2024, 04/09/24 (US month-first) and Excel-style "Apr 9, 2024".
+    function parseDateLoose(v) {
+        if (!v) return { value: null };
+        let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        let y, mo, d;
+        if (m) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+        else if ((m = v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2}|\d{4})$/))) {
+            mo = +m[1]; d = +m[2]; y = +m[3]; if (y < 100) y += y < 70 ? 2000 : 1900;
+        } else {
+            const t = Date.parse(v);
+            if (isNaN(t)) return { error: 'unreadable date "' + v + '"' };
+            const dt = new Date(t); y = dt.getFullYear(); mo = dt.getMonth() + 1; d = dt.getDate();
+        }
+        const dt = new Date(y, mo - 1, d);
+        if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return { error: 'invalid date "' + v + '"' };
+        if (y < 1950 || isoOf(dt) > todayIso()) return { error: 'date out of range "' + v + '"' };
+        return { value: isoOf(dt) };
+    }
+
+    const IMPORT_SPECS = {
+        staff: {
+            label: 'staff', example: 'Name,Credential,Hire date,Email\nMaria Alvarez,MLS(ASCP),4/9/2019,malvarez@yourlab.org',
+            cols: [
+                { key: 'name', title: 'Name', alias: ['name', 'full name', 'employee', 'employee name', 'staff', 'staff name', 'technologist'] },
+                { key: 'position', title: 'Position', alias: ['position', 'title', 'job title', 'credential', 'credentials', 'role'] },
+                { key: 'hire_date', title: 'Hire date', alias: ['hire date', 'hired', 'date hired', 'date of hire', 'start date'], date: true },
+                { key: 'email', title: 'Email', alias: ['email', 'e-mail', 'email address', 'work email'] }
+            ],
+            existing: () => S.staff
+        },
+        test_systems: {
+            label: 'test systems', example: 'Test system,Instrument,Section\nGeneral chemistry,Roche Cobas Pure c303,Chemistry',
+            cols: [
+                { key: 'name', title: 'Test system', alias: ['test system', 'system', 'name', 'test', 'assay group'] },
+                { key: 'instrument', title: 'Instrument', alias: ['instrument', 'analyzer', 'analyser', 'platform', 'equipment'] },
+                { key: 'section', title: 'Section', alias: ['section', 'department', 'dept', 'area', 'bench'] }
+            ],
+            existing: () => S.systems
+        }
+    };
+
+    function buildImportRows(kind, rows) {
+        const spec = IMPORT_SPECS[kind];
+        const norm = h => h.toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim();
+        const header = rows[0] ? rows[0].map(norm) : [];
+        const idx = {};
+        spec.cols.forEach(c => { const al = c.alias.map(norm); const i = header.findIndex(h => al.includes(h)); if (i >= 0) idx[c.key] = i; });
+        const hasHeader = idx.name !== undefined;
+        if (!hasHeader) spec.cols.forEach((c, i) => { idx[c.key] = i; });
+        const body = hasHeader ? rows.slice(1) : rows;
+        const seen = new Set(spec.existing().map(x => x.name.trim().toLowerCase()));
+        const out = body.map((r, n) => {
+            const rec = {}, problems = [];
+            spec.cols.forEach(c => {
+                let v = idx[c.key] !== undefined ? (r[idx[c.key]] || '').trim() : '';
+                if (c.date) { const d = parseDateLoose(v); if (d.error) problems.push(d.error); v = d.value || null; }
+                rec[c.key] = v === '' ? (c.key === 'name' ? '' : (c.date ? null : '')) : v;
+            });
+            if (!rec.name) problems.push('no name');
+            else if (rec.name.length > 200) problems.push('name too long');
+            const k = (rec.name || '').toLowerCase();
+            let status = problems.length ? 'error' : 'ok';
+            if (status === 'ok' && seen.has(k)) status = 'duplicate';
+            if (status === 'ok') seen.add(k);
+            return { line: n + (hasHeader ? 2 : 1), rec, status, problems };
+        });
+        return { hasHeader, rows: out, mapped: spec.cols.filter(c => idx[c.key] !== undefined && (hasHeader ? true : idx[c.key] < (rows[0] || []).length)).map(c => c.title) };
+    }
+
+    function openImport(kind, done) {
+        const spec = IMPORT_SPECS[kind];
+        const wrap = document.createElement('div');
+        wrap.className = 'modal-backdrop';
+        wrap.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="impTitle">' +
+            '<div class="modal-head"><h2 id="impTitle">Import ' + spec.label + '</h2><button class="linkish" type="button" id="impClose">Close</button></div>' +
+            '<p class="muted" style="font-size:0.88rem;margin-bottom:0.6rem">Copy the rows from Excel or Google Sheets and paste them below, or choose a CSV file. ' +
+            'A header row is recommended: ' + spec.cols.map(c => '<b>' + c.title + '</b>').join(', ') + '. Without one, columns are read in that order.</p>' +
+            '<textarea id="impText" rows="7" placeholder="' + esc(spec.example) + '"></textarea>' +
+            '<div class="form-row" style="margin-top:0.6rem"><div><label class="lbl" for="impFile">Or choose a CSV file</label><input type="file" id="impFile" accept=".csv,.txt,text/csv"></div>' +
+            '<button class="btn" type="button" id="impPreview">Preview</button></div>' +
+            '<div id="impOut"></div></div>';
+        document.body.appendChild(wrap);
+        document.body.style.overflow = 'hidden';
+        const close = () => { wrap.remove(); document.body.style.overflow = ''; };
+        $('#impClose', wrap).onclick = close;
+        $('#impFile', wrap).onchange = e => {
+            const f = e.target.files[0];
+            if (!f) return;
+            if (f.size > 1024 * 1024) { toast('That file is over 1 MB. Export just the columns you need.', true); return; }
+            f.text().then(t => { $('#impText', wrap).value = t; $('#impPreview', wrap).click(); });
+        };
+        let plan = null;
+        $('#impPreview', wrap).onclick = () => {
+            const rows = parseDelimited($('#impText', wrap).value);
+            const out = $('#impOut', wrap);
+            if (!rows.length) { out.innerHTML = '<p class="error" style="margin-top:0.8rem">Nothing to import yet.</p>'; return; }
+            if (rows.length > 501) { out.innerHTML = '<p class="error" style="margin-top:0.8rem">Up to 500 rows at a time, please.</p>'; return; }
+            plan = buildImportRows(kind, rows);
+            const ok = plan.rows.filter(r => r.status === 'ok');
+            const dup = plan.rows.filter(r => r.status === 'duplicate').length;
+            const bad = plan.rows.filter(r => r.status === 'error').length;
+            const cell = v => esc(v == null ? '' : v);
+            out.innerHTML = '<p style="margin:0.9rem 0 0.4rem"><b>' + ok.length + ' to add</b>' +
+                (dup ? ' · ' + dup + ' already exist (skipped)' : '') + (bad ? ' · <span class="error">' + bad + ' with problems (skipped)</span>' : '') +
+                '<br><span class="muted" style="font-size:0.82rem">' + (plan.hasHeader ? 'Matched columns: ' + plan.mapped.join(', ') : 'No header row found: columns read in order.') + '</span></p>' +
+                '<div class="list-wrap" style="max-height:280px;overflow:auto"><table class="list"><thead><tr><th>Row</th>' +
+                spec.cols.map(c => '<th>' + c.title + '</th>').join('') + '<th>Status</th></tr></thead><tbody>' +
+                plan.rows.map(r => '<tr><td class="num">' + r.line + '</td>' + spec.cols.map(c => '<td>' + (c.date ? fmtDate(r.rec[c.key]) : cell(r.rec[c.key])) + '</td>').join('') +
+                    '<td>' + (r.status === 'ok' ? '<span class="pill complete">Add</span>' : r.status === 'duplicate' ? '<span class="pill scheduled">Exists</span>' :
+                    '<span class="pill overdue" title="' + esc(r.problems.join('; ')) + '">' + esc(r.problems[0]) + '</span>') + '</td></tr>').join('') +
+                '</tbody></table></div>' +
+                '<div class="actions" style="margin:0.8rem 0 0"><button class="btn primary" type="button" id="impGo"' + (ok.length ? '' : ' disabled') + '>Import ' + ok.length + ' ' + spec.label + '</button></div>';
+            const go = $('#impGo', wrap);
+            if (go) go.onclick = async () => {
+                go.disabled = true;
+                const recs = ok.map(r => kind === 'staff'
+                    ? { name: r.rec.name, position: r.rec.position || '', hire_date: r.rec.hire_date || null, email: r.rec.email || '' }
+                    : { name: r.rec.name, instrument: r.rec.instrument || '', section: r.rec.section || '' });
+                try {
+                    const created = await run(() => S.backend.insertMany(kind, recs), recs.length + ' ' + spec.label + ' imported');
+                    if (kind === 'staff') { S.staff.push(...created); S.staff.sort((a, b) => a.name.localeCompare(b.name)); }
+                    else { S.systems.push(...created); S.systems.sort((a, b) => a.name.localeCompare(b.name)); }
+                    close(); done();
+                } catch (e) { go.disabled = false; }
+            };
+        };
     }
 
     // Proctored quiz for competency method 6. The tech answers on the supervisor's screen.
