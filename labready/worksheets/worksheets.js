@@ -100,99 +100,14 @@
 
     const studyId = new URLSearchParams(location.search).get('study');
     let linked = null;           // { backend, record, labName, member }
-    const SIGNERS = ['admin', 'supervisor', 'director'];
-    const ROLE_NAMES = { admin: 'Admin', supervisor: 'Supervisor', assessor: 'Assessor', director: 'Director' };
-
-    const DemoStudies = {
-        key: 'labready.app.demo.v2',
-        db() { try { return JSON.parse(localStorage.getItem(this.key) || 'null'); } catch (e) { return null; } },
-        async open(id) {
-            const db = this.db();
-            const rec = db && (db.studies || []).find(x => x.id === id);
-            if (!rec) return null;
-            return { record: rec, labName: db.labs[0].name, member: db.members[0] };
-        },
-        async write(id, apply) {
-            const db = this.db();
-            const rec = (db.studies || []).find(x => x.id === id);
-            if (!rec) throw new Error('This study no longer exists.');
-            apply(rec, db.members[0]);
-            rec.updated_at = new Date().toISOString();
-            localStorage.setItem(this.key, JSON.stringify(db));
-            return JSON.parse(JSON.stringify(rec));
-        },
-        save(id, content, verdict) {
-            return this.write(id, rec => {
-                if (rec.signoff) throw new Error('This study is signed off and locked. Remove the sign-off to make changes.');
-                rec.content = content; rec.verdict = verdict;
-            });
-        },
-        sign(id, content, verdict) {
-            return this.write(id, (rec, me) => {
-                if (!SIGNERS.includes(me.role)) throw new Error('Only a supervisor, director or admin can sign off a study.');
-                if (!(content.review || {}).decision) throw new Error('Choose a decision before signing off the study.');
-                rec.content = content; rec.verdict = verdict;
-                rec.signoff = { name: me.display_name, role: me.role, user_id: me.user_id, at: new Date().toISOString() };
-            });
-        },
-        unsign(id) {
-            return this.write(id, (rec, me) => {
-                if (!SIGNERS.includes(me.role)) throw new Error('Only a supervisor, director or admin can remove a study sign-off.');
-                rec.signoff = null;
-            });
-        }
-    };
-
-    const LiveStudies = {
-        client: null,
-        check(res) { if (res.error) throw new Error(res.error.message); return res.data; },
-        async open(id) {
-            const CFG = window.LABREADY_CONFIG || {};
-            if (!(CFG.supabaseUrl && window.supabase)) throw new Error('This site isn\'t connected to its database.');
-            this.client = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey);
-            const { data } = await this.client.auth.getSession();
-            if (!data.session) return { signedOut: true };
-            const user = data.session.user;
-            const rec = this.check(await this.client.from('studies').select('*').eq('id', id).maybeSingle());
-            if (!rec) return null;
-            const lab = this.check(await this.client.from('labs').select('name').eq('id', rec.lab_id).single());
-            const m = this.check(await this.client.from('lab_members').select('role, display_name').eq('lab_id', rec.lab_id).eq('user_id', user.id).single());
-            return { record: rec, labName: lab.name, member: { user_id: user.id, role: m.role, display_name: m.display_name || user.email } };
-        },
-        async update(id, patch) { return this.check(await this.client.from('studies').update(patch).eq('id', id).select().single()); },
-        save(id, content, verdict) { return this.update(id, { content, verdict }); },
-        // The database re-stamps the name, role and time; the value sent is only a placeholder.
-        sign(id, content, verdict) { return this.update(id, { content, verdict, signoff: { pending: true } }); },
-        unsign(id) { return this.update(id, { signoff: null }); }
-    };
-
-    let saveTimer = null, saving = Promise.resolve();
+    const R = window.LabReadyRecords;
+    const SIGNERS = R.SIGNERS, ROLE_NAMES = R.ROLE_NAMES;
+    let saver = null;
     function setSaveState(text, bad) {
         const el = $('#saveState');
         if (el) { el.textContent = text; el.classList.toggle('bad', !!bad); }
     }
-    function scheduleSave() {
-        if (!linked || linked.record.signoff) return;
-        setSaveState('Unsaved changes…');
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(saveNow, 800);
-    }
-    function saveNow() {
-        clearTimeout(saveTimer);
-        const content = JSON.parse(JSON.stringify(cur()));
-        const verdict = last ? last.res.verdict.state : 'incomplete';
-        saving = saving.then(async () => {
-            setSaveState('Saving…');
-            try {
-                linked.record = await linked.backend.save(linked.record.id, content, verdict);
-                setSaveState('Saved to ' + linked.labName + ' · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-            } catch (e) { setSaveState('Not saved: ' + e.message, true); }
-        });
-        return saving;
-    }
-    window.addEventListener('beforeunload', e => {
-        if (saveTimer && linked && !linked.record.signoff) { saveNow(); e.preventDefault(); e.returnValue = ''; }
-    });
+    const scheduleSave = () => saver && saver.schedule();
 
     // ---------------------------------------------------------------- render
 
@@ -249,10 +164,10 @@
             if (sb) sb.onclick = async () => {
                 collect(); compute();
                 if (!cur().review.decision) { alert('Choose a decision before signing off.'); $('#r_decision').focus(); return; }
-                await saving;
+                await saver.settled();
                 try { linked.record = await linked.backend.sign(linked.record.id, JSON.parse(JSON.stringify(cur())), last ? last.res.verdict.state : 'incomplete'); }
                 catch (e) { alert(e.message); return; }
-                clearTimeout(saveTimer); saveTimer = null;
+                saver.cancel();
                 render();
             };
             if (ub) ub.onclick = async () => {
@@ -535,9 +450,7 @@
         render();
     }
     async function openStudy() {
-        let mode = null;
-        try { mode = localStorage.getItem('labready.app.mode'); } catch (e) { /* ignore */ }
-        const backend = mode === 'live' ? LiveStudies : DemoStudies;
+        const backend = R.backend();
         const back = '<a href="../app/#/studies">Back to studies</a>';
         let got;
         try { got = await backend.open(studyId); } catch (e) {
@@ -550,10 +463,12 @@
             $('#ws').innerHTML = '<div class="card"><h2>Study not found</h2><p>It may have been deleted, or it belongs to a lab you\'re not a member of.</p><p>' + back + '</p></div>'; return;
         }
         linked = Object.assign({ backend }, got);
+        saver = R.autosaver(backend, () => linked.record, r => { linked.record = r; },
+            () => ({ content: JSON.parse(JSON.stringify(cur())), verdict: last ? last.res.verdict.state : 'incomplete' }), setSaveState, linked.labName);
         kind = linked.record.kind;
         all = { [kind]: Object.assign(blank(), linked.record.content || {}) };
         $('#tabs').hidden = true;
-        $('.page-head').innerHTML = '<span class="tag">Study · ' + esc(linked.labName) + (backend === DemoStudies ? ' (demo)' : '') + '</span>' +
+        $('.page-head').innerHTML = '<span class="tag">Study · ' + esc(linked.labName) + (backend.mode === 'demo' ? ' (demo)' : '') + '</span>' +
             '<h1>' + esc(KINDS[kind].title) + '</h1><p>' + back + '</p>';
         render();
     }
