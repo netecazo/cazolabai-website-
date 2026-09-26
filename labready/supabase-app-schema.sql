@@ -488,6 +488,71 @@ revoke execute on function public.submit_quiz_link(text, int[], text) from publi
 grant execute on function public.quiz_link_info(text) to anon, authenticated;
 grant execute on function public.submit_quiz_link(text, int[], text) to anon, authenticated;
 
+-- =====================================================================
+-- Studies: lot-to-lot, method comparison and AMR / calibration verification
+-- worksheets saved to the lab (see labready/worksheets/). The review sign-off
+-- is stamped here, and a signed study is locked until the sign-off is removed.
+-- =====================================================================
+
+create table if not exists public.studies (
+    id          uuid primary key default gen_random_uuid(),
+    lab_id      uuid not null references public.labs(id) on delete cascade,
+    kind        text not null check (kind in ('lot', 'method', 'amr')),
+    content     jsonb not null default '{}'::jsonb,   -- {fields, criteria, data, review: {decision, comments}}
+    analyte     text generated always as (nullif(btrim(content -> 'fields' ->> 'analyte'), '')) stored,
+    verdict     text check (verdict in ('pass', 'fail', 'incomplete')),
+    signoff     jsonb,                                -- {name, role, user_id, at}, stamped by the trigger below
+    created_by  uuid default auth.uid(),
+    created_at  timestamptz not null default now(),
+    updated_at  timestamptz not null default now()
+);
+create index if not exists studies_lab_idx on public.studies(lab_id, created_at desc);
+
+alter table public.studies enable row level security;
+drop policy if exists "lab members all" on public.studies;
+create policy "lab members all" on public.studies for all to authenticated
+    using (private.is_lab_member(lab_id)) with check (private.is_lab_member(lab_id));
+
+create or replace function private.studies_guard()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+    if tg_op = 'DELETE' then
+        if old.signoff is not null then raise exception 'Signed studies can''t be deleted. Remove the sign-off first.'; end if;
+        return old;
+    end if;
+    if tg_op = 'UPDATE' then
+        if new.lab_id is distinct from old.lab_id or new.created_by is distinct from old.created_by or new.created_at is distinct from old.created_at then
+            raise exception 'A study can''t be moved or re-attributed.';
+        end if;
+        if old.signoff is not null and new.signoff is not null and
+           (new.content is distinct from old.content or new.kind is distinct from old.kind or new.verdict is distinct from old.verdict) then
+            raise exception 'This study is signed off and locked. Remove the sign-off to make changes.';
+        end if;
+        if old.signoff is not null and new.signoff is null and
+           coalesce(private.member_role(new.lab_id), '') not in ('admin', 'supervisor', 'director') then
+            raise exception 'Only a supervisor, director or admin can remove a study sign-off.';
+        end if;
+    end if;
+    -- A new sign-off (or a changed one) is stamped with the real signer, their role and the server time.
+    if new.signoff is not null and (tg_op = 'INSERT' or old.signoff is null or new.signoff is distinct from old.signoff) then
+        if coalesce(private.member_role(new.lab_id), '') not in ('admin', 'supervisor', 'director') then
+            raise exception 'Only a supervisor, director or admin can sign off a study.';
+        end if;
+        if coalesce(new.content -> 'review' ->> 'decision', '') = '' then
+            raise exception 'Choose a decision before signing off the study.';
+        end if;
+        new.signoff := jsonb_build_object('name', private.member_name(new.lab_id), 'role', private.member_role(new.lab_id),
+                                          'user_id', auth.uid(), 'at', now());
+    end if;
+    new.updated_at := now();
+    return new;
+end;
+$$;
+
+drop trigger if exists studies_guard on public.studies;
+create trigger studies_guard before insert or update or delete on public.studies
+    for each row execute function private.studies_guard();
+
 -- ---------- Private helper permissions ----------
 -- Row-level security policies run as the signed-in user, so they need EXECUTE on the two membership checks.
 revoke execute on all functions in schema private from public, anon;

@@ -79,6 +79,11 @@
         }
         .tip b { display: block; }
 
+        .saved-note.bad { color: var(--danger); }
+        .signoff-box { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; align-items: center; margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 10px; background: var(--bg); font-size: 0.88rem; color: var(--slate); }
+        .signoff-box.signed { background: #f0fdf4; border: 1px solid #86efac; }
+        .signoff-box.signed b { color: var(--accent-dark); }
+        .linkish { background: none; border: none; color: var(--brand); cursor: pointer; font: inherit; font-size: 0.88rem; padding: 0; }
         .print-only { display: none; }
         .sig { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2.2rem; }
         .sig div { border-top: 1px solid var(--ink); padding-top: 0.3rem; font-size: 0.85rem; }
@@ -122,6 +127,8 @@
 
     <footer class="site">LabReady Pro · Training and documentation support. No patient data is stored. · <a href="/">labready</a></footer>
 
+    <script src="../app/config.js"></script>
+    <script src="../assets/supabase-2.117.1.min.js"></script>
     <script src="stats.js"></script>
     <script src="worksheets.js"></script>
 </body>
