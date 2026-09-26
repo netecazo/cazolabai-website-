@@ -507,6 +507,9 @@ create table if not exists public.studies (
     updated_at  timestamptz not null default now()
 );
 create index if not exists studies_lab_idx on public.studies(lab_id, created_at desc);
+-- 'qc' records are QC failure investigations from the QC assistant (labready/qc-assistant/?record=<id>).
+alter table public.studies drop constraint if exists studies_kind_check;
+alter table public.studies add constraint studies_kind_check check (kind in ('lot', 'method', 'amr', 'qc'));
 
 alter table public.studies enable row level security;
 drop policy if exists "lab members all" on public.studies;
