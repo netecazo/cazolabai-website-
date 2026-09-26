@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Worksheets - LabReady Pro</title>
+    <meta name="description" content="Lot-to-lot, method comparison and AMR / calibration verification worksheets: paste your data, judge it against your lab's limits and print a signed record.">
+    <link rel="stylesheet" href="../assets/labready.css">
+    <style>
+        .ws-root {
+            --series-1: #2a78d6;   /* samples */
+            --series-2: #eb6834;   /* regression fit */
+            --ref: #8a96a0;        /* identity / zero line */
+            --band: #e3e8ec;       /* allowable limits */
+            --grid: #edf1f4;
+        }
+        .ws-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+        .ws-tabs button {
+            border: 1px solid var(--line); background: white; border-radius: 999px; padding: 0.5rem 1rem;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; color: var(--slate); font-family: inherit;
+        }
+        .ws-tabs button.active { background: var(--ink); color: white; border-color: var(--ink); }
+        .card-head { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.3rem; }
+        .card-head h2 { margin: 0; }
+        .btn.small { padding: 0.4rem 0.8rem; font-size: 0.82rem; }
+        #data { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88rem; }
+        .skip-note { color: var(--warn); font-size: 0.85rem; margin-top: 0.4rem; }
+        .muted { color: var(--muted); }
+        .saved-note { color: var(--muted); font-size: 0.82rem; align-self: center; }
+
+        .verdict { display: flex; gap: 0.8rem; align-items: flex-start; border-radius: 10px; padding: 0.8rem 1rem; margin: 0.6rem 0 0.8rem; }
+        .verdict b { display: block; }
+        .verdict span { font-size: 0.9rem; }
+        .v-icon { flex: none; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; color: white; }
+        .verdict.pass { background: #f0fdf4; border: 1px solid #86efac; }
+        .verdict.pass .v-icon { background: var(--accent-dark); }
+        .verdict.fail { background: var(--danger-soft); border: 1px solid #fca5a5; }
+        .verdict.fail .v-icon { background: var(--danger); }
+        .verdict.incomplete { background: var(--bg); border: 1px solid var(--line); }
+        .verdict.incomplete .v-icon { background: var(--muted); }
+        .checks { list-style: none; margin: 0 0 1rem; font-size: 0.9rem; }
+        .checks li { padding: 0.15rem 0; }
+        .checks .ok, td .ok { color: var(--accent-dark); font-weight: 700; }
+        .checks .bad, td .bad { color: var(--danger); font-weight: 700; }
+        .callout p + p { margin-top: 0.4rem; }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.6rem; margin: 0 0 1rem; }
+        .stat-grid div { background: var(--bg); border-radius: 10px; padding: 0.6rem 0.8rem; }
+        .stat-grid span { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+        .stat-grid b { font-size: 0.98rem; font-variant-numeric: tabular-nums; }
+
+        table.doc { margin-bottom: 1rem; }
+        table.doc caption { text-align: left; font-weight: 700; font-size: 0.92rem; margin-bottom: 0.4rem; }
+        table.doc td.num { font-variant-numeric: tabular-nums; }
+
+        figure.chart { margin: 0 0 1.2rem; max-width: 760px; }
+        figure.chart figcaption { font-size: 0.85rem; font-weight: 600; color: var(--slate); margin-bottom: 0.3rem; }
+        .chart-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; font-size: 0.8rem; color: var(--slate); margin-bottom: 0.3rem; }
+        .chart-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+        .sw { display: inline-block; width: 14px; height: 10px; }
+        .sw.pt { width: 10px; height: 10px; border-radius: 50%; background: var(--series-1); }
+        .sw.fit { height: 2px; background: var(--series-2); }
+        .sw.ref { height: 0; border-top: 2px dashed var(--ref); }
+        .sw.band { background: var(--band); border-radius: 2px; }
+        .chart-box { position: relative; }
+        .chart-box svg { width: 100%; height: auto; display: block; overflow: visible; }
+        .chart-box .grid { stroke: var(--grid); stroke-width: 1; }
+        .chart-box .axis { stroke: #b8c4cc; stroke-width: 1; }
+        .chart-box .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+        .chart-box .axis-label { fill: var(--slate); font-size: 12px; font-weight: 600; }
+        .chart-box .band { fill: var(--band); }
+        .chart-box .ref { stroke: var(--ref); stroke-width: 1.5; stroke-dasharray: 5 4; }
+        .chart-box .fit { stroke: var(--series-2); stroke-width: 2; }
+        .chart-box .pt { fill: var(--series-1); stroke: white; stroke-width: 2; }
+        .chart-box .pt.on { r: 6.5; }
+        .tip {
+            position: absolute; transform: translate(-50%, -100%); background: var(--ink); color: white; font-size: 0.78rem;
+            line-height: 1.4; padding: 0.4rem 0.6rem; border-radius: 8px; pointer-events: none; white-space: nowrap; z-index: 5;
+        }
+        .tip b { display: block; }
+
+        .print-only { display: none; }
+        .sig { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2.2rem; }
+        .sig div { border-top: 1px solid var(--ink); padding-top: 0.3rem; font-size: 0.85rem; }
+
+        @media print {
+            .page-head, .ws-tabs { display: none !important; }
+            .print-only { display: block; }
+            .sig.print-only { display: grid; }
+            .card { padding: 0.8rem 1rem; margin-bottom: 0.6rem; break-inside: auto; page-break-inside: auto; }
+            .no-break, table.doc tr { break-inside: avoid; }
+            #ws input, #ws select, #ws textarea { border: none; border-bottom: 1px solid #999; border-radius: 0; padding: 0.15rem 0; -webkit-appearance: none; appearance: none; background: none; }
+            #ws input::-webkit-calendar-picker-indicator { display: none; }
+            #ws .hint { display: none !important; }
+            #ws .field-grid { gap: 0.4rem 1rem; }
+            .stat-grid { gap: 0.3rem; }
+            .stat-grid div { padding: 0.3rem 0.6rem; }
+            .tip { display: none !important; }
+        }
+    </style>
+</head>
+<body class="ws-root">
+    <header class="site">
+        <nav class="container">
+            <a href="/" class="logo"><div class="logo-mark">LR</div><span class="logo-text">LabReady <span>Pro</span></span></a>
+            <a href="/" class="back">← Back to LabReady Pro</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="page-head">
+            <span class="tag">Study worksheets</span>
+            <h1>Lot-to-lot, method comparison and AMR verification</h1>
+            <p>Paste your results, enter your lab's acceptance limits and get the statistics, charts and a pass/fail against those limits. Print it as the record for review and sign-off.</p>
+        </div>
+
+        <div class="ws-tabs" id="tabs" role="tablist"></div>
+        <div id="ws"></div>
+
+        <p class="disclaimer">LabReady Pro worksheets are calculation and documentation aids. The acceptance criteria, the decision and the sign-off belong to your laboratory director or designee, following your own procedures and your accreditor's requirements. Results stay in this browser unless you print or download them. Don't enter patient identifiers.</p>
+    </main>
+
+    <footer class="site">LabReady Pro · Training and documentation support. No patient data is stored. · <a href="/">labready</a></footer>
+
+    <script src="stats.js"></script>
+    <script src="worksheets.js"></script>
+</body>
+</html>
