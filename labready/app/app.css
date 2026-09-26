@@ -140,3 +140,51 @@ table.list td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
 .modal-head h2 { font-size: 1.15rem; }
 @media print { .modal-backdrop { display: none !important; } }
+
+/* Reports */
+.report { background: white; border: 1px solid var(--line); border-radius: 14px; padding: 1.3rem; margin-bottom: 1.5rem; }
+.report-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+.report-head h2 { font-size: 1.2rem; }
+.report-summary { font-weight: 600; margin-bottom: 0.8rem; }
+table.matrix td { font-size: 0.82rem; vertical-align: top; min-width: 150px; }
+table.matrix td.mx-none { color: var(--muted); font-style: italic; }
+.mx-next { margin-top: 0.3rem; }
+.packet-page { border-top: 2px solid var(--line); padding-top: 1.2rem; margin-top: 1.2rem; }
+.packet-page h2 { font-size: 1.15rem; margin-bottom: 0.6rem; }
+.packet-page h3 { font-size: 0.95rem; margin: 1rem 0 0.4rem; }
+.packet-cover h1 { font-size: 1.5rem; margin-bottom: 0.2rem; }
+.packet-lab { font-size: 1.05rem; color: var(--slate); margin-bottom: 1rem; }
+.packet-toc, .packet-hist { padding-left: 1.3rem; font-size: 0.88rem; color: var(--slate); }
+.packet-toc li, .packet-hist li { margin-bottom: 0.2rem; }
+.packet-note { font-size: 0.8rem; margin-top: 1rem; }
+.packet-page table.doc { margin-bottom: 0.4rem; }
+.packet-page table.kv th { width: 24%; }
+.packet-page table.methods { table-layout: fixed; }
+.packet-page table.methods th:nth-child(1) { width: 27%; }
+.packet-page table.methods th:nth-child(2) { width: 41%; }
+.packet-page table.methods th:nth-child(3) { width: 12%; }
+.packet-page table.methods th:nth-child(4) { width: 9%; }
+.packet-page table.methods th:nth-child(5) { width: 11%; }
+.pre { white-space: pre-wrap; }
+
+@media print {
+    body[data-print-only] header.site, body[data-print-only] footer.site, body[data-print-only] .demo-banner,
+    body[data-print-only] .view-head, body[data-print-only] .form-card, body[data-print-only] .toast { display: none !important; }
+    body[data-print-only="matrixReport"] #packetReport, body[data-print-only="packetReport"] #matrixReport { display: none !important; }
+    .report { border: none; padding: 0; }
+    .packet-page { break-before: page; page-break-before: always; border-top: none; margin-top: 0; padding-top: 0; }
+    .packet-cover { break-before: auto; page-break-before: auto; }
+    table.matrix { font-size: 8pt; }
+    .packet-page { font-size: 9pt; }
+    .packet-page table.doc th, .packet-page table.doc td { padding: 3px 5px; font-size: 8.5pt; }
+    .packet-page h2 { font-size: 13pt; margin-bottom: 4px; }
+    .packet-page h3 { font-size: 10pt; margin: 8px 0 3px; }
+    .packet-hist, .packet-toc { font-size: 8.5pt; }
+    .packet-hist li, .packet-toc li { margin-bottom: 1px; }
+    .list-wrap { overflow: visible; }
+}
+@media screen and (max-width: 700px) {
+    .report { padding: 0.9rem; }
+    .packet-page { overflow-x: auto; }
+    .packet-page table.doc { min-width: 480px; }
+}

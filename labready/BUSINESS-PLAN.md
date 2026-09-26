@@ -21,6 +21,7 @@ The course is the entry product. The competency system is the recurring product.
 | Record integrity: server-stamped signatures, lock on sign-off, no deleting signed records, tamper-proof history | `labready/supabase-app-schema.sql`, `labready/app/` | Built and tested on a local Postgres; mirrored in demo mode |
 | Weekly email reminders (overdue + due in 30 days) to admins/supervisors | `labready/supabase/functions/competency-reminders/`, `labready/supabase/reminders-cron.sql` | Code written, email logic unit-tested; needs Supabase project, Resend account and deploy |
 | Module quizzes: 80 multiple-choice questions (8 per module), shuffled answers, pass mark 80% | `labready/content/quizzes.js`, `labready/assets/quiz.js` | On every module page for self-study; in the app, "Run a module quiz" fills competency method 6. Draft v0.1, review with the modules |
+| Reports: competency matrix and inspection packet (cover + one page per signed-off record with methods, signatures and history) | `labready/app/` (Reports tab) | Built; prints one record per Letter page |
 | Tech self-service (staff log in to take quizzes themselves) | — | Not started; quizzes are proctored on the supervisor's screen for now |
 
 ---

@@ -310,7 +310,18 @@
             this.db.events = this.db.events || [];
             this.db.events.push({ id: this.db.events.length + 1, competency_id: competencyId, actor: me.user_id, actor_name: me.display_name, action, detail, at: new Date().toISOString() });
         },
+        async allEvents() {
+            // Paged so large labs aren't cut off by the API's row limit.
+            const out = [];
+            for (let from = 0; ; from += 1000) {
+                const page = this.check(await this.client.from('competency_events').select('*')
+                    .eq('lab_id', this.lab.id).order('id').range(from, from + 999));
+                out.push(...page);
+                if (page.length < 1000) return out;
+            }
+        },
         async events(competencyId) { return clone((this.db.events || []).filter(e => e.competency_id === competencyId)); },
+        async allEvents() { return clone(this.db.events || []); },
         async setMyReminders(on) { this.db.members[0].email_reminders = on; this.persist(); },
         async updateLab(patch) { Object.assign(this.lab, patch); this.persist(); return clone(this.lab); },
         async members() { return clone(this.db.members); },
@@ -483,6 +494,7 @@
             systems: () => viewSystems(view),
             schedule: () => viewSchedule(view, parts[1]),
             competency: () => viewCompetency(view, parts[1]),
+            reports: () => viewReports(view),
             settings: () => viewSettings(view)
         };
         (routes[route] || routes.dashboard)();
@@ -1055,6 +1067,142 @@
                       esc(e.actor_name || 'Unknown') + ' · ' + fmtStamp(e.at) + '</span></li>').join('') + '</ol>'
                 : 'No history yet.';
         } catch (e) { el.textContent = 'Couldn\'t load history: ' + e.message; }
+    }
+
+    // ---------------------------------------------------------------- reports
+
+    function viewReports(view) {
+        const staff = S.staff.filter(s => s.active);
+        const systems = S.systems.filter(s => s.active);
+        const yearAgo = addMonths(todayIso(), -12);
+        view.innerHTML = head('Reports', 'Print-ready evidence for inspections and management review.') +
+            '<div class="form-card no-print"><h2>Competency matrix</h2>' +
+            '<p class="muted" style="font-size:0.88rem;margin-bottom:0.8rem">Everyone active against every active test system: last completed assessment and what is due next.</p>' +
+            '<div class="actions" style="margin:0"><button class="btn" type="button" id="showMatrix">Show matrix</button></div></div>' +
+            '<form class="form-card no-print" id="packetForm"><h2>Inspection packet</h2>' +
+            '<p class="muted" style="font-size:0.88rem;margin-bottom:0.8rem">Every signed-off competency record in the period, one per page, with all six methods, signatures and history.</p>' +
+            '<div class="form-row">' +
+            '<div><label class="lbl" for="pStaff">Staff</label><select id="pStaff"><option value="">Everyone</option>' +
+            S.staff.map(s => '<option value="' + s.id + '">' + esc(s.name) + (s.active ? '' : ' (inactive)') + '</option>').join('') + '</select></div>' +
+            '<div><label class="lbl" for="pFrom">Completed from</label><input type="date" id="pFrom" value="' + yearAgo + '"></div>' +
+            '<div><label class="lbl" for="pTo">to</label><input type="date" id="pTo" value="' + todayIso() + '"></div>' +
+            '<button class="btn" type="submit">Build packet</button></div></form>' +
+            '<div id="reportOut"></div>';
+
+        $('#showMatrix').onclick = () => renderMatrix($('#reportOut'), staff, systems);
+        $('#packetForm').onsubmit = async e => {
+            e.preventDefault();
+            const from = $('#pFrom').value, to = $('#pTo').value, who = $('#pStaff').value;
+            if (from && to && from > to) { toast('The start date is after the end date.', true); return; }
+            const recs = S.comps.filter(c => c.completed_at &&
+                (!who || c.staff_id === who) &&
+                (!from || c.completed_at.slice(0, 10) >= from) &&
+                (!to || c.completed_at.slice(0, 10) <= to))
+                .sort((a, b) => {
+                    const sa = (staffById(a.staff_id) || {}).name || '', sb = (staffById(b.staff_id) || {}).name || '';
+                    return sa.localeCompare(sb) || a.completed_at.localeCompare(b.completed_at);
+                });
+            const out = $('#reportOut');
+            if (!recs.length) { out.innerHTML = '<div class="empty">No signed-off records in that period.</div>'; return; }
+            out.innerHTML = '<p class="muted">Loading history…</p>';
+            let events = [];
+            try { events = await S.backend.allEvents(); } catch (err) { toast('History unavailable: ' + err.message, true); }
+            renderPacket(out, recs, events, { from, to, who });
+        };
+    }
+
+    function renderMatrix(out, staff, systems) {
+        if (!staff.length || !systems.length) { out.innerHTML = '<div class="empty">Add active staff and test systems first.</div>'; return; }
+        const cell = (s, sy) => {
+            const cs = S.comps.filter(c => c.staff_id === s.id && c.test_system_id === sy.id);
+            const done = cs.filter(c => c.completed_at).sort((a, b) => b.completed_at.localeCompare(a.completed_at))[0];
+            const next = cs.filter(c => !c.completed_at).sort((a, b) => a.due_date.localeCompare(b.due_date))[0];
+            if (!done && !next) return '<td class="mx-none">Not scheduled</td>';
+            const st = next ? compStatus(next) : null;
+            return '<td>' +
+                (done ? '<div>' + (done.overall === 'not_competent' ? '<span class="pill not-competent">Not competent</span> ' : '✓ ') +
+                    esc(KINDS[done.kind] || done.kind) + ' · ' + fmtDate(done.completed_at.slice(0, 10)) + '</div>' : '<div class="muted">No completed record</div>') +
+                (next ? '<div class="mx-next"><span class="pill ' + st.key + '">' + st.label + '</span> ' + esc(KINDS[next.kind] || next.kind) + ' due ' + fmtDate(next.due_date) + '</div>' : '') +
+                '</td>';
+        };
+        const overdue = S.comps.filter(c => !c.completed_at && compStatus(c).key === 'overdue' && staff.some(s => s.id === c.staff_id)).length;
+        out.innerHTML = '<div class="report" id="matrixReport">' +
+            '<div class="report-head"><div><h2>Competency matrix</h2><p class="muted">' + esc(S.lab.name) + ' · generated ' + fmtStamp(new Date().toISOString()) +
+            ' by ' + esc(S.member.display_name || S.user.email) + '</p></div>' +
+            '<button class="btn ghost no-print" type="button" id="printMatrix">Print matrix</button></div>' +
+            '<p class="report-summary">' + staff.length + ' staff · ' + systems.length + ' test systems · ' + overdue + ' overdue</p>' +
+            '<div class="list-wrap"><table class="list matrix"><thead><tr><th>Staff</th>' +
+            systems.map(sy => '<th>' + esc(sy.name) + '<br><span class="muted" style="text-transform:none;font-weight:400">' + esc(sy.instrument || '') + '</span></th>').join('') +
+            '</tr></thead><tbody>' +
+            staff.map(s => '<tr><td><b>' + esc(s.name) + '</b><br><span class="muted" style="font-size:0.8rem">' + esc(s.position || '') + '</span></td>' +
+                systems.map(sy => cell(s, sy)).join('') + '</tr>').join('') +
+            '</tbody></table></div></div>';
+        $('#printMatrix').onclick = () => printOnly('matrixReport');
+        out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderPacket(out, recs, events, f) {
+        const byComp = {};
+        events.forEach(e => { (byComp[e.competency_id] = byComp[e.competency_id] || []).push(e); });
+        const people = new Set(recs.map(r => r.staff_id)).size;
+        const who = f.who ? (staffById(f.who) || {}).name : 'All staff';
+        const cover = '<section class="packet-page packet-cover">' +
+            '<h1>Competency Assessment Records</h1>' +
+            '<p class="packet-lab">' + esc(S.lab.name) + '</p>' +
+            '<table class="doc kv"><tbody>' +
+            '<tr><th>Staff</th><td>' + esc(who) + '</td></tr>' +
+            '<tr><th>Completed between</th><td>' + (fmtDate(f.from) || 'the start') + ' and ' + (fmtDate(f.to) || 'today') + '</td></tr>' +
+            '<tr><th>Records</th><td>' + recs.length + ' signed-off records for ' + people + (people === 1 ? ' person' : ' people') + '</td></tr>' +
+            '<tr><th>Generated</th><td>' + fmtStamp(new Date().toISOString()) + ' by ' + esc(S.member.display_name || S.user.email) + '</td></tr>' +
+            '</tbody></table>' +
+            '<h3>Contents</h3><ol class="packet-toc">' + recs.map(c => {
+                const s = staffById(c.staff_id) || {}, sy = systemById(c.test_system_id) || {};
+                return '<li>' + esc(s.name || '—') + ' · ' + esc(sy.name || '—') + ' · ' + esc(KINDS[c.kind] || c.kind) + ' · ' + fmtDate(c.completed_at.slice(0, 10)) + '</li>';
+            }).join('') + '</ol>' +
+            '<p class="muted packet-note">Signatures and times are recorded by the system at signing. History entries are written by the database and can\'t be edited. Generated with LabReady Pro; follow your accrediting body\'s requirements for record retention.</p>' +
+            '</section>';
+
+        const page = c => {
+            const s = staffById(c.staff_id) || {}, sy = systemById(c.test_system_id) || {};
+            const hist = (byComp[c.id] || []).sort((a, b) => String(a.at).localeCompare(String(b.at)));
+            return '<section class="packet-page">' +
+                '<h2>' + esc(s.name || '—') + ' · ' + esc(KINDS[c.kind] || c.kind) + '</h2>' +
+                '<table class="doc kv"><tbody>' +
+                '<tr><th>Position</th><td>' + esc(s.position || '—') + '</td><th>Hire date</th><td>' + (fmtDate(s.hire_date) || '—') + '</td></tr>' +
+                '<tr><th>Test system</th><td>' + esc(sy.name || '—') + '</td><th>Instrument</th><td>' + esc(sy.instrument || '—') + '</td></tr>' +
+                '<tr><th>Due</th><td>' + fmtDate(c.due_date) + '</td><th>Completed</th><td>' + fmtStamp(c.completed_at) + '</td></tr>' +
+                '</tbody></table>' +
+                '<h3>Assessment methods</h3><table class="doc methods"><thead><tr><th>Method</th><th>Evidence</th><th>Date</th><th>Assessor</th><th>Result</th></tr></thead><tbody>' +
+                ELEMENTS.map((el, i) => {
+                    const e = (c.elements || [])[i] || {};
+                    return '<tr><td>' + (i + 1) + '. ' + esc(el.title) + '</td><td class="pre">' + esc(e.evidence) + '</td><td>' + fmtDate(e.date) + '</td><td>' + esc(e.assessor) + '</td><td>' + esc(e.result) + '</td></tr>';
+                }).join('') + '</tbody></table>' +
+                '<h3>Outcome</h3><p><b>' + (c.overall === 'not_competent' ? 'Not yet competent: remediation required' : 'Competent: may test independently') + '</b></p>' +
+                (c.remediation ? '<p class="pre">' + esc(c.remediation) + '</p>' : '') +
+                '<h3>Sign-off</h3><table class="doc kv"><tbody>' + SIGNERS.map(([k, label]) => {
+                    const so = (c.signoffs || {})[k];
+                    return '<tr><th>' + label + '</th><td>' + (so ? esc(so.name) + (so.role ? ' (' + esc(ROLES[so.role] || so.role) + ')' : '') + ' · ' + fmtStamp(so.at) : 'Not signed') + '</td></tr>';
+                }).join('') + '</tbody></table>' +
+                '<h3>History</h3>' + (hist.length
+                    ? '<ol class="packet-hist">' + hist.map(e => '<li>' + fmtStamp(e.at) + ' · ' + esc(e.actor_name || 'Unknown') + ' · ' +
+                        esc((EVENT_TEXT[e.action] || (() => e.action))(e.detail || {})) + '</li>').join('') + '</ol>'
+                    : '<p class="muted">No history recorded.</p>') +
+                '</section>';
+        };
+
+        out.innerHTML = '<div class="report" id="packetReport">' +
+            '<div class="report-head no-print"><div><h2>Inspection packet</h2><p class="muted">' + recs.length + ' records · cover page + one page per record</p></div>' +
+            '<button class="btn primary" type="button" id="printPacket">Print / Save as PDF</button></div>' +
+            cover + recs.map(page).join('') + '</div>';
+        $('#printPacket').onclick = () => printOnly('packetReport');
+        out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Print a single report: everything else on the page is hidden while printing.
+    function printOnly(id) {
+        document.body.dataset.printOnly = id;
+        window.print();
+        setTimeout(() => { delete document.body.dataset.printOnly; }, 500);
     }
 
     // ---------------------------------------------------------------- settings
