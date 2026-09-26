@@ -208,8 +208,35 @@
                 { user_id: 'demo-lh', role: 'assessor', display_name: 'Leila Haddad', email: 'lead@yourlab.org' },
                 { user_id: 'demo-pr', role: 'director', display_name: 'Dr P. Rao', email: 'director@yourlab.org' }
             ],
-            staff, test_systems: sys, competencies: comps
+            staff, test_systems: sys, competencies: comps,
+            studies: seedStudies(t)
         };
+    }
+
+    // Two sample studies for the demo lab: one signed off, one waiting for review.
+    function seedStudies(t) {
+        const at = daysAgo => new Date(Date.now() - daysAgo * 86400000).toISOString();
+        return [{
+            id: uid(), kind: 'lot', verdict: 'pass', created_by: 'demo-user', created_at: at(12), updated_at: at(10),
+            signoff: { name: 'Dr P. Rao', role: 'director', user_id: 'demo-pr', at: at(10) },
+            content: {
+                fields: { analyte: 'Glucose', units: 'mg/dL', system: 'Cobas Pure 1 (c303)', lot_current: 'Lot 481', lot_new: 'Lot 512',
+                    qc_note: 'Both QC levels within range on the new lot', performed_by: 'Leila Haddad', date: addDays(t, -12) },
+                criteria: { abs: '4', pct: '5', minPassPct: '100', meanBiasPct: '' },
+                data: 'Sample\tCurrent lot\tNew lot\nS1\t52\t53\nS2\t78\t80\nS3\t96\t99\nS4\t124\t127\nS5\t168\t172\nS6\t231\t238\nS7\t305\t313\nS8\t402\t414',
+                review: { decision: 'Accepted', comments: 'New lot put into use the same day.' }
+            }
+        }, {
+            id: uid(), kind: 'method', verdict: 'pass', created_by: 'demo-user', created_at: at(3), updated_at: at(2), signoff: null,
+            content: {
+                fields: { analyte: 'Creatinine', units: 'mg/dL', system: 'Cobas Pure 1 (c303)', method_x: 'ARCHITECT c4000 (backup)', method_y: 'Cobas Pure c303',
+                    performed_by: 'James Chen', date: addDays(t, -3) },
+                criteria: { abs: '0.1', pct: '7.5', levels: '1.0, 4.0', model: 'deming' },
+                data: 'Sample\tx\ty\n' + [0.42, 0.58, 0.66, 0.74, 0.81, 0.89, 0.95, 1.02, 1.1, 1.24, 1.38, 1.55, 1.8, 2.12, 2.6, 3.15, 3.9, 4.8, 6.2, 8.4]
+                    .map((x, i) => 'S' + (i + 1) + '\t' + x + '\t' + (x * 1.035 + 0.02 + ((i * 7) % 5 - 2) * 0.012).toFixed(2)).join('\n'),
+                review: {}
+            }
+        }];
     }
 
     // Mirrors the competencies_guard / competencies_log triggers in supabase-app-schema.sql
@@ -261,12 +288,14 @@
             const me = this.db.members[0];
             return { user: { id: me.user_id, email: me.email }, lab: this.lab, member: me };
         },
-        async list(table) { return clone(this.db[table]); },
+        async list(table) { return clone(this.db[table] || []); },
         async insert(table, row) {
             const now = new Date().toISOString();
             const r = Object.assign({ id: uid(), lab_id: this.lab.id, created_at: now }, row);
             if (table === 'competencies') Object.assign(r, { updated_at: now, signoffs: r.signoffs || {}, elements: r.elements || emptyElements() });
             if (table === 'staff' || table === 'test_systems') r.active = r.active !== false;
+            if (table === 'studies') Object.assign(r, { updated_at: now, content: r.content || {}, verdict: r.verdict || 'incomplete', signoff: null, created_by: this.db.members[0].user_id });
+            this.db[table] = this.db[table] || [];
             this.db[table].push(r);
             if (table === 'competencies') this.log(r.id, 'created', { kind: r.kind, due_date: r.due_date });
             this.persist();
@@ -292,6 +321,13 @@
             return clone(r);
         },
         async remove(table, id) {
+            if (table === 'studies') {
+                const st = (this.db.studies || []).find(x => x.id === id);
+                if (st && st.signoff) throw new Error('Signed studies can\'t be deleted. Remove the sign-off first.');
+                this.db.studies = (this.db.studies || []).filter(x => x.id !== id);
+                this.persist();
+                return;
+            }
             const doomed = this.db.competencies.filter(c =>
                 (table === 'competencies' && c.id === id) || (table === 'staff' && c.staff_id === id) || (table === 'test_systems' && c.test_system_id === id));
             if (doomed.some(c => c.completed_at)) {
@@ -529,6 +565,7 @@
             staff: () => parts[1] ? viewStaffDetail(view, parts[1]) : viewStaff(view),
             systems: () => viewSystems(view),
             schedule: () => viewSchedule(view, parts[1]),
+            studies: () => viewStudies(view),
             competency: () => viewCompetency(view, parts[1]),
             reports: () => viewReports(view),
             settings: () => viewSettings(view)
@@ -837,6 +874,52 @@
             S.systems = S.systems.filter(x => x.id !== s.id);
             S.comps = S.comps.filter(c => c.test_system_id !== s.id);
             viewSystems(view);
+        });
+    }
+
+    // ---------------------------------------------------------------- studies (worksheets saved to the lab)
+
+    const STUDY_KINDS = { lot: 'Lot-to-lot', method: 'Method comparison', amr: 'AMR / calibration verification' };
+    const VERDICTS = { pass: ['complete', 'Meets criteria'], fail: ['overdue', 'Does not meet'], incomplete: ['scheduled', 'Not yet judged'] };
+    const studyUrl = id => '../worksheets/?study=' + encodeURIComponent(id);
+
+    async function viewStudies(view) {
+        view.innerHTML = head('Studies', 'Lot-to-lot, method comparison and AMR / calibration verification, saved to ' + esc(S.lab.name) + '.',
+            '<select id="newKind" aria-label="Study type">' + Object.keys(STUDY_KINDS).map(k => '<option value="' + k + '">' + STUDY_KINDS[k] + '</option>').join('') + '</select>' +
+            '<button class="btn primary" type="button" id="newStudy">New study</button>') +
+            '<div id="studyList"><p class="muted">Loading…</p></div>';
+        $('#newStudy').onclick = async () => {
+            const kind = $('#newKind').value;
+            let r;
+            try { r = await run(() => S.backend.insert('studies', { kind, content: { fields: { performed_by: S.member.display_name || '' }, criteria: {}, data: '', review: {} }, verdict: 'incomplete' })); } catch (e) { return; }
+            location.href = studyUrl(r.id);
+        };
+        let studies;
+        try { studies = await S.backend.list('studies'); } catch (e) { $('#studyList').innerHTML = '<p class="error">Couldn\'t load studies: ' + esc(e.message) + '</p>'; return; }
+        if (!$('#studyList')) return;
+        studies.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+        const waiting = studies.filter(x => !x.signoff).length;
+        if (!studies.length) {
+            $('#studyList').innerHTML = '<div class="empty">No studies yet. Choose a type and click <b>New study</b>, then paste your results into the worksheet.</div>';
+            return;
+        }
+        $('#studyList').innerHTML = (waiting ? '<p class="muted" style="margin-bottom:0.6rem">' + waiting + ' stud' + (waiting === 1 ? 'y' : 'ies') + ' waiting for sign-off.</p>' : '') +
+            '<div class="list-wrap"><table class="list"><thead><tr><th>Study</th><th class="hide-sm">Instrument</th><th>Performed</th><th>Result</th><th>Review</th><th></th></tr></thead><tbody>' +
+            studies.map(x => {
+                const fl = (x.content && x.content.fields) || {};
+                const v = VERDICTS[x.verdict] || VERDICTS.incomplete;
+                return '<tr class="clickable" data-open="' + x.id + '"><td><b>' + esc(fl.analyte || x.analyte || 'Untitled') + '</b><span class="sub">' + esc(STUDY_KINDS[x.kind] || x.kind) + '</span></td>' +
+                    '<td class="hide-sm">' + esc(fl.system || '—') + '</td>' +
+                    '<td>' + (fl.date ? fmtDate(fl.date) : '<span class="muted">—</span>') + (fl.performed_by ? '<span class="sub">' + esc(fl.performed_by) + '</span>' : '') + '</td>' +
+                    '<td><span class="pill ' + v[0] + '">' + v[1] + '</span></td>' +
+                    '<td>' + (x.signoff ? '✓ ' + esc(x.signoff.name) + '<span class="sub">' + fmtStamp(x.signoff.at) + '</span>' : '<span class="muted">Awaiting sign-off</span>') + '</td>' +
+                    '<td class="row-actions">' + (x.signoff ? '' : '<button class="btn danger small" type="button" data-del="' + x.id + '">Delete</button>') + '</td></tr>';
+            }).join('') + '</tbody></table></div>';
+        $$('[data-open]').forEach(tr => tr.onclick = e => { if (!e.target.closest('button')) location.href = studyUrl(tr.dataset.open); });
+        $$('[data-del]').forEach(b => b.onclick = async () => {
+            if (!confirm('Delete this study? This can\'t be undone.')) return;
+            try { await run(() => S.backend.remove('studies', b.dataset.del), 'Study deleted'); } catch (e) { return; }
+            viewStudies(view);
         });
     }
 
@@ -1581,8 +1664,12 @@
             await run(() => S.backend.addMember($('#mEmail').value.trim(), $('#mRole').value, $('#mName').value.trim()), 'Added');
             viewSettings(view);
         };
-        $('#exportJson').onclick = () => download('labready-backup-' + todayIso() + '.json',
-            JSON.stringify({ exported_at: new Date().toISOString(), lab: S.lab, staff: S.staff, test_systems: S.systems, competencies: S.comps }, null, 2), 'application/json');
+        $('#exportJson').onclick = async () => {
+            let studies = [];
+            try { studies = await S.backend.list('studies'); } catch (e) { toast('Studies left out of the backup: ' + e.message, true); }
+            download('labready-backup-' + todayIso() + '.json',
+                JSON.stringify({ exported_at: new Date().toISOString(), lab: S.lab, staff: S.staff, test_systems: S.systems, competencies: S.comps, studies }, null, 2), 'application/json');
+        };
         const rd = $('#resetDemo');
         if (rd) rd.onclick = async () => {
             if (!confirm('Reset the demo lab to its starting sample data?')) return;

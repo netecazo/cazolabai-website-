@@ -208,3 +208,7 @@ table.matrix td.mx-none { color: var(--muted); font-style: italic; }
     .quiz-links li { flex-direction: column; align-items: stretch; }
     .ql-actions { justify-content: flex-start; }
 }
+
+/* Studies */
+.view-head .actions select { width: auto; }
+table.list td .sub { display: block; color: var(--muted); font-size: 0.8rem; font-weight: 400; }

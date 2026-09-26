@@ -86,11 +86,113 @@
     // ---------------------------------------------------------------- state
 
     function loadAll() { try { return JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch (e) { return {}; } }
-    function saveAll(all) { try { localStorage.setItem(STORE, JSON.stringify(all)); } catch (e) { /* private window: drafts not kept */ } }
+    function saveAll(all) {
+        if (linked) { scheduleSave(); return; }
+        try { localStorage.setItem(STORE, JSON.stringify(all)); } catch (e) { /* private window: drafts not kept */ }
+    }
     const blank = () => ({ fields: {}, criteria: {}, data: '', review: {} });
     let all = loadAll();
     let kind = null;
     const cur = () => (all[kind] = Object.assign(blank(), all[kind] || {}));
+
+    // ---------------------------------------------------------------- saved to the app (?study=<id>)
+    // Opened from the app's Studies tab, the worksheet saves to the lab (demo lab or Supabase) instead of this browser.
+
+    const studyId = new URLSearchParams(location.search).get('study');
+    let linked = null;           // { backend, record, labName, member }
+    const SIGNERS = ['admin', 'supervisor', 'director'];
+    const ROLE_NAMES = { admin: 'Admin', supervisor: 'Supervisor', assessor: 'Assessor', director: 'Director' };
+
+    const DemoStudies = {
+        key: 'labready.app.demo.v2',
+        db() { try { return JSON.parse(localStorage.getItem(this.key) || 'null'); } catch (e) { return null; } },
+        async open(id) {
+            const db = this.db();
+            const rec = db && (db.studies || []).find(x => x.id === id);
+            if (!rec) return null;
+            return { record: rec, labName: db.labs[0].name, member: db.members[0] };
+        },
+        async write(id, apply) {
+            const db = this.db();
+            const rec = (db.studies || []).find(x => x.id === id);
+            if (!rec) throw new Error('This study no longer exists.');
+            apply(rec, db.members[0]);
+            rec.updated_at = new Date().toISOString();
+            localStorage.setItem(this.key, JSON.stringify(db));
+            return JSON.parse(JSON.stringify(rec));
+        },
+        save(id, content, verdict) {
+            return this.write(id, rec => {
+                if (rec.signoff) throw new Error('This study is signed off and locked. Remove the sign-off to make changes.');
+                rec.content = content; rec.verdict = verdict;
+            });
+        },
+        sign(id, content, verdict) {
+            return this.write(id, (rec, me) => {
+                if (!SIGNERS.includes(me.role)) throw new Error('Only a supervisor, director or admin can sign off a study.');
+                if (!(content.review || {}).decision) throw new Error('Choose a decision before signing off the study.');
+                rec.content = content; rec.verdict = verdict;
+                rec.signoff = { name: me.display_name, role: me.role, user_id: me.user_id, at: new Date().toISOString() };
+            });
+        },
+        unsign(id) {
+            return this.write(id, (rec, me) => {
+                if (!SIGNERS.includes(me.role)) throw new Error('Only a supervisor, director or admin can remove a study sign-off.');
+                rec.signoff = null;
+            });
+        }
+    };
+
+    const LiveStudies = {
+        client: null,
+        check(res) { if (res.error) throw new Error(res.error.message); return res.data; },
+        async open(id) {
+            const CFG = window.LABREADY_CONFIG || {};
+            if (!(CFG.supabaseUrl && window.supabase)) throw new Error('This site isn\'t connected to its database.');
+            this.client = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey);
+            const { data } = await this.client.auth.getSession();
+            if (!data.session) return { signedOut: true };
+            const user = data.session.user;
+            const rec = this.check(await this.client.from('studies').select('*').eq('id', id).maybeSingle());
+            if (!rec) return null;
+            const lab = this.check(await this.client.from('labs').select('name').eq('id', rec.lab_id).single());
+            const m = this.check(await this.client.from('lab_members').select('role, display_name').eq('lab_id', rec.lab_id).eq('user_id', user.id).single());
+            return { record: rec, labName: lab.name, member: { user_id: user.id, role: m.role, display_name: m.display_name || user.email } };
+        },
+        async update(id, patch) { return this.check(await this.client.from('studies').update(patch).eq('id', id).select().single()); },
+        save(id, content, verdict) { return this.update(id, { content, verdict }); },
+        // The database re-stamps the name, role and time; the value sent is only a placeholder.
+        sign(id, content, verdict) { return this.update(id, { content, verdict, signoff: { pending: true } }); },
+        unsign(id) { return this.update(id, { signoff: null }); }
+    };
+
+    let saveTimer = null, saving = Promise.resolve();
+    function setSaveState(text, bad) {
+        const el = $('#saveState');
+        if (el) { el.textContent = text; el.classList.toggle('bad', !!bad); }
+    }
+    function scheduleSave() {
+        if (!linked || linked.record.signoff) return;
+        setSaveState('Unsaved changes…');
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(saveNow, 800);
+    }
+    function saveNow() {
+        clearTimeout(saveTimer);
+        const content = JSON.parse(JSON.stringify(cur()));
+        const verdict = last ? last.res.verdict.state : 'incomplete';
+        saving = saving.then(async () => {
+            setSaveState('Saving…');
+            try {
+                linked.record = await linked.backend.save(linked.record.id, content, verdict);
+                setSaveState('Saved to ' + linked.labName + ' · ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+            } catch (e) { setSaveState('Not saved: ' + e.message, true); }
+        });
+        return saving;
+    }
+    window.addEventListener('beforeunload', e => {
+        if (saveTimer && linked && !linked.record.signoff) { saveNow(); e.preventDefault(); e.returnValue = ''; }
+    });
 
     // ---------------------------------------------------------------- render
 
@@ -127,21 +229,45 @@
             '<div class="card"><h2>Review</h2><div class="field-grid">' +
             '<div><label class="lbl" for="r_decision">Decision</label><select id="r_decision"><option value=""></option>' +
             ['Accepted', 'Accepted with conditions (see comments)', 'Not accepted: investigate'].map(o => '<option' + (d.review.decision === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></div>' +
-            input('r_by', 'Reviewed by (director or designee)', d.review.by) +
+            (linked ? '' : input('r_by', 'Reviewed by (director or designee)', d.review.by)) +
             '<div class="full"><label class="lbl" for="r_comments">Comments / corrective action</label><textarea id="r_comments" rows="3">' + esc(d.review.comments || '') + '</textarea></div>' +
-            input('r_date', 'Review date', d.review.date, '', 'date') +
-            '</div><div class="sig print-only"><div>Performed by (signature / date)</div><div>Reviewed by (signature / date)</div></div></div>' +
+            (linked ? '' : input('r_date', 'Review date', d.review.date, '', 'date')) +
+            '</div>' + (linked ? signBlock() : '') +
+            '<div class="sig print-only"><div>Performed by (signature / date)</div><div>' + (linked && linked.record.signoff ? 'Director / designee (signature)' : 'Reviewed by (signature / date)') + '</div></div></div>' +
 
             '<div class="actions no-print"><button class="btn primary" type="button" id="printBtn">Print record</button>' +
             '<button class="btn ghost" type="button" id="csvBtn">Download results (CSV)</button>' +
-            '<span class="saved-note">Drafts save in this browser as you type.</span></div>';
+            (linked ? '<span class="saved-note" id="saveState">' + (linked.record.signoff ? 'Signed off and locked.' : 'Saved to ' + esc(linked.labName) + '.') + '</span>'
+                : '<span class="saved-note">Drafts save in this browser as you type.</span>') + '</div>';
+
+        if (linked) {
+            const locked = !!linked.record.signoff;
+            if (locked) $$('#ws input, #ws select, #ws textarea').forEach(el => { el.disabled = true; });
+            $('#exampleBtn').hidden = locked;
+            $('#clearBtn').hidden = true;
+            const sb = $('#signBtn'), ub = $('#unsignBtn');
+            if (sb) sb.onclick = async () => {
+                collect(); compute();
+                if (!cur().review.decision) { alert('Choose a decision before signing off.'); $('#r_decision').focus(); return; }
+                await saving;
+                try { linked.record = await linked.backend.sign(linked.record.id, JSON.parse(JSON.stringify(cur())), last ? last.res.verdict.state : 'incomplete'); }
+                catch (e) { alert(e.message); return; }
+                clearTimeout(saveTimer); saveTimer = null;
+                render();
+            };
+            if (ub) ub.onclick = async () => {
+                if (!confirm('Remove the sign-off? The study unlocks for changes and will need signing again.')) return;
+                try { linked.record = await linked.backend.unsign(linked.record.id); } catch (e) { alert(e.message); return; }
+                render();
+            };
+        }
 
         $$('#ws input, #ws select, #ws textarea').forEach(el => el.addEventListener('input', () => { collect(); if (el.id === 'data' || el.id.startsWith('c_')) compute(); }));
         $('#exampleBtn').onclick = () => {
             const d0 = cur();
             if ((d0.data.trim() || Object.values(d0.fields).some(Boolean)) && !confirm('Replace what\'s on this worksheet with the example?')) return;
             const ex = KINDS[kind].example;
-            all[kind] = Object.assign(blank(), { fields: Object.assign({}, ex.fields), criteria: Object.assign({}, ex.criteria), data: ex.data });
+            all[kind] = Object.assign(blank(), { fields: Object.assign({}, d0.fields, ex.fields), criteria: Object.assign({}, ex.criteria), data: ex.data });
             saveAll(all); render();
         };
         $('#clearBtn').onclick = () => {
@@ -153,12 +279,27 @@
         compute();
     }
 
+    function signBlock() {
+        const so = linked.record.signoff, me = linked.member, can = SIGNERS.includes(me.role);
+        if (so) {
+            return '<div class="signoff-box signed"><b>✓ Signed off by ' + esc(so.name) + '</b><span>' + esc(ROLE_NAMES[so.role] || so.role || '') + ' · ' +
+                new Date(so.at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) + '</span>' +
+                (can ? '<button class="linkish no-print" type="button" id="unsignBtn">Remove sign-off</button>' : '') + '</div>';
+        }
+        return '<div class="signoff-box no-print">' + (can
+            ? '<button class="btn" type="button" id="signBtn">Sign off as ' + esc(me.display_name) + '</button><span>Your name, role and the time are recorded, and the study locks.</span>'
+            : '<span>A supervisor, director or admin signs off studies.</span>') + '</div>';
+    }
+
     function collect() {
+        if (linked && linked.record.signoff) return;
         const K = KINDS[kind], d = cur();
         K.fields.forEach(([id]) => { d.fields[id] = $('#f_' + id).value; });
         ['abs', 'pct'].concat(K.extraCriteria.map(c => c[0])).forEach(id => { d.criteria[id] = $('#c_' + id).value; });
         d.data = $('#data').value;
-        d.review = { decision: $('#r_decision').value, by: $('#r_by').value, comments: $('#r_comments').value, date: $('#r_date').value };
+        d.review = linked
+            ? { decision: $('#r_decision').value, comments: $('#r_comments').value }
+            : { decision: $('#r_decision').value, by: $('#r_by').value, comments: $('#r_comments').value, date: $('#r_date').value };
         saveAll(all);
     }
 
@@ -393,8 +534,36 @@
         kind = KINDS[k] ? k : 'lot';
         render();
     }
-    $('#tabs').innerHTML = Object.keys(KINDS).map(k => '<button type="button" data-kind="' + k + '">' + esc(KINDS[k].tab) + '</button>').join('');
-    $$('#tabs button').forEach(b => b.onclick = () => { if (location.hash !== '#' + b.dataset.kind) location.hash = b.dataset.kind; else route(); });
-    window.addEventListener('hashchange', route);
-    route();
+    async function openStudy() {
+        let mode = null;
+        try { mode = localStorage.getItem('labready.app.mode'); } catch (e) { /* ignore */ }
+        const backend = mode === 'live' ? LiveStudies : DemoStudies;
+        const back = '<a href="../app/#/studies">Back to studies</a>';
+        let got;
+        try { got = await backend.open(studyId); } catch (e) {
+            $('#ws').innerHTML = '<div class="card"><h2>Couldn\'t open this study</h2><p>' + esc(e.message) + '</p><p>' + back + '</p></div>'; return;
+        }
+        if (got && got.signedOut) {
+            $('#ws').innerHTML = '<div class="card"><h2>Sign in to open this study</h2><p>This study is saved to your lab. <a href="../app/">Sign in to LabReady Pro</a>, then open it from the Studies tab.</p></div>'; return;
+        }
+        if (!got) {
+            $('#ws').innerHTML = '<div class="card"><h2>Study not found</h2><p>It may have been deleted, or it belongs to a lab you\'re not a member of.</p><p>' + back + '</p></div>'; return;
+        }
+        linked = Object.assign({ backend }, got);
+        kind = linked.record.kind;
+        all = { [kind]: Object.assign(blank(), linked.record.content || {}) };
+        $('#tabs').hidden = true;
+        $('.page-head').innerHTML = '<span class="tag">Study · ' + esc(linked.labName) + (backend === DemoStudies ? ' (demo)' : '') + '</span>' +
+            '<h1>' + esc(KINDS[kind].title) + '</h1><p>' + back + '</p>';
+        render();
+    }
+
+    if (studyId) {
+        openStudy();
+    } else {
+        $('#tabs').innerHTML = Object.keys(KINDS).map(k => '<button type="button" data-kind="' + k + '">' + esc(KINDS[k].tab) + '</button>').join('');
+        $$('#tabs button').forEach(b => b.onclick = () => { if (location.hash !== '#' + b.dataset.kind) location.hash = b.dataset.kind; else route(); });
+        window.addEventListener('hashchange', route);
+        route();
+    }
 })();
