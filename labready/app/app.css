@@ -188,3 +188,23 @@ table.matrix td.mx-none { color: var(--muted); font-style: italic; }
     .packet-page { overflow-x: auto; }
     .packet-page table.doc { min-width: 480px; }
 }
+
+/* Quiz links (competency method 6) */
+.quiz-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.pill.muted { background: #eef2f5; color: var(--muted); }
+.quiz-links { list-style: none; margin: 0.3rem 0 0; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: white; }
+.quiz-links li { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; padding: 0.65rem 0.8rem; border-top: 1px solid var(--line); font-size: 0.86rem; }
+.quiz-links li:first-child { border-top: none; }
+.quiz-links li > div:first-child { min-width: 0; }
+.quiz-links li span { display: block; color: var(--muted); }
+.quiz-links li span.pill { display: inline-block; margin-right: 0.3rem; }
+.quiz-links li b.ok { color: var(--accent-dark); }
+.quiz-links li b.bad { color: var(--danger); }
+.quiz-links li.ql-cancelled, .quiz-links li.ql-expired { opacity: 0.65; }
+.ql-actions { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; flex: none; }
+.link-box { display: flex; gap: 0.5rem; }
+.link-box input { flex: 1; min-width: 0; font-size: 0.85rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+@media (max-width: 600px) {
+    .quiz-links li { flex-direction: column; align-items: stretch; }
+    .ql-actions { justify-content: flex-start; }
+}

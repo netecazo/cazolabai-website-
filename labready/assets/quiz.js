@@ -1,5 +1,8 @@
 /* LabReady Pro quiz player. Used by the module pages and the app.
- *   LabReadyQuiz.mount(el, moduleId, { onFinish(result), finishLabel, showPrint })
+ *   LabReadyQuiz.mount(el, moduleId, { onFinish(result), finishLabel, showPrint, onSubmit(answers), noRetry })
+ * onSubmit (optional, async) gets the chosen option indexes before marking; if it throws, the
+ * message is shown and the tech can try again. If it returns {correct, total, percent, passed},
+ * those server figures are shown instead of the local ones.
  * Needs window.LABREADY_QUIZZES (content/quizzes.js).
  * result = { moduleId, title, correct, total, percent, passed, passMark, completedAt, name }
  */
@@ -41,7 +44,8 @@
             '</form><div class="quiz-result" hidden></div>';
 
         const form = el.querySelector('form');
-        form.onsubmit = e => {
+        let sending = false;
+        form.onsubmit = async e => {
             e.preventDefault();
             const answers = mod.questions.map((_, qi) => {
                 const c = form.querySelector('input[name="q' + qi + '_' + moduleId + '"]:checked');
@@ -52,6 +56,21 @@
                 const first = answers.findIndex(a => a === null);
                 form.querySelector('[data-q="' + first + '"]').scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
+            }
+            let server = null;
+            if (opts.onSubmit) {
+                if (sending) return;
+                sending = true;
+                const btn = form.querySelector('.quiz-actions button');
+                const err = form.querySelector('.quiz-err');
+                btn.disabled = true; btn.textContent = 'Sending…';
+                try { server = await opts.onSubmit(answers); } catch (ex) {
+                    err.textContent = ex.message || 'Couldn\'t send your answers. Check your connection and try again.';
+                    err.hidden = false;
+                    btn.disabled = false; btn.textContent = 'Submit answers';
+                    sending = false;
+                    return;
+                }
             }
             let correct = 0;
             mod.questions.forEach((q, qi) => {
@@ -68,7 +87,7 @@
                 why.hidden = false;
             });
             form.querySelector('.quiz-err').hidden = true;
-            form.querySelector('.quiz-actions').hidden = true;
+            form.querySelector('.quiz-actions').style.display = 'none';
             const nameEl = form.querySelector('.quiz-name input');
             if (nameEl) nameEl.disabled = true;
 
@@ -79,17 +98,23 @@
                 passed: percent >= passMark, completedAt: new Date().toISOString(),
                 name: nameEl ? nameEl.value.trim() : ''
             };
+            if (server && typeof server.percent === 'number') {
+                Object.assign(result, { correct: server.correct, total: server.total, percent: server.percent, passed: !!server.passed });
+                if (server.pass_mark) result.passMark = server.pass_mark;
+                if (server.submitted_at) result.completedAt = server.submitted_at;
+            }
 
             const res = el.querySelector('.quiz-result');
             res.hidden = false;
             res.className = 'quiz-result ' + (result.passed ? 'pass' : 'fail');
             res.innerHTML =
-                '<div class="quiz-score"><b>' + correct + ' / ' + total + '</b> (' + percent + '%) · ' + (result.passed ? 'Pass' : 'Below the ' + passMark + '% pass mark') + '</div>' +
+                '<div class="quiz-score"><b>' + result.correct + ' / ' + result.total + '</b> (' + result.percent + '%) · ' + (result.passed ? 'Pass' : 'Below the ' + result.passMark + '% pass mark') + '</div>' +
                 '<p class="muted">Module ' + esc(moduleId) + ': ' + esc(mod.title) + (result.name ? ' · ' + esc(result.name) : '') + ' · ' + new Date(result.completedAt).toLocaleString() + '</p>' +
                 '<div class="actions" style="margin:0.8rem 0 0">' +
                 (opts.onFinish ? '<button class="btn primary quiz-finish" type="button">' + esc(opts.finishLabel || 'Use this result') + '</button>' : '') +
                 (opts.showPrint ? '<button class="btn ghost quiz-print" type="button">Print result</button>' : '') +
-                '<button class="btn ghost quiz-retry" type="button">Try again</button></div>';
+                (opts.noRetry ? '' : '<button class="btn ghost quiz-retry" type="button">Try again</button>') + '</div>' +
+                (opts.resultNote ? '<p class="quiz-note">' + esc(opts.resultNote) + '</p>' : '');
             const fin = res.querySelector('.quiz-finish');
             if (fin) fin.onclick = () => opts.onFinish(result);
             const pr = res.querySelector('.quiz-print');
@@ -98,7 +123,8 @@
                 window.print();
                 setTimeout(() => document.body.classList.remove('print-quiz-only'), 500);
             };
-            res.querySelector('.quiz-retry').onclick = () => mount(el, moduleId, opts);
+            const retry = res.querySelector('.quiz-retry');
+            if (retry) retry.onclick = () => mount(el, moduleId, opts);
             res.scrollIntoView({ behavior: 'smooth', block: 'center' });
         };
     }

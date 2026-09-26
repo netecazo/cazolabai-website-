@@ -154,3 +154,5 @@ footer.site a { color: #cbd5e1; }
     .quiz-q { break-inside: avoid; }
     .quiz-result .actions { display: none !important; }
 }
+.quiz-err { color: var(--danger); font-size: 0.9rem; margin: 0.4rem 0; }
+.quiz-note { font-size: 0.9rem; color: var(--slate); margin-top: 0.7rem; }
