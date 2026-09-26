@@ -1483,13 +1483,14 @@
             '<p class="muted" style="font-size:0.88rem;margin-bottom:0.8rem">Everyone active against every active test system: last completed assessment and what is due next.</p>' +
             '<div class="actions" style="margin:0"><button class="btn" type="button" id="showMatrix">Show matrix</button></div></div>' +
             '<form class="form-card no-print" id="packetForm"><h2>Inspection packet</h2>' +
-            '<p class="muted" style="font-size:0.88rem;margin-bottom:0.8rem">Every signed-off competency record in the period, one per page, with all six methods, signatures and history.</p>' +
+            '<p class="muted" style="font-size:0.88rem;margin-bottom:0.8rem">Every signed-off competency record in the period, one per page, with all six methods, signatures and history. Signed-off studies (lot-to-lot, method comparison, AMR) can go in too.</p>' +
             '<div class="form-row">' +
             '<div><label class="lbl" for="pStaff">Staff</label><select id="pStaff"><option value="">Everyone</option>' +
             S.staff.map(s => '<option value="' + s.id + '">' + esc(s.name) + (s.active ? '' : ' (inactive)') + '</option>').join('') + '</select></div>' +
             '<div><label class="lbl" for="pFrom">Completed from</label><input type="date" id="pFrom" value="' + yearAgo + '"></div>' +
             '<div><label class="lbl" for="pTo">to</label><input type="date" id="pTo" value="' + todayIso() + '"></div>' +
-            '<button class="btn" type="submit">Build packet</button></div></form>' +
+            '<button class="btn" type="submit">Build packet</button></div>' +
+            '<label class="inline-check"><input type="checkbox" id="pStudies" checked> Include signed-off studies (when the packet is for everyone)</label></form>' +
             '<div id="reportOut"></div>';
 
         $('#showMatrix').onclick = () => renderMatrix($('#reportOut'), staff, systems);
@@ -1497,6 +1498,13 @@
             e.preventDefault();
             const from = $('#pFrom').value, to = $('#pTo').value, who = $('#pStaff').value;
             if (from && to && from > to) { toast('The start date is after the end date.', true); return; }
+            const inPeriod = iso => (!from || iso.slice(0, 10) >= from) && (!to || iso.slice(0, 10) <= to);
+            let studies = [];
+            if (!who && $('#pStudies').checked) {
+                try { studies = (await S.backend.list('studies')).filter(x => x.signoff && inPeriod(x.signoff.at)); }
+                catch (err) { toast('Studies left out: ' + err.message, true); }
+                studies.sort((a, b) => a.signoff.at.localeCompare(b.signoff.at));
+            }
             const recs = S.comps.filter(c => c.completed_at &&
                 (!who || c.staff_id === who) &&
                 (!from || c.completed_at.slice(0, 10) >= from) &&
@@ -1506,11 +1514,11 @@
                     return sa.localeCompare(sb) || a.completed_at.localeCompare(b.completed_at);
                 });
             const out = $('#reportOut');
-            if (!recs.length) { out.innerHTML = '<div class="empty">No signed-off records in that period.</div>'; return; }
+            if (!recs.length && !studies.length) { out.innerHTML = '<div class="empty">No signed-off records in that period.</div>'; return; }
             out.innerHTML = '<p class="muted">Loading history…</p>';
             let events = [];
             try { events = await S.backend.allEvents(); } catch (err) { toast('History unavailable: ' + err.message, true); }
-            renderPacket(out, recs, events, { from, to, who });
+            renderPacket(out, recs, events, { from, to, who }, studies);
         };
     }
 
@@ -1544,7 +1552,8 @@
         out.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function renderPacket(out, recs, events, f) {
+    function renderPacket(out, recs, events, f, studies) {
+        studies = studies || [];
         const byComp = {};
         events.forEach(e => { (byComp[e.competency_id] = byComp[e.competency_id] || []).push(e); });
         const people = new Set(recs.map(r => r.staff_id)).size;
@@ -1555,13 +1564,18 @@
             '<table class="doc kv"><tbody>' +
             '<tr><th>Staff</th><td>' + esc(who) + '</td></tr>' +
             '<tr><th>Completed between</th><td>' + (fmtDate(f.from) || 'the start') + ' and ' + (fmtDate(f.to) || 'today') + '</td></tr>' +
-            '<tr><th>Records</th><td>' + recs.length + ' signed-off records for ' + people + (people === 1 ? ' person' : ' people') + '</td></tr>' +
+            '<tr><th>Records</th><td>' + recs.length + ' signed-off competency record' + (recs.length === 1 ? '' : 's') + ' for ' + people + (people === 1 ? ' person' : ' people') +
+                (studies.length ? '; ' + studies.length + ' signed-off stud' + (studies.length === 1 ? 'y' : 'ies') : '') + '</td></tr>' +
             '<tr><th>Generated</th><td>' + fmtStamp(new Date().toISOString()) + ' by ' + esc(S.member.display_name || S.user.email) + '</td></tr>' +
             '</tbody></table>' +
-            '<h3>Contents</h3><ol class="packet-toc">' + recs.map(c => {
+            '<h3>Contents</h3>' + (recs.length ? '<ol class="packet-toc">' + recs.map(c => {
                 const s = staffById(c.staff_id) || {}, sy = systemById(c.test_system_id) || {};
                 return '<li>' + esc(s.name || '—') + ' · ' + esc(sy.name || '—') + ' · ' + esc(KINDS[c.kind] || c.kind) + ' · ' + fmtDate(c.completed_at.slice(0, 10)) + '</li>';
-            }).join('') + '</ol>' +
+            }).join('') + '</ol>' : '') +
+            (studies.length ? '<h3>Studies</h3><ol class="packet-toc" start="' + (recs.length + 1) + '">' + studies.map(x => {
+                const fl = (x.content && x.content.fields) || {};
+                return '<li>' + esc(fl.analyte || 'Untitled') + ' · ' + esc(STUDY_KINDS[x.kind] || x.kind) + ' · ' + esc(fl.system || '—') + ' · signed ' + fmtDate(x.signoff.at.slice(0, 10)) + '</li>';
+            }).join('') + '</ol>' : '') +
             '<p class="muted packet-note">Signatures and times are recorded by the system at signing. History entries are written by the database and can\'t be edited. Generated with LabReady Pro; follow your accrediting body\'s requirements for record retention.</p>' +
             '</section>';
 
@@ -1594,11 +1608,81 @@
         };
 
         out.innerHTML = '<div class="report" id="packetReport">' +
-            '<div class="report-head no-print"><div><h2>Inspection packet</h2><p class="muted">' + recs.length + ' records · cover page + one page per record</p></div>' +
+            '<div class="report-head no-print"><div><h2>Inspection packet</h2><p class="muted">' + recs.length + ' records' + (studies.length ? ' and ' + studies.length + ' stud' + (studies.length === 1 ? 'y' : 'ies') : '') + ' · cover page + one page each</p></div>' +
             '<button class="btn primary" type="button" id="printPacket">Print / Save as PDF</button></div>' +
-            cover + recs.map(page).join('') + '</div>';
+            cover + recs.map(page).join('') + studies.map(studyPage).join('') + '</div>';
         $('#printPacket').onclick = () => printOnly('packetReport');
         out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // One packet page per signed-off study. Results are recalculated from the saved data with the worksheet maths (worksheets/stats.js).
+    const STUDY_FIELDS = {
+        lot: [['lot_current', 'Current lot'], ['lot_new', 'New lot'], ['qc_note', 'QC on the new lot']],
+        method: [['method_x', 'Comparative method (x)'], ['method_y', 'New method (y)']],
+        amr: [['material', 'Material and lot']]
+    };
+    function studyResult(x) {
+        const L = window.LRStats, c = (x.content && x.content.criteria) || {}, data = (x.content && x.content.data) || '';
+        const limit = { abs: L.num(c.abs), pct: L.num(c.pct) };
+        const crit = {
+            limit: L.hasLimit(limit) ? limit : null,
+            minPassPct: L.num(c.minPassPct) != null ? L.num(c.minPassPct) : 100,
+            meanBiasPct: L.num(c.meanBiasPct),
+            levels: String(c.levels || '').split(/[,;\s]+/).map(L.num).filter(v => v != null),
+            model: c.model || 'deming'
+        };
+        const rows = (x.kind === 'amr' ? L.parseLevels(data) : L.parsePairs(data)).rows;
+        return { rows, res: x.kind === 'lot' ? L.lotToLot(rows, crit) : x.kind === 'method' ? L.methodComparison(rows, crit) : L.amr(rows, crit) };
+    }
+    function studyPage(x) {
+        const L = window.LRStats;
+        const ct = x.content || {}, fl = ct.fields || {}, cr = ct.criteria || {}, rv = ct.review || {};
+        const u = fl.units ? ' ' + fl.units : '';
+        const kv = [['Analyte', fl.analyte], ['Units', fl.units], ['Instrument / test system', fl.system]]
+            .concat((STUDY_FIELDS[x.kind] || []).map(([k, label]) => [label, fl[k]]))
+            .concat([['Performed by', fl.performed_by], ['Date performed', fmtDate(fl.date)]]);
+        const limits = [cr.abs ? '±' + cr.abs + u : '', cr.pct ? '±' + cr.pct + '%' : ''].filter(Boolean).join(' or ') || 'Not entered';
+        let body = '';
+        if (!L) body = '<p class="muted">Results unavailable.</p>';
+        else {
+            const { res } = studyResult(x), f = L.fmt, sg = L.signed;
+            const verdict = res.verdict.state === 'pass' ? 'Meets the acceptance criteria entered' : res.verdict.state === 'fail' ? 'Does not meet the acceptance criteria entered' : 'Not judged';
+            body += '<h3>Result</h3><p><b>' + verdict + '</b></p>' +
+                (res.checks.length ? '<ul class="packet-hist">' + res.checks.map(ch => '<li>' + (ch.ok ? '✓ ' : '✗ ') + esc(ch.label) + '</li>').join('') + '</ul>' : '');
+            const tbl = (head, rows) => '<table class="doc study-tbl"><thead><tr>' + head.map(h => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' +
+                rows.map(r => '<tr>' + r.map(v => '<td>' + esc(v) + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+            const ok = v => v == null ? '—' : v ? 'Pass' : 'Fail';
+            if (x.kind === 'lot') {
+                const sm = res.summary;
+                body += '<p>' + sm.n + ' samples · mean difference ' + sg(sm.meanDiff, 3) + u + ' (' + sg(sm.meanPct, 2) + '%) · SD ' + f(sm.sdDiff, 3) + '</p>' +
+                    tbl(['Sample', 'Current', 'New', 'Diff', 'Diff %', 'Allowed ±', 'Result'],
+                        res.items.map(i => [i.id, f(i.x), f(i.y), sg(i.diff, 3), i.pct == null ? '—' : sg(i.pct, 2) + '%', i.allowed == null ? '—' : f(i.allowed, 3), ok(i.ok)]));
+            } else if (x.kind === 'method') {
+                const sm = res.summary;
+                if (sm.ols) body += '<p>' + sm.n + ' samples, x from ' + f(sm.xMin) + ' to ' + f(sm.xMax) + u + ' · r = ' + f(sm.ols.r, 4) +
+                    ' · Deming y = ' + f(sm.deming.slope, 4) + 'x ' + sg(sm.deming.intercept, 4) + ' · least squares y = ' + f(sm.ols.slope, 4) + 'x ' + sg(sm.ols.intercept, 4) + '</p>';
+                if (res.levels.length) body += tbl(['Decision level', 'Predicted', 'Bias', 'Bias %', 'Allowed ±', 'Result'],
+                    res.levels.map(l => [f(l.level), f(l.predicted, 3), sg(l.bias, 3), l.biasPct == null ? '—' : sg(l.biasPct, 2) + '%', l.allowed == null ? '—' : f(l.allowed, 3), ok(l.ok)]));
+                body += tbl(['Sample', 'x', 'y', 'Diff', 'Diff %'], res.items.map(i => [i.id, f(i.x), f(i.y), sg(i.diff, 3), i.pct == null ? '—' : sg(i.pct, 2) + '%']));
+            } else {
+                if (res.fit) body += '<p>' + res.items.length + ' levels · verified range: ' + (res.verified ? f(res.verified.low) + ' to ' + f(res.verified.high) + u : 'not verified') +
+                    ' · slope ' + f(res.fit.slope, 4) + ', intercept ' + f(res.fit.intercept, 4) + '</p>';
+                body += tbl(['Level', 'Assigned', 'Results', 'Mean', 'Deviation', 'Recovery', 'Allowed ±', 'Result'],
+                    res.items.map(i => [i.id, f(i.assigned), i.reps.map(v => f(v)).join(', '), f(i.mean, 3), sg(i.dev, 3), f(i.recovery, 1) + '%', i.allowed == null ? '—' : f(i.allowed, 3), ok(i.ok)]));
+            }
+        }
+        const so = x.signoff || {};
+        return '<section class="packet-page">' +
+            '<h2>Study: ' + esc(fl.analyte || 'Untitled') + ' · ' + esc(STUDY_KINDS[x.kind] || x.kind) + '</h2>' +
+            '<table class="doc kv"><tbody>' + kv.map(([k, v]) => '<tr><th>' + esc(k) + '</th><td>' + esc(v || '—') + '</td></tr>').join('') +
+            '<tr><th>Allowable difference</th><td>' + esc(limits) + (x.kind === 'lot' && cr.minPassPct ? '; ' + esc(cr.minPassPct) + '% of samples within' : '') +
+                (x.kind === 'lot' && cr.meanBiasPct ? '; mean within ±' + esc(cr.meanBiasPct) + '%' : '') + '</td></tr>' +
+            '</tbody></table>' + body +
+            '<h3>Review</h3><table class="doc kv"><tbody>' +
+            '<tr><th>Decision</th><td>' + esc(rv.decision || '—') + '</td></tr>' +
+            (rv.comments ? '<tr><th>Comments</th><td class="pre">' + esc(rv.comments) + '</td></tr>' : '') +
+            '<tr><th>Signed off</th><td>' + esc(so.name || '—') + (so.role ? ' (' + esc(ROLES[so.role] || so.role) + ')' : '') + ' · ' + fmtStamp(so.at) + '</td></tr>' +
+            '</tbody></table></section>';
     }
 
     // Print a single report: everything else on the page is hidden while printing.
