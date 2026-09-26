@@ -24,6 +24,7 @@ The course is the entry product. The competency system is the recurring product.
 | Reports: competency matrix and inspection packet (cover + one page per signed-off record with methods, signatures and history) | `labready/app/` (Reports tab) | Built; prints one record per Letter page |
 | Spreadsheet import for staff and test systems (paste from Excel/Sheets or CSV, preview, duplicate and date checks) | `labready/app/` (Staff and Test systems pages) | Built; up to 500 rows per import |
 | Quiz links: a supervisor sends a single-use link, the tech takes the quiz on their own device (no account), the database marks it and the score can go into method 6 | `labready/quiz/`, `labready/app/`, `labready/supabase-quiz-keys.sql` | Live on the LabReady Pro database. Links expire after 14 days and can be cancelled; every step is in the record history. After editing a quiz, run `node labready/tools/build-quiz-keys.mjs` and apply the SQL it writes |
+| Study worksheets: lot-to-lot, method comparison (Deming and least squares, bias at decision levels, scatter and difference plots) and AMR / calibration verification, judged against limits the lab enters, printable with sign-off lines | `labready/worksheets/` | Built; calculations unit-tested (`node --test labready/worksheets/stats.test.mjs`). Drafts stay in the browser for now; saving them to the app is a later step |
 
 ---
 
