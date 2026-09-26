@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabReady Pro Quiz</title>
+    <meta name="robots" content="noindex">
+    <meta name="referrer" content="no-referrer">
+    <link rel="stylesheet" href="../assets/labready.css">
+    <style>
+        .who { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.6rem 1.2rem; margin: 0.6rem 0 0; font-size: 0.92rem; }
+        .who span { display: block; color: var(--muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+        .attest { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.92rem; margin-top: 0.8rem; }
+        .attest input { margin-top: 0.3rem; width: 18px; height: 18px; flex: none; accent-color: var(--brand); }
+        .state { text-align: center; padding: 2.5rem 1.5rem; }
+        .state h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+        .state p { color: var(--slate); max-width: 520px; margin: 0 auto 0.4rem; }
+        .big-score { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; }
+    </style>
+</head>
+<body>
+    <header class="site">
+        <nav class="container">
+            <span class="logo"><span class="logo-mark">LR</span><span class="logo-text">LabReady <span>Pro</span></span></span>
+            <span class="muted" style="font-size:0.85rem;color:var(--muted)">Competency quiz</span>
+        </nav>
+    </header>
+
+    <main class="container" id="main"><p style="padding:3rem 0;color:var(--muted)">Loading your quiz…</p></main>
+
+    <footer class="site">LabReady Pro · Training and documentation support. No patient data is stored.</footer>
+
+    <script src="../app/config.js"></script>
+    <script src="../content/quizzes.js"></script>
+    <script src="../assets/quiz.js"></script>
+    <script>
+    (function () {
+        'use strict';
+        const CFG = window.LABREADY_CONFIG || {};
+        const DEMO_KEY = 'labready.app.demo.v2';
+        const BANK = window.LABREADY_QUIZZES;
+        const main = document.getElementById('main');
+        const token = decodeURIComponent(location.hash.replace(/^#\/?/, '')).trim();
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const fmt = ts => ts ? new Date(ts).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
+
+        // ---- Live: two public database functions, called with the site's publishable key.
+        async function rpc(fn, args) {
+            const res = await fetch(CFG.supabaseUrl + '/rest/v1/rpc/' + fn, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', apikey: CFG.supabaseAnonKey, Authorization: 'Bearer ' + CFG.supabaseAnonKey },
+                body: JSON.stringify(args)
+            });
+            const body = await res.json().catch(() => null);
+            if (!res.ok) throw new Error((body && body.message) || 'The server couldn\'t be reached. Try again in a moment.');
+            return body;
+        }
+
+        // ---- Demo: links made in the demo lab live in this browser, like the rest of the demo.
+        function demoDb() { try { return JSON.parse(localStorage.getItem(DEMO_KEY) || 'null'); } catch (e) { return null; } }
+        function demoStatus(l) {
+            return l.submitted_at ? 'submitted' : l.cancelled_at ? 'cancelled' : Date.parse(l.expires_at) < Date.now() ? 'expired' : 'open';
+        }
+        const Demo = {
+            async info(t) {
+                const db = demoDb();
+                const l = db && (db.quiz_links || []).find(x => x.token === t);
+                if (!l) return null;
+                const staff = db.staff.find(s => s.id === l.staff_id) || {};
+                return {
+                    module_id: l.module_id, staff_name: staff.name, lab_name: db.labs[0].name, sent_by: l.created_by_name,
+                    expires_at: l.expires_at, status: demoStatus(l),
+                    result: l.submitted_at ? { correct: l.correct, total: l.total, percent: l.percent, pass_mark: l.pass_mark, passed: l.passed, submitted_at: l.submitted_at, taker_name: l.taker_name } : null
+                };
+            },
+            async submit(t, answers, name) {
+                const db = demoDb();
+                const l = db && (db.quiz_links || []).find(x => x.token === t);
+                if (!l) throw new Error('quiz link not found');
+                if (demoStatus(l) !== 'open') throw new Error('This quiz link is no longer open.');
+                const qs = BANK.modules[l.module_id].questions;
+                const correct = qs.filter((q, i) => answers[i] === q.a).length;
+                const percent = Math.round(correct * 100 / qs.length);
+                const now = new Date().toISOString();
+                Object.assign(l, { submitted_at: now, taker_name: name, answers, correct, total: qs.length, percent, pass_mark: BANK.passMark, passed: percent >= BANK.passMark });
+                db.events = db.events || [];
+                db.events.push({ id: db.events.length + 1, competency_id: l.competency_id, actor: null, actor_name: name + ' (quiz link)', action: 'quiz_submitted',
+                    detail: { module: l.module_id, correct, total: qs.length, percent, passed: l.passed }, at: now });
+                localStorage.setItem(DEMO_KEY, JSON.stringify(db));
+                return { correct, total: qs.length, percent, pass_mark: BANK.passMark, passed: l.passed, submitted_at: now };
+            }
+        };
+        const Live = {
+            info: t => rpc('quiz_link_info', { p_token: t }),
+            submit: (t, answers, name) => rpc('submit_quiz_link', { p_token: t, p_answers: answers, p_name: name })
+        };
+        const backend = token.startsWith('demo-') ? Demo : Live;
+
+        function state(title, text) {
+            main.innerHTML = '<div class="card state" style="margin-top:2rem"><h2>' + title + '</h2>' + text + '</div>';
+        }
+
+        function showDone(info, mod) {
+            const r = info.result;
+            state('Quiz submitted',
+                '<p>Module ' + esc(info.module_id) + ': ' + esc(mod ? mod.title : '') + '</p>' +
+                '<p class="big-score">' + r.correct + ' / ' + r.total + ' (' + r.percent + '%)</p>' +
+                '<p>' + (r.passed ? 'Pass.' : 'Below the ' + r.pass_mark + '% pass mark. Your supervisor will talk you through next steps.') + '</p>' +
+                '<p style="color:var(--muted);font-size:0.88rem">Submitted by ' + esc(r.taker_name) + ' · ' + fmt(r.submitted_at) + '. Your result has gone to ' + esc(info.lab_name) + '. You can close this page.</p>');
+        }
+
+        async function start() {
+            if (!token) {
+                state('Open this page from your quiz link', '<p>Your supervisor sends you a link to a LabReady quiz. Open that link to start.</p>');
+                return;
+            }
+            if (backend === Live && !(CFG.supabaseUrl && CFG.supabaseAnonKey)) {
+                state('Quiz unavailable', '<p>This site isn\'t connected to its database yet.</p>');
+                return;
+            }
+            let info;
+            try { info = await backend.info(token); } catch (e) {
+                state('Couldn\'t load the quiz', '<p>' + esc(e.message) + '</p><p><button class="btn" onclick="location.reload()">Try again</button></p>');
+                return;
+            }
+            if (!info) {
+                state('Link not recognised', '<p>Check you opened the whole link from your supervisor\'s message. If it still doesn\'t work, ask them for a new one.</p>' +
+                    (backend === Demo ? '<p style="color:var(--muted);font-size:0.88rem">Demo links only work in the browser that created them.</p>' : ''));
+                return;
+            }
+            const mod = BANK.modules[info.module_id];
+            if (info.status === 'submitted') return showDone(info, mod);
+            if (info.status === 'cancelled') return state('Link cancelled', '<p>Your supervisor cancelled this quiz link. Ask them for a new one if you still need to take it.</p>');
+            if (info.status === 'expired') return state('Link expired', '<p>This quiz link expired on ' + fmt(info.expires_at) + '. Ask your supervisor for a new one.</p>');
+            if (!mod) return state('Quiz unavailable', '<p>This quiz is no longer in the question bank. Ask your supervisor for a new link.</p>');
+
+            main.innerHTML =
+                '<div class="page-head"><span class="tag">Competency quiz · Module ' + esc(info.module_id) + '</span>' +
+                '<h1>' + esc(mod.title) + '</h1>' +
+                '<p>Answer every question, then submit. You get one attempt, and your score goes straight to your supervisor. Work on your own, the same as a written assessment at the bench.</p></div>' +
+                '<div class="card"><div class="who">' +
+                '<div><span>For</span>' + esc(info.staff_name) + '</div>' +
+                '<div><span>Laboratory</span>' + esc(info.lab_name) + '</div>' +
+                '<div><span>Sent by</span>' + esc(info.sent_by || '—') + '</div>' +
+                '<div><span>Link expires</span>' + fmt(info.expires_at) + '</div></div>' +
+                '<div style="margin-top:1rem;max-width:360px"><label class="lbl" for="taker">Your full name</label><input type="text" id="taker" autocomplete="name" value="' + esc(info.staff_name) + '"></div>' +
+                '<label class="attest"><input type="checkbox" id="attest"><span>I am the person named above and I answered these questions myself, without help.</span></label></div>' +
+                '<div id="quiz"></div>' +
+                '<p class="disclaimer">LabReady Pro quizzes support competency assessment; they don\'t replace your laboratory\'s own procedures.</p>';
+
+            LabReadyQuiz.mount(document.getElementById('quiz'), info.module_id, {
+                noRetry: true,
+                resultNote: 'Your result has been sent to ' + info.lab_name + '. You can close this page.',
+                onSubmit: async answers => {
+                    const name = document.getElementById('taker').value.trim();
+                    if (!name) { document.getElementById('taker').focus(); throw new Error('Enter your full name at the top of the page.'); }
+                    if (!document.getElementById('attest').checked) {
+                        document.getElementById('attest').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        throw new Error('Tick the box at the top to confirm you took the quiz yourself.');
+                    }
+                    const r = await backend.submit(token, answers, name);
+                    document.getElementById('taker').disabled = true;
+                    document.getElementById('attest').disabled = true;
+                    return r;
+                }
+            });
+        }
+        // A different link pasted into the same tab only changes the hash, so start again.
+        window.addEventListener('hashchange', () => location.reload());
+        start();
+    })();
+    </script>
+</body>
+</html>

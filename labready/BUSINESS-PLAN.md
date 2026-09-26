@@ -23,7 +23,7 @@ The course is the entry product. The competency system is the recurring product.
 | Module quizzes: 80 multiple-choice questions (8 per module), shuffled answers, pass mark 80% | `labready/content/quizzes.js`, `labready/assets/quiz.js` | On every module page for self-study; in the app, "Run a module quiz" fills competency method 6. Draft v0.1, review with the modules |
 | Reports: competency matrix and inspection packet (cover + one page per signed-off record with methods, signatures and history) | `labready/app/` (Reports tab) | Built; prints one record per Letter page |
 | Spreadsheet import for staff and test systems (paste from Excel/Sheets or CSV, preview, duplicate and date checks) | `labready/app/` (Staff and Test systems pages) | Built; up to 500 rows per import |
-| Tech self-service (staff log in to take quizzes themselves) | — | Not started; quizzes are proctored on the supervisor's screen for now |
+| Quiz links: a supervisor sends a single-use link, the tech takes the quiz on their own device (no account), the database marks it and the score can go into method 6 | `labready/quiz/`, `labready/app/`, `labready/supabase-quiz-keys.sql` | Live on the LabReady Pro database. Links expire after 14 days and can be cancelled; every step is in the record history. After editing a quiz, run `node labready/tools/build-quiz-keys.mjs` and apply the SQL it writes |
 
 ---
 

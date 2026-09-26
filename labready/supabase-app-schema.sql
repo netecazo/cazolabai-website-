@@ -329,6 +329,165 @@ $$;
 revoke execute on function public.set_my_reminders(uuid, boolean) from public, anon;
 grant execute on function public.set_my_reminders(uuid, boolean) to authenticated;
 
+-- =====================================================================
+-- Quiz links: a tech takes a module quiz on their own device.
+-- A supervisor creates a single-use link for one competency record. The tech
+-- opens it without an account, answers, and the database marks the answers
+-- against private.quiz_keys (see supabase-quiz-keys.sql). The supervisor then
+-- adds the score to method 6 of the record.
+-- =====================================================================
+
+create table if not exists private.quiz_keys (
+    module_id  text not null,
+    q          int  not null,
+    answer     int  not null,
+    primary key (module_id, q)
+);
+revoke all on private.quiz_keys from public, anon, authenticated;
+
+-- Placeholder until supabase-quiz-keys.sql runs; left alone on re-runs so it doesn't undo that file.
+do $$ begin
+    if to_regprocedure('private.quiz_pass_mark()') is null then
+        create function private.quiz_pass_mark() returns int language sql immutable set search_path = '' as 'select 80';
+    end if;
+end $$;
+
+-- Lets quiz links point at a record in the same lab only.
+do $$ begin
+    alter table public.competencies add constraint competencies_id_lab_key unique (id, lab_id);
+exception when duplicate_table or duplicate_object then null; end $$;
+
+create table if not exists public.quiz_links (
+    id               uuid primary key default gen_random_uuid(),
+    lab_id           uuid not null references public.labs(id) on delete cascade,
+    competency_id    uuid not null,
+    staff_id         uuid not null,
+    module_id        text not null check (module_id ~ '^[0-9]{2}$'),
+    token            text not null unique
+                     default replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
+    created_by       uuid default auth.uid(),
+    created_by_name  text,
+    created_at       timestamptz not null default now(),
+    expires_at       timestamptz not null default now() + interval '14 days',
+    cancelled_at     timestamptz,
+    submitted_at     timestamptz,
+    taker_name       text,
+    answers          jsonb,
+    correct          int,
+    total            int,
+    percent          int,
+    pass_mark        int,
+    passed           boolean,
+    foreign key (competency_id, lab_id) references public.competencies(id, lab_id) on delete cascade,
+    foreign key (staff_id, lab_id) references public.staff(id, lab_id) on delete cascade
+);
+create index if not exists quiz_links_comp_idx on public.quiz_links(competency_id, lab_id);
+create index if not exists quiz_links_staff_idx on public.quiz_links(staff_id, lab_id);
+create index if not exists quiz_links_lab_idx on public.quiz_links(lab_id);
+
+alter table public.quiz_links enable row level security;
+drop policy if exists "members read quiz links" on public.quiz_links;
+create policy "members read quiz links" on public.quiz_links
+    for select to authenticated using (private.is_lab_member(lab_id));
+-- No insert/update/delete policies: links are made, cancelled and submitted through the functions below.
+
+-- Creates a link for an open competency record. Returns the new row (including its token).
+create or replace function public.create_quiz_link(p_competency uuid, p_module text)
+returns public.quiz_links language plpgsql security definer set search_path = public as $$
+declare c competencies; r quiz_links;
+begin
+    select * into c from competencies where id = p_competency;
+    if c.id is null or not private.is_lab_member(c.lab_id) then raise exception 'competency record not found'; end if;
+    if c.completed_at is not null then raise exception 'This record is signed off and locked. Reopen it to send a quiz.'; end if;
+    if not exists (select 1 from private.quiz_keys where module_id = p_module) then raise exception 'no quiz for module %', p_module; end if;
+    insert into quiz_links (lab_id, competency_id, staff_id, module_id, created_by, created_by_name)
+        values (c.lab_id, c.id, c.staff_id, p_module, auth.uid(), private.member_name(c.lab_id))
+        returning * into r;
+    insert into competency_events (lab_id, competency_id, actor, actor_name, action, detail)
+        values (c.lab_id, c.id, auth.uid(), r.created_by_name, 'quiz_sent', jsonb_build_object('module', p_module));
+    return r;
+end;
+$$;
+
+create or replace function public.cancel_quiz_link(p_id uuid)
+returns void language plpgsql security definer set search_path = public as $$
+declare r quiz_links;
+begin
+    select * into r from quiz_links where id = p_id for update;
+    if r.id is null or not private.is_lab_member(r.lab_id) then raise exception 'quiz link not found'; end if;
+    if r.submitted_at is not null then raise exception 'This quiz has already been submitted.'; end if;
+    if r.cancelled_at is null then
+        update quiz_links set cancelled_at = now() where id = p_id;
+        insert into competency_events (lab_id, competency_id, actor, actor_name, action, detail)
+            values (r.lab_id, r.competency_id, auth.uid(), private.member_name(r.lab_id), 'quiz_cancelled', jsonb_build_object('module', r.module_id));
+    end if;
+end;
+$$;
+
+-- Public: what the quiz page needs to show for a link. Reveals nothing without the token.
+create or replace function public.quiz_link_info(p_token text)
+returns jsonb language plpgsql stable security definer set search_path = public as $$
+declare r quiz_links;
+begin
+    if p_token is null or p_token !~ '^[0-9a-f]{64}$' then return null; end if;
+    select * into r from quiz_links where token = p_token;
+    if r.id is null then return null; end if;
+    return jsonb_build_object(
+        'module_id', r.module_id,
+        'staff_name', (select name from staff where id = r.staff_id),
+        'lab_name', (select name from labs where id = r.lab_id),
+        'sent_by', r.created_by_name,
+        'expires_at', r.expires_at,
+        'status', case when r.submitted_at is not null then 'submitted'
+                       when r.cancelled_at is not null then 'cancelled'
+                       when r.expires_at < now() then 'expired' else 'open' end,
+        'result', case when r.submitted_at is null then null else jsonb_build_object(
+            'correct', r.correct, 'total', r.total, 'percent', r.percent, 'pass_mark', r.pass_mark,
+            'passed', r.passed, 'submitted_at', r.submitted_at, 'taker_name', r.taker_name) end);
+end;
+$$;
+
+-- Public: marks the answers (original option indexes, one per question) and stores the result. Single use.
+create or replace function public.submit_quiz_link(p_token text, p_answers int[], p_name text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare r quiz_links; n int; ok int; pct int; pm int := private.quiz_pass_mark(); who text;
+begin
+    if p_token is null or p_token !~ '^[0-9a-f]{64}$' then raise exception 'quiz link not found'; end if;
+    select * into r from quiz_links where token = p_token for update;
+    if r.id is null then raise exception 'quiz link not found'; end if;
+    if r.submitted_at is not null then raise exception 'This quiz has already been submitted.'; end if;
+    if r.cancelled_at is not null then raise exception 'This quiz link has been cancelled.'; end if;
+    if r.expires_at < now() then raise exception 'This quiz link has expired. Ask your supervisor for a new one.'; end if;
+    who := left(btrim(coalesce(p_name, '')), 120);
+    if who = '' then raise exception 'Enter your name before submitting.'; end if;
+
+    select count(*) into n from private.quiz_keys where module_id = r.module_id;
+    if p_answers is null or cardinality(p_answers) <> n or array_position(p_answers, null) is not null then
+        raise exception 'Answer every question before submitting.';
+    end if;
+    select count(*) into ok from private.quiz_keys k where k.module_id = r.module_id and p_answers[k.q + 1] = k.answer;
+    pct := round(ok * 100.0 / n);
+
+    update quiz_links set submitted_at = now(), taker_name = who, answers = to_jsonb(p_answers),
+        correct = ok, total = n, percent = pct, pass_mark = pm, passed = pct >= pm
+        where id = r.id;
+    insert into competency_events (lab_id, competency_id, actor, actor_name, action, detail)
+        values (r.lab_id, r.competency_id, null, who || ' (quiz link)', 'quiz_submitted',
+                jsonb_build_object('module', r.module_id, 'correct', ok, 'total', n, 'percent', pct, 'passed', pct >= pm));
+    return jsonb_build_object('correct', ok, 'total', n, 'percent', pct, 'pass_mark', pm, 'passed', pct >= pm, 'submitted_at', now());
+end;
+$$;
+
+revoke execute on function public.create_quiz_link(uuid, text) from public, anon;
+revoke execute on function public.cancel_quiz_link(uuid) from public, anon;
+grant execute on function public.create_quiz_link(uuid, text) to authenticated;
+grant execute on function public.cancel_quiz_link(uuid) to authenticated;
+-- These two are meant to be called by someone with only the link, so anon may run them.
+revoke execute on function public.quiz_link_info(text) from public;
+revoke execute on function public.submit_quiz_link(text, int[], text) from public;
+grant execute on function public.quiz_link_info(text) to anon, authenticated;
+grant execute on function public.submit_quiz_link(text, int[], text) to anon, authenticated;
+
 -- ---------- Private helper permissions ----------
 -- Row-level security policies run as the signed-in user, so they need EXECUTE on the two membership checks.
 revoke execute on all functions in schema private from public, anon;

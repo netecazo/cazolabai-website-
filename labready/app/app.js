@@ -310,17 +310,36 @@
             this.db.events = this.db.events || [];
             this.db.events.push({ id: this.db.events.length + 1, competency_id: competencyId, actor: me.user_id, actor_name: me.display_name, action, detail, at: new Date().toISOString() });
         },
-        async allEvents() {
-            // Paged so large labs aren't cut off by the API's row limit.
-            const out = [];
-            for (let from = 0; ; from += 1000) {
-                const page = this.check(await this.client.from('competency_events').select('*')
-                    .eq('lab_id', this.lab.id).order('id').range(from, from + 999));
-                out.push(...page);
-                if (page.length < 1000) return out;
+        async events(competencyId) { return clone((this.db.events || []).filter(e => e.competency_id === competencyId)); },
+        async quizLinks(competencyId) { return clone((this.db.quiz_links || []).filter(l => l.competency_id === competencyId)); },
+        async createQuizLink(competencyId, moduleId) {
+            const c = this.db.competencies.find(x => x.id === competencyId);
+            if (!c) throw new Error('competency record not found');
+            if (c.completed_at) throw new Error('This record is signed off and locked. Reopen it to send a quiz.');
+            const me = this.db.members[0];
+            const now = new Date();
+            const l = {
+                id: uid(), lab_id: this.lab.id, competency_id: c.id, staff_id: c.staff_id, module_id: moduleId,
+                token: 'demo-' + uid().replace(/-/g, '') + uid().replace(/-/g, ''),
+                created_by: me.user_id, created_by_name: me.display_name, created_at: now.toISOString(),
+                expires_at: new Date(now.getTime() + 14 * 86400000).toISOString(), cancelled_at: null, submitted_at: null
+            };
+            this.db.quiz_links = this.db.quiz_links || [];
+            this.db.quiz_links.push(l);
+            this.log(c.id, 'quiz_sent', { module: moduleId });
+            this.persist();
+            return clone(l);
+        },
+        async cancelQuizLink(id) {
+            const l = (this.db.quiz_links || []).find(x => x.id === id);
+            if (!l) throw new Error('quiz link not found');
+            if (l.submitted_at) throw new Error('This quiz has already been submitted.');
+            if (!l.cancelled_at) {
+                l.cancelled_at = new Date().toISOString();
+                this.log(l.competency_id, 'quiz_cancelled', { module: l.module_id });
+                this.persist();
             }
         },
-        async events(competencyId) { return clone((this.db.events || []).filter(e => e.competency_id === competencyId)); },
         async allEvents() { return clone(this.db.events || []); },
         async setMyReminders(on) { this.db.members[0].email_reminders = on; this.persist(); },
         async updateLab(patch) { Object.assign(this.lab, patch); this.persist(); return clone(this.lab); },
@@ -385,6 +404,23 @@
         async events(competencyId) {
             return this.check(await this.client.from('competency_events').select('*').eq('competency_id', competencyId).order('at'));
         },
+        async allEvents() {
+            // Paged so large labs aren't cut off by the API's row limit.
+            const out = [];
+            for (let from = 0; ; from += 1000) {
+                const page = this.check(await this.client.from('competency_events').select('*')
+                    .eq('lab_id', this.lab.id).order('id').range(from, from + 999));
+                out.push(...page);
+                if (page.length < 1000) return out;
+            }
+        },
+        async quizLinks(competencyId) {
+            return this.check(await this.client.from('quiz_links').select('*').eq('competency_id', competencyId).order('created_at'));
+        },
+        async createQuizLink(competencyId, moduleId) {
+            return this.check(await this.client.rpc('create_quiz_link', { p_competency: competencyId, p_module: moduleId }));
+        },
+        async cancelQuizLink(id) { this.check(await this.client.rpc('cancel_quiz_link', { p_id: id })); },
         async setMyReminders(on) {
             this.check(await this.client.rpc('set_my_reminders', { p_lab: this.lab.id, p_on: on }));
         },
@@ -905,8 +941,11 @@
                     '<div><label class="lbl" for="rs' + i + '">Result</label><select id="rs' + i + '"' + dis + '><option value=""></option>' +
                     RESULTS.map(r => '<option' + (e.result === r ? ' selected' : '') + '>' + r + '</option>').join('') + '</select></div>' +
                     (i === 5 && !locked && window.LABREADY_QUIZZES
-                        ? '<div class="full no-print"><button class="btn ghost small" type="button" id="runQuiz">Run a module quiz</button> <span class="muted" style="font-size:0.82rem">The tech answers on this screen; the score fills in this method.</span></div>'
+                        ? '<div class="full no-print quiz-tools"><button class="btn ghost small" type="button" id="runQuiz">Run a module quiz</button>' +
+                          '<button class="btn ghost small" type="button" id="sendQuiz">Send quiz link</button>' +
+                          '<span class="muted" style="font-size:0.82rem">Run it here with the tech at your screen, or send a single-use link they open on their own device. Either way the score can fill in this method.</span></div>'
                         : '') +
+                    (i === 5 ? '<div class="full no-print" id="quizLinks"></div>' : '') +
                     '</div></div>';
             }).join('') + '</div>' +
             '<div class="form-card"><h2>Outcome</h2><div class="form-row">' +
@@ -960,18 +999,24 @@
                 $('#saveState').textContent = 'Unsaved changes · edit the suggestions to match what was actually assessed';
             };
             const rq = $('#runQuiz');
-            if (rq) rq.onclick = () => openQuiz(s, result => {
-                const line = 'LabReady Module ' + result.moduleId + ' quiz (' + result.title + '): ' + result.correct + '/' + result.total +
-                    ' (' + result.percent + '%), pass mark ' + result.passMark + '%, taken ' + fmtStamp(result.completedAt) + '.';
-                const ev = $('#ev5');
-                ev.value = ev.value.trim() ? ev.value.trim() + '\n' + line : line;
-                $('#dt5').value = result.completedAt.slice(0, 10);
-                $('#rs5').value = result.passed ? 'Satisfactory' : 'Unsatisfactory';
-                S.dirty = true; collect();
-                $('#saveState').textContent = 'Unsaved changes · quiz result added to method 6. Add assessor initials and save.';
-                toast(result.passed ? 'Quiz passed: added to method 6' : 'Quiz below pass mark: recorded as Unsatisfactory', !result.passed);
-                ev.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
+            if (rq) rq.onclick = () => openQuiz(s, addQuizResult);
+            const sq = $('#sendQuiz');
+            if (sq) sq.onclick = () => openSendQuiz(c, s, () => loadQuizLinks(id, s, locked, addQuizResult));
+        }
+        function addQuizResult(result) {
+            const line = 'LabReady Module ' + result.moduleId + ' quiz (' + result.title + '): ' + result.correct + '/' + result.total +
+                ' (' + result.percent + '%), pass mark ' + result.passMark + '%, ' + (result.via === 'link'
+                    ? 'submitted by ' + result.name + ' via quiz link ' + fmtStamp(result.completedAt)
+                    : 'taken ' + fmtStamp(result.completedAt)) + '.';
+            const ev = $('#ev5');
+            if (ev.value.includes(line)) { toast('That result is already in method 6.'); return; }
+            ev.value = ev.value.trim() ? ev.value.trim() + '\n' + line : line;
+            $('#dt5').value = isoOf(new Date(result.completedAt));
+            $('#rs5').value = result.passed ? 'Satisfactory' : 'Unsatisfactory';
+            S.dirty = true; collect();
+            $('#saveState').textContent = 'Unsaved changes · quiz result added to method 6. Add assessor initials and save.';
+            toast(result.passed ? 'Quiz passed: added to method 6' : 'Quiz below pass mark: recorded as Unsatisfactory', !result.passed);
+            ev.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         $$('[data-sign]', view).forEach(b => b.onclick = async () => {
@@ -994,6 +1039,8 @@
 
         $('#printBtn').onclick = () => window.print();
         loadHistory(id);
+        S.refreshQuiz = () => { loadQuizLinks(id, s, locked, addQuizResult); loadHistory(id); };
+        loadQuizLinks(id, s, locked, addQuizResult);
         if (!locked) $('#delComp').onclick = async () => {
             if (!confirm('Delete this competency record? This can\'t be undone. The deletion is kept in the history.')) return;
             try { await run(() => S.backend.remove('competencies', id), 'Deleted'); } catch (e) { return; }
@@ -1206,6 +1253,115 @@
         };
     }
 
+    // ---------------------------------------------------------------- quiz links (tech takes the quiz on their own device)
+
+    const quizUrl = token => new URL('../quiz/#' + token, location.href).href;
+
+    function quizLinkStatus(l) {
+        if (l.submitted_at) return 'submitted';
+        if (l.cancelled_at) return 'cancelled';
+        return Date.parse(l.expires_at) < Date.now() ? 'expired' : 'open';
+    }
+
+    async function copyText(text) {
+        try { await navigator.clipboard.writeText(text); toast('Link copied'); } catch (e) {
+            window.prompt('Copy this link:', text);
+        }
+    }
+
+    function quizMailto(staff, l) {
+        const mod = window.LABREADY_QUIZZES.modules[l.module_id] || {};
+        const body = 'Hi ' + (staff.name || '').split(' ')[0] + ',\n\n' +
+            'Please take the LabReady Module ' + l.module_id + ' quiz (' + (mod.title || '') + ') for your competency assessment. ' +
+            'It takes about 10 minutes and you get one attempt:\n\n' + quizUrl(l.token) + '\n\n' +
+            'The link works until ' + fmtStamp(l.expires_at) + '.\n\nThanks,\n' + (S.member.display_name || '');
+        return 'mailto:' + encodeURIComponent(staff.email || '') + '?subject=' + encodeURIComponent('Competency quiz: Module ' + l.module_id) +
+            '&body=' + encodeURIComponent(body);
+    }
+
+    function openSendQuiz(comp, staff, done) {
+        const mods = window.LABREADY_QUIZZES.modules;
+        const wrap = document.createElement('div');
+        wrap.className = 'modal-backdrop';
+        wrap.innerHTML = '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="sqTitle" style="max-width:560px">' +
+            '<div class="modal-head"><h2 id="sqTitle">Send a quiz link · ' + esc(staff.name || '') + '</h2>' +
+            '<button class="linkish" type="button" id="sqClose">Close</button></div>' +
+            '<div id="sqBody"><p class="muted" style="font-size:0.9rem;margin-bottom:0.8rem">' + esc(staff.name || 'The tech') + ' opens the link on a phone or computer, no account needed. ' +
+            'They get one attempt, the database marks it, and the score appears on this record. Links expire after 14 days.</p>' +
+            '<div class="form-row"><div><label class="lbl" for="sqModule">Module</label><select id="sqModule">' +
+            Object.keys(mods).map(k => '<option value="' + k + '"' + (k === '02' ? ' selected' : '') + '>' + k + '. ' + esc(mods[k].title) + '</option>').join('') +
+            '</select></div><button class="btn" type="button" id="sqCreate">Create link</button></div></div></div>';
+        document.body.appendChild(wrap);
+        document.body.style.overflow = 'hidden';
+        const close = () => { wrap.remove(); document.body.style.overflow = ''; };
+        $('#sqClose', wrap).onclick = close;
+        $('#sqCreate', wrap).onclick = async () => {
+            $('#sqCreate', wrap).disabled = true;
+            let l;
+            try { l = await run(() => S.backend.createQuizLink(comp.id, $('#sqModule', wrap).value), 'Quiz link created'); } catch (e) {
+                $('#sqCreate', wrap).disabled = false; return;
+            }
+            done();
+            loadHistory(comp.id);
+            const url = quizUrl(l.token);
+            $('#sqBody', wrap).innerHTML =
+                '<p style="margin-bottom:0.5rem">Send this link to ' + esc(staff.name || 'the tech') + '. Anyone with it can take the quiz once, so send it only to them.</p>' +
+                '<div class="link-box"><input type="text" readonly id="sqUrl" value="' + esc(url) + '"><button class="btn small" type="button" id="sqCopy">Copy</button></div>' +
+                '<div class="actions" style="margin:1rem 0 0">' +
+                '<a class="btn ghost" href="' + esc(quizMailto(staff, l)) + '">' + (staff.email ? 'Email to ' + esc(staff.email) : 'Open in email') + '</a>' +
+                (S.backend.mode === 'demo' ? '<a class="btn ghost" href="' + esc(url) + '" target="_blank" rel="noopener">Open as the tech (new tab)</a>' : '') +
+                '<button class="btn" type="button" id="sqDone">Done</button></div>' +
+                (S.backend.mode === 'demo' ? '<p class="muted" style="font-size:0.82rem;margin-top:0.8rem">Demo links work in this browser only. Take the quiz in the new tab and the score appears here.</p>' : '');
+            $('#sqUrl', wrap).onfocus = e => e.target.select();
+            $('#sqCopy', wrap).onclick = () => copyText(url);
+            $('#sqDone', wrap).onclick = close;
+        };
+    }
+
+    async function loadQuizLinks(compId, staff, locked, onUse) {
+        const el = $('#quizLinks');
+        if (!el || !S.backend.quizLinks) return;
+        let links;
+        try { links = await S.backend.quizLinks(compId); } catch (e) { el.innerHTML = '<p class="error">Couldn\'t load quiz links: ' + esc(e.message) + '</p>'; return; }
+        if (el !== $('#quizLinks')) return;
+        links.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+        const mods = window.LABREADY_QUIZZES ? window.LABREADY_QUIZZES.modules : {};
+        el.innerHTML = !links.length ? '' : '<ul class="quiz-links">' + links.map(l => {
+            const st = quizLinkStatus(l);
+            const title = 'Module ' + esc(l.module_id) + (mods[l.module_id] ? ': ' + esc(mods[l.module_id].title) : '');
+            const sent = 'Sent by ' + esc(l.created_by_name || '—') + ' · ' + fmtStamp(l.created_at);
+            let right = '', line = '';
+            if (st === 'submitted') {
+                line = '<b class="' + (l.passed ? 'ok' : 'bad') + '">' + l.correct + '/' + l.total + ' (' + l.percent + '%) · ' + (l.passed ? 'Pass' : 'Below pass mark') + '</b> · ' +
+                    esc(l.taker_name) + ', ' + fmtStamp(l.submitted_at);
+                if (!locked) right = '<button class="btn small" type="button" data-use="' + l.id + '">Add to method 6</button>';
+            } else if (st === 'open') {
+                line = '<span class="pill due">Waiting</span> expires ' + fmtStamp(l.expires_at);
+                right = '<button class="btn ghost small" type="button" data-copy="' + l.id + '">Copy link</button>' +
+                    '<a class="btn ghost small" href="' + esc(quizMailto(staff, l)) + '">Email</a>' +
+                    '<button class="linkish" type="button" data-cancel="' + l.id + '">Cancel</button>';
+            } else {
+                line = '<span class="pill muted">' + (st === 'cancelled' ? 'Cancelled' : 'Expired') + '</span>';
+            }
+            return '<li class="ql-' + st + '"><div><b>' + title + '</b><span>' + sent + '</span><span>' + line + '</span></div><div class="ql-actions">' + right + '</div></li>';
+        }).join('') + '</ul>';
+        const byId = id => links.find(l => l.id === id);
+        $$('[data-copy]', el).forEach(b => b.onclick = () => copyText(quizUrl(byId(b.dataset.copy).token)));
+        $$('[data-cancel]', el).forEach(b => b.onclick = async () => {
+            if (!confirm('Cancel this quiz link? It will stop working straight away.')) return;
+            try { await run(() => S.backend.cancelQuizLink(b.dataset.cancel), 'Link cancelled'); } catch (e) { return; }
+            loadQuizLinks(compId, staff, locked, onUse);
+            loadHistory(compId);
+        });
+        $$('[data-use]', el).forEach(b => b.onclick = () => {
+            const l = byId(b.dataset.use);
+            onUse({
+                moduleId: l.module_id, title: (mods[l.module_id] || {}).title || '', correct: l.correct, total: l.total, percent: l.percent,
+                passMark: l.pass_mark, passed: l.passed, completedAt: l.submitted_at, name: l.taker_name, via: 'link'
+            });
+        });
+    }
+
     const EVENT_TEXT = {
         created: d => 'Scheduled (' + (KINDS[d.kind] || d.kind || '') + ', due ' + fmtDate(d.due_date) + ')',
         edited: d => 'Record edited · ' + (d.methods_recorded != null ? d.methods_recorded + ' of 6 methods recorded' : ''),
@@ -1214,6 +1370,9 @@
         unsigned: d => 'Removed ' + ((SIGNERS.find(x => x[0] === d.as) || [0, d.as])[1]).toLowerCase() + ' signature' + (d.was ? ' (' + d.was + ')' : ''),
         completed: d => 'Completed · ' + (d.overall === 'not_competent' ? 'not yet competent' : 'competent'),
         reopened: () => 'Reopened for changes',
+        quiz_sent: d => 'Quiz link sent (Module ' + d.module + ')',
+        quiz_cancelled: d => 'Quiz link cancelled (Module ' + d.module + ')',
+        quiz_submitted: d => 'Quiz submitted (Module ' + d.module + '): ' + d.correct + '/' + d.total + ', ' + d.percent + '%' + (d.passed ? ', pass' : ', below pass mark'),
         deleted: () => 'Deleted'
     };
 
@@ -1457,6 +1616,14 @@
                 }
             });
         }
+        // Pick up quiz results that arrive while a record is open: from the tech's tab (demo) or on returning to this tab.
+        const refreshOpenRecord = () => { if ($('#quizLinks') && S.refreshQuiz) S.refreshQuiz(); };
+        window.addEventListener('storage', e => {
+            if (e.key !== DEMO_KEY || !S.backend || S.backend.mode !== 'demo' || !e.newValue) return;
+            try { Demo.db = JSON.parse(e.newValue); Demo.lab = Demo.db.labs[0]; } catch (err) { return; }
+            refreshOpenRecord();
+        });
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshOpenRecord(); });
         render();
     })();
 })();
