@@ -29,6 +29,7 @@ The course is the entry product. The competency system is the recurring product.
 | QC investigations in the app: the QC Troubleshooting Assistant saves to the lab (`?record=…`), QC tab lists open and closed events, supervisor sign-off stamped by the database, signed investigations print in the inspection packet | `labready/qc-assistant/`, `labready/app/` (QC tab), `labready/assets/records.js` | Live on the LabReady Pro database (stored in `studies` with kind `qc`). The standalone assistant still saves to the browser |
 | Dashboard sign-off queue: competency records, studies and QC investigations that are filled in and waiting only for a signature, oldest first | `labready/app/` (Dashboard) | Built |
 | Design system for Claude Design: 16 React components wrapping the site's own CSS (`@labready/ui`), previews for all 16 graded good, conventions note for the design agent | `labready/design-system/` | Synced to the Claude Design project "LabReady Pro" (16 components) |
+| Instrument packs: Roche cobas pure (c 303 / e 402) and Abbott ARCHITECT (c / i-series), each with lesson, 12-question bank, case, 10-point direct-observation checklist, record review and an 8-question quiz (quiz links work for both) | `labready/content/pack-11-cobas-pure.md`, `labready/content/pack-12-architect.md`, module viewer `?m=11` / `?m=12` | Draft v0.1, written in our own words with "per the operator's manual" where exact steps matter. Needs Elie's review of every **[CHECK]** item against the current manuals before a lab uses it for a record |
 
 ---
 
