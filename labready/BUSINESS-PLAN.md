@@ -30,6 +30,7 @@ The course is the entry product. The competency system is the recurring product.
 | Dashboard sign-off queue: competency records, studies and QC investigations that are filled in and waiting only for a signature, oldest first | `labready/app/` (Dashboard) | Built |
 | Design system for Claude Design: 16 React components wrapping the site's own CSS (`@labready/ui`), previews for all 16 graded good, conventions note for the design agent | `labready/design-system/` | Synced to the Claude Design project "LabReady Pro" (16 components) |
 | Instrument packs: Roche cobas pure (c 303 / e 402) and Abbott ARCHITECT (c / i-series), each with lesson, 12-question bank, case, 10-point direct-observation checklist, record review and an 8-question quiz (quiz links work for both) | `labready/content/pack-11-cobas-pure.md`, `labready/content/pack-12-architect.md`, module viewer `?m=11` / `?m=12` | Draft v0.1, written in our own words with "per the operator's manual" where exact steps matter. Needs Elie's review of every **[CHECK]** item against the current manuals before a lab uses it for a record |
+| Privacy Policy and Terms of Use (no-PHI rule, what is collected and where, roles, retention, ownership, pilot status, Florida law) | `labready/privacy/`, `labready/terms/`; linked from every page footer, the pilot form and the sign-up screen | Draft written in plain English. Have a lawyer review before paid contracts; confirm the operating entity (sole trader or LLC) and name the email provider before reminders go live |
 
 ---
 

@@ -635,6 +635,7 @@
                 '<form class="stack" id="authForm">' +
                 '<div><label class="lbl" for="authEmail">Work email</label><input type="text" id="authEmail" autocomplete="email" required></div>' +
                 '<div id="pwWrap"><label class="lbl" for="authPw">Password</label><input type="password" id="authPw" autocomplete="current-password" minlength="8"></div>' +
+                '<p class="muted" id="authTerms" hidden style="font-size:0.82rem">By creating an account you agree to the <a href="../terms/" target="_blank">Terms of Use</a> and <a href="../privacy/" target="_blank">Privacy Policy</a>. Never enter patient information.</p>' +
                 '<p class="error" id="authErr" hidden></p>' +
                 '<button class="btn" type="submit" id="authSubmit">Sign in</button>' +
                 '</form>' +
@@ -649,6 +650,7 @@
                 $('#authTitle').textContent = { signin: 'Sign in to LabReady Pro', signup: 'Create your account', reset: 'Reset your password' }[m];
                 $('#authSubmit').textContent = { signin: 'Sign in', signup: 'Create account', reset: 'Send reset link' }[m];
                 $('#pwWrap').hidden = m === 'reset';
+                $('#authTerms').hidden = m !== 'signup';
                 $('#authPw').autocomplete = m === 'signup' ? 'new-password' : 'current-password';
                 $('#toSignUp').textContent = m === 'signin' ? 'Create an account' : 'I already have an account';
                 $('#authErr').hidden = true;
