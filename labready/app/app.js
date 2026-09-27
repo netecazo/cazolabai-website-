@@ -1436,7 +1436,7 @@
             '<div class="modal-head"><h2 id="quizTitle">Module quiz' + (staff && staff.name ? ' · ' + esc(staff.name) : '') + '</h2>' +
             '<button class="linkish" type="button" id="quizClose">Close</button></div>' +
             '<div class="form-row" id="quizPick"><div><label class="lbl" for="quizModule">Module</label><select id="quizModule">' +
-            Object.keys(mods).map(k => '<option value="' + k + '"' + (k === '02' ? ' selected' : '') + '>' + k + '. ' + esc(mods[k].title) + '</option>').join('') +
+            Object.keys(mods).sort().map(k => '<option value="' + k + '"' + (k === '02' ? ' selected' : '') + '>' + k + '. ' + esc(mods[k].title) + '</option>').join('') +
             '</select></div><button class="btn" type="button" id="quizStart">Start quiz</button></div>' +
             '<div id="quizBody"></div></div>';
         document.body.appendChild(wrap);
@@ -1491,7 +1491,7 @@
             '<div id="sqBody"><p class="muted" style="font-size:0.9rem;margin-bottom:0.8rem">' + esc(staff.name || 'The tech') + ' opens the link on a phone or computer, no account needed. ' +
             'They get one attempt, the database marks it, and the score appears on this record. Links expire after 14 days.</p>' +
             '<div class="form-row"><div><label class="lbl" for="sqModule">Module</label><select id="sqModule">' +
-            Object.keys(mods).map(k => '<option value="' + k + '"' + (k === '02' ? ' selected' : '') + '>' + k + '. ' + esc(mods[k].title) + '</option>').join('') +
+            Object.keys(mods).sort().map(k => '<option value="' + k + '"' + (k === '02' ? ' selected' : '') + '>' + k + '. ' + esc(mods[k].title) + '</option>').join('') +
             '</select></div><button class="btn" type="button" id="sqCreate">Create link</button></div></div></div>';
         document.body.appendChild(wrap);
         document.body.style.overflow = 'hidden';

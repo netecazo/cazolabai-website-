@@ -296,6 +296,64 @@ window.LABREADY_QUIZZES = {
                   o: ["Nothing", "Back-enter and verify manual results, clear the backlog and document", "Delete manual reports", "Rerun every sample"], a: 1,
                   why: "Manual results must end up in the LIS, verified." }
             ]
+        },
+        "11": {
+            title: "Roche cobas pure (c 303 / e 402) Instrument Pack",
+            questions: [
+                { q: "What measuring principle does the e 402 use?",
+                  o: ["Indirect potentiometry", "Electrochemiluminescence (ECL) with streptavidin-coated microparticles", "Turbidimetry", "Fluorescence polarisation"], a: 1,
+                  why: "Most e 402 assays capture the analyte on streptavidin-coated microparticles through a biotinylated antibody." },
+                { q: "A reagent pack is in date but past its on-board stability. Can you use it?",
+                  o: ["Yes, the expiry date is what counts", "No, both the expiry date and on-board stability must be current", "Yes, if QC passes", "Only for stat samples"], a: 1,
+                  why: "Two clocks: lot expiry and opened (on-board) stability." },
+                { q: "A well patient on high-dose biotin has a low TSH and a high free T4. What's the most likely explanation?",
+                  o: ["Hyperthyroidism", "Biotin interference: sandwich assay falsely low, competitive assay falsely high", "A haemolysed sample", "Calibration drift on both assays"], a: 1,
+                  why: "Excess biotin lowers the signal in both designs, which reads low in a sandwich assay and high in a competitive one." },
+                { q: "A very high analyte concentration in a sandwich assay can give a falsely low result. This is:",
+                  o: ["Carry-over", "The high-dose hook effect", "Biotin interference", "Short sampling"], a: 1,
+                  why: "Dilute and rerun when the clinical picture says the value should be very high." },
+                { q: "The ISE slope check fails before the morning run. What should you do?",
+                  o: ["Report electrolytes with a comment", "Hold Na, K and Cl; do ISE maintenance, recalibrate and run QC", "Stop every module", "Clear the alarm and continue"], a: 1,
+                  why: "Photometric and immunoassay tests may continue if their QC is acceptable and your procedure allows." },
+                { q: "Three clot alarms in 15 minutes on clean-looking samples most likely point to:",
+                  o: ["Three clotted samples", "An analyser problem: probe, pressure detection, tubing or wash", "A bad QC lot", "An LIS fault"], a: 1,
+                  why: "Repeated alarms on good samples suggest the instrument. Check per the manual; call service if it continues." },
+                { q: "The ALT calibration has expired with requests pending. What do you do?",
+                  o: ["Run them and recalibrate later", "Recalibrate, confirm QC is acceptable, then run the samples", "Send them to another lab", "Report with a comment"], a: 1,
+                  why: "Results from an expired calibration must not be reported." },
+                { q: "A result doesn't fit the patient and doesn't dilute linearly. Consider:",
+                  o: ["Heterophile or human anti-animal antibody interference", "A new reagent lot", "Temperature fault", "Nothing, report it"], a: 0,
+                  why: "Follow the lab's policy: blocking tube, alternative method or referral." }
+            ]
+        },
+        "12": {
+            title: "Abbott ARCHITECT (c-series / i-series) Instrument Pack",
+            questions: [
+                { q: "What measuring principle does the ARCHITECT i-series use?",
+                  o: ["Electrochemiluminescence", "CMIA: chemiluminescent microparticle immunoassay", "Nephelometry", "Radioimmunoassay"], a: 1,
+                  why: "An acridinium-labelled conjugate; pre-trigger and trigger solutions start the light reaction." },
+                { q: "What measures sodium, potassium and chloride on the c-series?",
+                  o: ["The photometer", "The ICT (Integrated Chip Technology) module", "Flame photometry", "The i-series"], a: 1,
+                  why: "The ICT module is a consumable with a limited life." },
+                { q: "The ICT module has been replaced. Before reporting electrolytes you need:",
+                  o: ["Nothing", "Calibration and acceptable QC", "A new reagent lot", "A service visit"], a: 1,
+                  why: "Replacement means calibration and QC, plus anything else the manual requires." },
+                { q: "QC for one immunoassay shifts just after a new pack was loaded, with no error. Think of:",
+                  o: ["A temperature fault", "Poor microparticle mixing, or a new lot needing its lot-to-lot check", "An LIS problem", "A haemolysed control"], a: 1,
+                  why: "Unmixed microparticles give wrong results without an obvious error." },
+                { q: "A very high hCG is followed by a low-positive hCG on the next sample. What should you consider?",
+                  o: ["Hook effect", "Carry-over: rerun the second sample per the lab's rule", "Biotin", "Nothing"], a: 1,
+                  why: "Wide-range analytes can carry over from a very high sample." },
+                { q: "A suspected molar pregnancy gives an hCG lower than expected. The first thing to try is:",
+                  o: ["Report it", "Dilute and rerun to check for a high-dose hook effect", "Recalibrate", "Ask for a urine sample"], a: 1,
+                  why: "Extremely high hCG can saturate a sandwich assay and read falsely low." },
+                { q: "The c-series reaction temperature was out of range for 30 minutes. Which results are affected by that fault?",
+                  o: ["Everything on the i-series too", "c-series results in that window", "Only the next sample", "None"], a: 1,
+                  why: "Each module has its own checks; treat the affected module as a QC failure look-back." },
+                { q: "A reagent is in date but past its on-board stability. Can you use it?",
+                  o: ["Yes", "No, both must be current", "Only if QC passes", "Only for controls"], a: 1,
+                  why: "Lot expiry and on-board stability are separate clocks." }
+            ]
         }
     }
 };
