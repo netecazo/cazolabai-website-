@@ -721,6 +721,7 @@
             '<div class="stat-tile complete"><b>' + doneYear + '</b><span>Completed in last 12 months</span></div>' +
             '<div class="stat-tile"><b>' + activeStaff + '</b><span>Active testing staff</span></div>' +
             '</div>' +
+            '<div id="signQueue"></div>' +
             '<div class="filters no-print">' +
             '<select id="fStatus"><option value="open">Open (not signed off)</option><option value="attention">Overdue + due in 30 days</option><option value="complete">Completed</option><option value="all">All</option></select>' +
             '<select id="fSystem"><option value="">All test systems</option>' + S.systems.map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('') + '</select>' +
@@ -739,6 +740,31 @@
         $('#fStatus').onchange = update; $('#fSystem').onchange = update; $('#fQ').oninput = update;
         $('#csvBtn').onclick = () => exportCsv(filteredComps());
         update();
+        renderSignQueue();
+    }
+
+    // Everything filled in and waiting only for a signature: competency records, studies and QC investigations.
+    async function renderSignQueue() {
+        const box = $('#signQueue');
+        const items = S.comps.filter(c => !c.completed_at && c.overall && elementsDone(c) === 6).map(c => {
+            const st = staffById(c.staff_id) || {}, sy = systemById(c.test_system_id) || {};
+            return { href: '#/competency/' + c.id, what: 'Competency', title: (st.name || '—') + ' · ' + (sy.name || ''), sub: (KINDS[c.kind] || c.kind) + (c.signoffs.assessor ? ' · assessor signed' : ''), at: c.updated_at };
+        });
+        let recs = [];
+        try { recs = await S.backend.list('studies'); } catch (e) { /* studies unavailable: show competencies only */ }
+        if (!box || box !== $('#signQueue')) return;
+        recs.filter(x => !x.signoff && x.verdict !== 'incomplete').forEach(x => {
+            const fl = (x.content && x.content.fields) || {};
+            items.push(x.kind === 'qc'
+                ? { href: qcUrl(x.id), what: 'QC investigation', title: (fl.analyte || 'Untitled') + (fl.rule ? ' · ' + fl.rule : ''), sub: (fl.evDate ? fmtDate(fl.evDate) : '') + (x.verdict === 'fail' ? ' · escalated' : ' · QC acceptable'), at: x.updated_at }
+                : { href: studyUrl(x.id), what: 'Study', title: (fl.analyte || 'Untitled') + ' · ' + (STUDY_KINDS[x.kind] || x.kind), sub: x.verdict === 'pass' ? 'Meets criteria' : 'Does not meet criteria', at: x.updated_at });
+        });
+        if (!items.length) { box.innerHTML = ''; return; }
+        items.sort((a, b) => String(a.at || '').localeCompare(String(b.at || '')));
+        box.innerHTML = '<div class="form-card sign-queue"><h2>Waiting for sign-off <span class="pill due">' + items.length + '</span></h2>' +
+            '<p class="muted" style="font-size:0.85rem;margin-bottom:0.5rem">Filled in and ready for a supervisor or director, oldest first.</p><ul>' +
+            items.slice(0, 8).map(i => '<li><a href="' + esc(i.href) + '"><span class="sq-kind">' + esc(i.what) + '</span><b>' + esc(i.title) + '</b><span class="muted">' + esc(i.sub) + '</span></a></li>').join('') +
+            '</ul>' + (items.length > 8 ? '<p class="muted" style="font-size:0.82rem;margin-top:0.4rem">and ' + (items.length - 8) + ' more</p>' : '') + '</div>';
     }
 
     function filteredComps() {
