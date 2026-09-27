@@ -17,4 +17,11 @@ export const Small = () => (
     </div>
 );
 
+export const Disabled = () => (
+    <div style={{ display: 'flex', gap: 8 }}>
+        <Button variant="primary" disabled>Signing…</Button>
+        <Button disabled>Sign off</Button>
+    </div>
+);
+
 export const AsLink = () => <Button href="#pilot" variant="primary">Start a 60-day pilot</Button>;

@@ -4,7 +4,7 @@
 - Run everything from `labready/design-system/` (the config home). Build: `npm run build` (esbuild ESM + `tsc` for `.d.ts`).
 - Converter command: `node .ds-sync/package-build.mjs --config .design-sync/config.json --node-modules ./node_modules --entry ./dist/index.js --out ./ds-bundle`.
 - Render check: playwright must be importable from `.ds-sync/` (NODE_PATH doesn't reach ESM imports). The container's chromium is revision 1194 → install `playwright@1.56.1` into `.ds-sync` with `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`; browsers come from `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`.
-- `.btn` has no disabled style in the site CSS, so a disabled Button looks identical to an enabled one. No Disabled story for that reason; add one if the site CSS gains a `:disabled` rule.
+- Disabled buttons: the site CSS gained `.btn:disabled { opacity: 0.55 }` (Sept 2026), so Button has a Disabled story again.
 - Modal's backdrop is `position: fixed`; its preview wraps it in a `transform: translateZ(0)` box so it stays inside the card (`cardMode: single`).
 - Most components render full-width content, so they use `cardMode: column`; contact-sheet thumbnails crop at the right edge, but the full-size review sheets are complete.
 - Synced to the Claude Design project "LabReady Pro" (projectId in config.json). First sync: 16 components, 88 files, `_ds_sync.json` anchor uploaded last. Access from claude.ai/code needs Claude Design's "Send to Claude Code Web" first; without it DesignSync returns an authorization error.
