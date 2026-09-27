@@ -1,11 +1,11 @@
 # Instrument Pack — Roche cobas pure (c 303 / e 402)
 
-**LabReady Instrument Competency Pack** · Draft v0.1 for founding-lab pilots
+**LabReady Instrument Competency Pack** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~25 min · quiz ~15 min · case ~10 min · direct observation at the analyser
 **Prerequisites:** Modules 1–3 and 10
 **Competency methods covered:** 3 (records), 4 (direct observation on this analyser), 6 (problem solving)
 
-> Author's note (Elie): this pack is written from bench experience, not copied from Roche documents. Where exact steps, volumes, intervals or screen names matter, it says "per the operator's manual" on purpose. Check everything marked **[CHECK]** against the current operator's manual, the software version your lab runs and your lab's own procedures before using it for a competency record.
+> Written from bench experience, not copied from Roche documents. Where exact steps, volumes, intervals or screen names matter, it says "per the operator's manual" on purpose. Anything marked **[CHECK]** is a setting your lab supplies (its configuration, procedures and policies). Fill those in, and follow your current operator's manual and assay inserts, before using this pack for a competency record.
 
 ---
 
@@ -32,7 +32,7 @@ The cobas pure is a compact integrated system. In most labs it combines:
 
 A shared sample supply unit feeds all of them, so one tube can go to every module. That's convenient, and it also means a sample-level problem (clot, short sample, wrong tube) can affect results across modules.
 
-**[CHECK: the exact module configuration, software version and test menu at the pilot lab. Some labs run the c 303 without the e 402.]**
+**[CHECK: the exact module configuration, software version and test menu at your lab. Some labs run the c 303 without the e 402.]**
 
 ### 2. Start-up and daily checks
 
@@ -47,7 +47,7 @@ Before patient testing each day (or each shift, per your lab's procedure):
 
 Don't start patients while a required maintenance task is overdue or a function check is outside its limits.
 
-**[CHECK: daily, weekly and as-needed task names and intervals per the current operator's manual and the lab's maintenance log.]**
+**[CHECK: daily, weekly and as-needed task names and intervals per the current operator's manual and your lab's maintenance log.]**
 
 ### 3. Reagents, calibrators and on-board stability
 
@@ -58,7 +58,7 @@ Don't start patients while a required maintenance task is overdue or a function 
 - **New reagent lot:** follow your lab's lot-to-lot procedure (Module 5) before putting it into use. Run the study in the LabReady worksheets.
 - **Immunoassay reagents** are usually mixed on board. Don't shake packs by hand unless the pack insert tells you to.
 
-**[CHECK: the lab's policy on calibration after a new pack of the same lot, and which maintenance tasks trigger recalibration.]**
+**[CHECK: your lab's policy on calibration after a new pack of the same lot, and which maintenance tasks trigger recalibration.]**
 
 ### 4. Alarms and flags: what to do at operator level
 
@@ -80,7 +80,7 @@ Rules that don't change:
 - **Protect patients first.** Work out which samples were in progress and whether their results are affected.
 - **Call Roche service** when the fix is beyond operator level, the problem recurs, or the manual says to. Have the alarm history, serial number and what you've already tried ready.
 
-**[CHECK: the pilot lab's escalation path and service contact details.]**
+**[CHECK: your lab's escalation path and service contact details.]**
 
 ### 5. Immunoassay pitfalls on the e 402
 
@@ -95,7 +95,7 @@ These don't show up as instrument alarms, which is why they catch people out.
 
 **Carry-over and sample integrity** matter more for analytes with a very wide range (for example hCG). Follow the manual's guidance and your lab's rules on rerunning low results that follow a very high one.
 
-**[CHECK: the lab's biotin, hook and heterophile policies, and which assays on the menu have hook or biotin limits worth listing on the bench card.]**
+**[CHECK: your lab's biotin, hook and heterophile policies, and which assays on the menu have hook or biotin limits worth listing on the bench card.]**
 
 ### 6. Which results are affected?
 
@@ -111,7 +111,7 @@ If the ISE is down but the c 303 is fine, you may keep reporting photometric tes
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **What measuring principle does the e 402 use?**
    **Answer:** Electrochemiluminescence (ECL), with most assays captured on streptavidin-coated microparticles.
@@ -169,7 +169,7 @@ A GP calls about a 34-year-old woman with fatigue and hair thinning. Her TSH on 
 4. Follow the lab's biotin policy: don't report the results as a straightforward hyperthyroid picture; add a comment, and arrange a redraw after the biotin-free interval the policy states, or test on a method without biotin–streptavidin binding. Talk to the pathologist or director if the policy says so.
 5. The call, what was asked and answered, the action taken (comment, redraw, alternative method), who was informed and when.
 
-**[CHECK: units, reference intervals and the biotin-free interval the lab's policy uses.]**
+**[CHECK: your lab's units, reference intervals and biotin-free interval.]**
 
 ---
 

@@ -1,11 +1,11 @@
 # Module 4 — AMR, Reportable Range & Dilutions
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~10 min
 **Prerequisite:** Module 3
 **Competency methods covered:** 2 (recording and reporting), 5 (previously analysed samples), 6 (problem solving)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -26,7 +26,7 @@
 - **Analytical measurement range (AMR):** the range of values the method can measure directly on the specimen, without dilution, concentration or other pretreatment that isn't part of the usual process.
 - **Clinically reportable range (CRR):** the range of values the lab reports, including results obtained after a validated dilution. It can extend above the AMR (by dilution) but never below the lower AMR limit without a validated method.
 
-Your procedure or LIS should list both for every test. **[CHECK: add the pilot lab's AMR and CRR table for the chemistry menu.]**
+Your procedure or LIS should list both for every test. **[CHECK: add your lab's AMR and CRR table for the chemistry menu.]**
 
 ### 2. Results above the AMR
 
@@ -54,11 +54,11 @@ Report as **less than** the lower limit (e.g. "< 2 mg/dL"). Never extrapolate be
 
 ### 5. Hook effect (immunoassays)
 
-In some sandwich immunoassays, a very high analyte concentration can saturate the antibodies and give a **falsely low** result. If a result doesn't fit the clinical picture (e.g. a very large tumour with a modest tumour marker), a dilution that gives a **higher** corrected result reveals it. Know which of your assays are susceptible. **[CHECK: list the pilot lab's susceptible assays, per manufacturer.]**
+In some sandwich immunoassays, a very high analyte concentration can saturate the antibodies and give a **falsely low** result. If a result doesn't fit the clinical picture (e.g. a very large tumour with a modest tumour marker), a dilution that gives a **higher** corrected result reveals it. Know which of your assays are susceptible. **[CHECK: list your lab's susceptible assays, per manufacturer.]**
 
 ### 6. Verifying the AMR
 
-The lab verifies the AMR by testing materials with known values at the low end, midpoint and high end of the range, and checking the recovery against acceptance limits. Many accreditors require AMR verification at least every six months and after major changes, and calibration verification materials often serve both purposes. **[CHECK: confirm frequency and material requirements against the pilot lab's accreditor checklist.]**
+The lab verifies the AMR by testing materials with known values at the low end, midpoint and high end of the range, and checking the recovery against acceptance limits. Many accreditors require AMR verification at least every six months and after major changes, and calibration verification materials often serve both purposes. **[CHECK: confirm frequency and material requirements against your lab's accreditor checklist.]**
 
 Validated maximum dilutions and the CRR are set during method validation and approved by the laboratory director.
 
@@ -66,7 +66,7 @@ Validated maximum dilutions and the CRR are set during method validation and app
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **Define AMR.**
    **Answer:** The range the method measures directly without dilution or pretreatment outside the normal process.
@@ -122,7 +122,7 @@ The analyser flags lipase as above range. Auto-dilution returns 3900 U/L with a 
 3. The result exceeds the reportable range and is reported as greater than the upper limit. If a number is clinically essential, escalate to the supervisor or director per policy (e.g. send-out or a validated alternative).
 4. The flags, auto-dilution result, reported value, physician call, escalation if any.
 
-**[CHECK: set the pilot lab's lipase AMR/CRR and validated dilution.]**
+**[CHECK: your lab's lipase AMR/CRR and any validated dilution.]**
 
 ---
 

@@ -150,7 +150,7 @@
                 el.innerHTML = `
                     <div class="review-bar">
                         <span>${isPack(current) ? "Instrument pack" : `Module ${current[0]} of ${MODULES.filter(m => !isPack(m)).length}`}</span>
-                        <label><input type="checkbox" id="showChecks"> Show author review notes</label>
+                        <label><input type="checkbox" id="showChecks"> Show lab set-up notes</label>
                     </div>
                     ${html.replace(/\[CHECK[^\]]*\]/g, m => `<mark class="review-note">${m}</mark>`)}
                     <section class="quiz-section" id="quiz">

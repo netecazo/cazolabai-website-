@@ -1,4 +1,4 @@
-/* LabReady Pro module quizzes (draft v0.1).
+/* LabReady Pro module quizzes (version 1.0).
  * Multiple-choice versions of each module's question bank, used by the module
  * pages (self-study) and by the app (competency method 6, problem solving).
  * `a` is the index of the correct option. Review against your lab's procedures

@@ -1,11 +1,11 @@
 # Instrument Pack — Abbott ARCHITECT (c-series / i-series)
 
-**LabReady Instrument Competency Pack** · Draft v0.1 for founding-lab pilots
+**LabReady Instrument Competency Pack** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~25 min · quiz ~15 min · case ~10 min · direct observation at the analyser
 **Prerequisites:** Modules 1–3 and 10
 **Competency methods covered:** 3 (records), 4 (direct observation on this analyser), 6 (problem solving)
 
-> Author's note (Elie): this pack is written from bench experience, not copied from Abbott documents. Where exact steps, volumes, intervals or screen names matter, it says "per the operator's manual" on purpose. Check everything marked **[CHECK]** against the current operator's manual, the software version your lab runs and your lab's own procedures before using it for a competency record.
+> Written from bench experience, not copied from Abbott documents. Where exact steps, volumes, intervals or screen names matter, it says "per the operator's manual" on purpose. Anything marked **[CHECK]** is a setting your lab supplies (its configuration, procedures and policies). Fill those in, and follow your current operator's manual and assay inserts, before using this pack for a competency record.
 
 ---
 
@@ -31,7 +31,7 @@ ARCHITECT systems come as stand-alone chemistry (c-series, such as the c4000, c8
 
 On an integrated system, one tube can go to both modules, so a sample-level problem can affect results on both.
 
-**[CHECK: the exact models, software version and test menu at the pilot lab.]**
+**[CHECK: the exact models, software version and test menu at your lab.]**
 
 ### 2. Start-up and daily checks
 
@@ -46,7 +46,7 @@ Before patient testing each day (or each shift, per your lab's procedure):
 
 Don't start patients while required maintenance is overdue or a function check is out of limits.
 
-**[CHECK: daily, weekly and monthly maintenance procedures and their names in the current operator's manual; the lab's maintenance log.]**
+**[CHECK: daily, weekly and monthly maintenance procedures and their names in the current operator's manual; your lab's maintenance log.]**
 
 ### 3. Reagents, calibrators and on-board stability
 
@@ -58,7 +58,7 @@ Don't start patients while required maintenance is overdue or a function check i
 - **New reagent lot:** complete your lab's lot-to-lot procedure (Module 5) before use. Run the study in the LabReady worksheets.
 - **Microparticle reagents** on the i-series need to be mixed before loading per the insert. Unmixed particles give wrong results without an obvious error.
 
-**[CHECK: which assays on the menu need calibration per lot, and the lab's rule for new packs of the same lot.]**
+**[CHECK: which assays on the menu need calibration per lot, and your lab's rule for new packs of the same lot.]**
 
 ### 4. Errors and flags: what to do at operator level
 
@@ -81,7 +81,7 @@ Rules that don't change:
 - **Protect patients first.** Work out which samples were in progress and whether their results are affected.
 - **Call Abbott service** when the fix is beyond operator level, the problem recurs, or the manual says to. Have the error log, serial number and what you've tried ready.
 
-**[CHECK: the pilot lab's escalation path and service contact details.]**
+**[CHECK: your lab's escalation path and service contact details.]**
 
 ### 5. Immunoassay pitfalls on the i-series
 
@@ -91,13 +91,13 @@ These don't appear as analyser errors.
 
 **Heterophile and human anti-animal antibodies (HAMA).** These can bridge the capture and detection antibodies and give falsely high, occasionally low, results. Suspect them when a result doesn't fit the patient and doesn't dilute linearly. Options include a blocking tube, testing on a different platform or referral, per your lab's policy.
 
-**Biotin.** CMIA assays generally don't rely on biotin–streptavidin capture the way some other platforms do, so biotin is a smaller concern here. Don't assume every assay is immune; check the insert. This matters when your lab moves a test between platforms. **[CHECK: biotin statements in the inserts for the lab's menu.]**
+**Biotin.** CMIA assays generally don't rely on biotin–streptavidin capture the way some other platforms do, so biotin is a smaller concern here. Don't assume every assay is immune; check the insert. This matters when your lab moves a test between platforms.
 
 **Carry-over.** Analytes with a very wide range (hCG, some tumour markers) can carry over from a very high sample to the next one. Follow the manual's guidance and your lab's rule on rerunning an unexpected low-positive that follows a very high result.
 
 **Microparticle mixing.** An i-series reagent loaded without proper mixing can give a shift in QC and patients with no error message. If QC shifts right after a new pack was loaded, think of this.
 
-**[CHECK: the lab's hook and heterophile policies and which assays warrant a bench-card note.]**
+**[CHECK: your lab's hook and heterophile policies and which assays warrant a bench-card note.]**
 
 ### 6. Which results are affected?
 
@@ -113,7 +113,7 @@ On an integrated ci-system, a c-series fault doesn't necessarily stop the i-seri
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **What measuring principle does the i-series use?**
    **Answer:** CMIA: chemiluminescent microparticle immunoassay with an acridinium-labelled conjugate, started by pre-trigger and trigger solutions.
@@ -171,7 +171,7 @@ The ED sends an urgent serum hCG for a 29-year-old woman with abdominal pain and
 4. The next samples after a very high hCG, for carry-over, per the lab's rule.
 5. The call from the ED, the dilution and rerun, the corrected result, who was told and when, and any carry-over reruns.
 
-**[CHECK: the insert's hook statement and dilution protocol for the lab's hCG assay, and the lab's policy on when hCG is diluted automatically.]**
+**[CHECK: your lab's hCG dilution protocol (per the assay insert) and when hCG is diluted automatically.]**
 
 ---
 

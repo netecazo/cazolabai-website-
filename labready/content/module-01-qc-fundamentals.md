@@ -1,10 +1,10 @@
 # Module 1 — QC Fundamentals & Westgard Rules
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~10 min
 **Competency methods covered:** 3 (review of QC records), 6 (problem solving)
 
-> Author's note (Elie): this draft is here for you to review and correct against your own experience before it goes to a pilot lab. Anything marked **[CHECK]** needs your judgement or your lab's numbers.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -84,7 +84,7 @@ Never adjust the mean or widen the limits to make a failing control "pass". Chan
 
 ## Question bank
 
-Answers and rationale follow each question. Pilot labs can pick 10–15 per assessment. **Pass mark: 80%. [CHECK]**
+Answers and rationale follow each question. Pilot labs can pick 10–15 per assessment. **Pass mark: 80%.**
 
 1. **Why is one Level 1 result at +2.3 SD not, by itself, a reason to reject a run in a Westgard multirule procedure?**
    a) 2 SD limits are too wide to matter b) About 1 in 20 results from a stable system falls outside 2 SD by chance c) Level 1 is less important than Level 2 d) Only Level 3 matters for rejection

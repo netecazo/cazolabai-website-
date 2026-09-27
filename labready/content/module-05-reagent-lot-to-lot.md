@@ -1,11 +1,11 @@
 # Module 5 — Reagent Management & Lot-to-Lot Verification
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~15 min
 **Prerequisites:** Modules 1–3
 **Competency methods covered:** 3 (records review), 5 (previously analysed specimens), 6 (problem solving)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -48,12 +48,12 @@ Control material is processed (stabilised, lyophilised, spiked). It may react di
 - QC can shift with a new lot when patients haven't, leading you to wrongly reject a good lot or re-target QC unnecessarily.
 - QC can look fine while patients have shifted, which is the dangerous one.
 
-So compare **patient samples** on old and new lots. Use QC as well, but don't rely on it alone. **[CHECK: the pilot lab's procedure; many follow CLSI EP26 for lot-to-lot evaluation.]**
+So compare **patient samples** on old and new lots. Use QC as well, but don't rely on it alone. Many labs follow CLSI EP26 for lot-to-lot evaluation. **[CHECK: your lab's lot-to-lot procedure.]**
 
 ### 5. Doing the comparison
 
 1. Before the old lot runs out, load the new lot alongside (or on a second channel/analyser as your system allows). Calibrate the new lot if required.
-2. Select patient samples covering the reportable range, with emphasis near **medical decision points**. **[CHECK: number of samples in the pilot lab's procedure, often 5–20 depending on the risk and the test.]**
+2. Select patient samples covering the reportable range, with emphasis near **medical decision points**. **[CHECK: number of samples in your lab's procedure, often 5–20 depending on the risk and the test.]**
 3. Run each sample on both lots, close together in time.
 4. Calculate the difference for each sample (new − old) in units and in percent.
 5. Compare against the lab's **acceptance criteria** (a set allowable difference, often defined at decision points).
@@ -75,7 +75,7 @@ Receipt log, storage temperature log, lot-to-lot worksheet with raw data, differ
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **A shipment of refrigerated reagents arrives warm. What do you do?**
    **Answer:** Don't put it into use. Quarantine it, document, notify the supervisor; contact the supplier per procedure.
@@ -117,7 +117,7 @@ Receipt log, storage temperature log, lot-to-lot worksheet with raw data, differ
 
 ## Case: new glucose lot, +4%
 
-You compare a new glucose reagent lot using 10 patient samples. Differences (new − old) average +4%, all in the same direction. At 126 mg/dL the difference is +5 mg/dL. The lab's acceptance criterion is ±5% or ±4 mg/dL at or below 100 mg/dL. **[CHECK: replace with the pilot lab's real criteria.]** QC on the new lot is about +0.5 SD on both levels. The old lot runs out in 36 hours.
+You compare a new glucose reagent lot using 10 patient samples. Differences (new − old) average +4%, all in the same direction. At 126 mg/dL the difference is +5 mg/dL. The lab's acceptance criterion is ±5% or ±4 mg/dL at or below 100 mg/dL. QC on the new lot is about +0.5 SD on both levels. The old lot runs out in 36 hours.
 
 **Questions**
 1. Does the new lot pass?

@@ -1,11 +1,11 @@
 # Module 10 — Maintenance, Troubleshooting & Downtime
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~10 min
 **Prerequisites:** Modules 1–3
 **Competency methods covered:** 3 (maintenance records), 4 (direct observation of maintenance and function checks), 6 (problem solving)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures. Instrument-specific steps belong in the Cobas Pure and ARCHITECT packs.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record. For instrument-specific steps, see the cobas pure and ARCHITECT instrument packs.
 
 ---
 
@@ -31,7 +31,7 @@ Rules:
 - Record it: date, task, result, initials. Unrecorded maintenance didn't happen as far as an inspector is concerned.
 - After major maintenance or part replacement, check whether calibration, calibration verification and QC are required before resuming (Module 3).
 
-**[CHECK: the pilot lab's maintenance log format and schedules per analyser.]**
+**[CHECK: your lab's maintenance log format and schedules per analyser.]**
 
 ### 2. Troubleshooting an error
 
@@ -67,13 +67,13 @@ Recovery:
 4. Confirm backup-method results were reported with any needed comments.
 5. Document the downtime: start, end, cause, actions, communication.
 
-**[CHECK: the pilot lab's downtime and LIS downtime procedures.]**
+**[CHECK: your lab's downtime and LIS downtime procedures.]**
 
 ---
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **Weekly maintenance was done but not recorded. Was it done, as far as an inspector is concerned?**
    **Answer:** No. Unrecorded maintenance can't be shown to have been done.
