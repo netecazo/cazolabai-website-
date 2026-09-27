@@ -425,12 +425,21 @@
         init() {
             if (!this.client) this.client = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey);
         },
-        check(res) { if (res.error) throw new Error(res.error.message); return res.data; },
+        check(res) {
+            if (res.error) throw Object.assign(new Error(res.error.message), { code: res.error.code, status: res.error.status });
+            return res.data;
+        },
         async user() { const { data } = await this.client.auth.getSession(); return data.session ? data.session.user : null; },
         async signIn(email, password) { this.check(await this.client.auth.signInWithPassword({ email, password })); },
+        // Resolves 'confirm' (check your email), 'exists' (already confirmed: sign in instead) or 'in' (signed in).
         async signUp(email, password) {
             const data = this.check(await this.client.auth.signUp({ email, password, options: { emailRedirectTo: location.href.split('#')[0] } }));
-            return !data.session; // true when email confirmation is required
+            if (data.session) return 'in';
+            // Supabase hides whether an address is registered: a confirmed account comes back with no identities.
+            return data.user && Array.isArray(data.user.identities) && !data.user.identities.length ? 'exists' : 'confirm';
+        },
+        async resendConfirmation(email) {
+            this.check(await this.client.auth.resend({ type: 'signup', email, options: { emailRedirectTo: location.href.split('#')[0] } }));
         },
         async resetPassword(email) {
             this.check(await this.client.auth.resetPasswordForEmail(email, { redirectTo: location.href.split('#')[0] }));
@@ -623,6 +632,27 @@
 
     // ---------------------------------------------------------------- auth + onboarding
 
+    // Plain-English wording for sign-in and sign-up errors. `needsConfirm` flags the ones where resending helps.
+    function authError(ex) {
+        const code = ex && ex.code || '';
+        const msg = String(ex && ex.message || '').toLowerCase();
+        if (code === 'over_email_send_rate_limit' || /rate limit/.test(msg) || (ex && ex.status === 429))
+            return { text: 'We\'ve already sent you an email in the last few minutes. Check your inbox and spam folder for it. If nothing arrives, you can ask for another one shortly.', needsConfirm: true };
+        if (code === 'email_not_confirmed' || /email not confirmed/.test(msg))
+            return { text: 'Please confirm your email first: open the link we sent you, then sign in here.', needsConfirm: true };
+        if (code === 'invalid_credentials' || /invalid login credentials/.test(msg))
+            return { text: 'That email and password don\'t match an account. Check them and try again, or use "Forgot password?".' };
+        if (code === 'user_already_exists' || code === 'email_exists' || /already registered/.test(msg))
+            return { text: 'There\'s already an account with this email. Sign in instead, or use "Forgot password?".' };
+        if (code === 'weak_password' || /password should/.test(msg))
+            return { text: 'Please choose a stronger password: at least 8 characters, ideally a mix of letters, numbers and symbols.' };
+        if (code === 'email_address_invalid' || code === 'validation_failed' || /invalid.*email|email.*invalid/.test(msg))
+            return { text: 'That doesn\'t look like a valid email address. Please check it.' };
+        if (/failed to fetch|network/.test(msg))
+            return { text: 'We couldn\'t reach LabReady Pro. Check your internet connection and try again.' };
+        return { text: 'Something went wrong (' + (ex && ex.message || 'unknown error') + '). Please try again in a moment.' };
+    }
+
     function viewAuth(view) {
         const demoCard = '<div class="card"><h1>Explore the demo lab</h1><p class="muted" style="margin-bottom:1rem">A sample chemistry department with eight staff, three test systems and competencies at every stage. Nothing you do leaves this browser.</p>' +
             '<button class="btn primary" type="button" id="demoBtn">Open the demo lab</button></div>';
@@ -636,6 +666,7 @@
                 '<div><label class="lbl" for="authEmail">Work email</label><input type="text" id="authEmail" autocomplete="email" required></div>' +
                 '<div id="pwWrap"><label class="lbl" for="authPw">Password</label><input type="password" id="authPw" autocomplete="current-password" minlength="8"></div>' +
                 '<p class="muted" id="authTerms" hidden style="font-size:0.82rem">By creating an account you agree to the <a href="../terms/" target="_blank">Terms of Use</a> and <a href="../privacy/" target="_blank">Privacy Policy</a>. Never enter patient information.</p>' +
+                '<div class="callout info" id="authNote" hidden><span id="authNoteText"></span> <button class="linkish" type="button" id="resendBtn">Resend the email</button></div>' +
                 '<p class="error" id="authErr" hidden></p>' +
                 '<button class="btn" type="submit" id="authSubmit">Sign in</button>' +
                 '</form>' +
@@ -655,6 +686,20 @@
                 $('#toSignUp').textContent = m === 'signin' ? 'Create an account' : 'I already have an account';
                 $('#authErr').hidden = true;
             };
+            // A note under the form: what just happened and, where it helps, a way to resend the confirmation email.
+            const showNote = (text, withResend) => {
+                $('#authNoteText').textContent = text;
+                $('#resendBtn').hidden = !withResend;
+                $('#authNote').hidden = false;
+            };
+            $('#resendBtn').onclick = async () => {
+                const email = $('#authEmail').value.trim();
+                if (!email) { showNote('Enter your email address above, then tap Resend.', true); return; }
+                $('#resendBtn').disabled = true;
+                try { await Live.resendConfirmation(email); showNote('Sent. Check ' + email + ' (and the spam folder) for the confirmation link, then sign in here.', false); }
+                catch (ex) { showNote(authError(ex).text, false); }
+                $('#resendBtn').disabled = false;
+            };
             $('#toSignUp').onclick = () => setAuthMode(mode === 'signin' ? 'signup' : 'signin');
             $('#toReset').onclick = () => setAuthMode('reset');
             $('#authForm').onsubmit = async e => {
@@ -663,16 +708,23 @@
                 const pw = $('#authPw').value;
                 const err = $('#authErr');
                 err.hidden = true;
+                $('#authNote').hidden = true;
                 if (mode !== 'reset' && pw.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.hidden = false; return; }
                 $('#authSubmit').disabled = true;
                 try {
                     if (mode === 'reset') { await Live.resetPassword(email); toast('Check your email for a reset link.'); setAuthMode('signin'); }
                     else if (mode === 'signup') {
-                        const needsConfirm = await Live.signUp(email, pw);
-                        if (needsConfirm) { toast('Check your email to confirm your account, then sign in.'); setAuthMode('signin'); }
-                        else { setMode('live'); await startSession(); render(); }
+                        const outcome = await Live.signUp(email, pw);
+                        if (outcome === 'in') { setMode('live'); await startSession(); render(); return; }
+                        setAuthMode('signin');
+                        if (outcome === 'exists') showNote('There\'s already an account with this email. Sign in below, or use "Forgot password?".', false);
+                        else showNote('We\'ve sent a confirmation link to ' + email + '. Open it (check the spam folder too), then sign in here.', true);
                     } else { await Live.signIn(email, pw); setMode('live'); await startSession(); render(); }
-                } catch (ex) { err.textContent = ex.message; err.hidden = false; }
+                } catch (ex) {
+                    const e2 = authError(ex);
+                    if (e2.needsConfirm) { if (mode === 'signup') setAuthMode('signin'); showNote(e2.text, true); }
+                    else { err.textContent = e2.text; err.hidden = false; }
+                }
                 $('#authSubmit').disabled = false;
             };
         }
