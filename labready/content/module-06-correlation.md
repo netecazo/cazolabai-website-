@@ -1,11 +1,11 @@
 # Module 6 — Instrument Correlation & Method Comparison
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~25 min · quiz ~15 min · case ~15 min
 **Prerequisites:** Modules 1, 3 and 5
 **Competency methods covered:** 3 (records review), 5 (previously analysed specimens), 6 (problem solving)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -24,7 +24,7 @@
 ### 1. When comparisons are needed
 
 - **New instrument or method** before patient use (part of method verification).
-- **Same test on more than one instrument or method** in the lab: CLIA requires the lab to check the relationship between them at least twice a year. **[CHECK: 42 CFR 493.1281 and the pilot lab's accreditor checklist.]**
+- **Same test on more than one instrument or method** in the lab: CLIA requires the lab to check the relationship between them at least twice a year.
 - **After major repair or relocation**, if procedure requires.
 - **Unexplained patient complaints** that one analyser reads differently from another.
 
@@ -43,7 +43,7 @@ Predicted y at a decision point: **y = slope × x + intercept.** Bias = y − x.
 
 Two methods can have R² = 0.999 and still disagree badly: if y is always exactly 10% lower than x, the points form a perfect line with slope 0.90. R² rises with a wide range of samples, whatever the agreement. A high R² tells you the regression estimates are reliable; the **slope, intercept and bias** tell you whether the methods agree.
 
-If R² is low (a common rule of thumb: r < 0.975, R² < 0.95), the range of samples may be too narrow for ordinary regression, and statistics such as Deming or Passing-Bablok regression, or a difference (Bland-Altman) plot, are more appropriate. **[CHECK: the pilot lab's statistical approach and software.]**
+If R² is low (a common rule of thumb: r < 0.975, R² < 0.95), the range of samples may be too narrow for ordinary regression, and statistics such as Deming or Passing-Bablok regression, or a difference (Bland-Altman) plot, are more appropriate. **[CHECK: your lab's statistical approach and software.]**
 
 ### 4. Look at the plots, not just the numbers
 
@@ -55,7 +55,7 @@ If R² is low (a common rule of thumb: r < 0.975, R² < 0.95), the range of samp
 
 1. Choose the medical decision points for the analyte.
 2. Calculate the predicted bias at each.
-3. Compare with the lab's acceptance criterion (often based on allowable total error, e.g. from CLIA proficiency testing limits or biological variation). **[CHECK: the pilot lab's criteria per analyte.]**
+3. Compare with the lab's acceptance criterion (often based on allowable total error, e.g. from CLIA proficiency testing limits or biological variation). **[CHECK: your lab's criteria per analyte.]**
 4. Consider how much of the allowable error the bias uses. A bias that consumes most of it leaves little room for imprecision.
 5. The laboratory director approves acceptance.
 
@@ -73,7 +73,7 @@ Things to check: calibration of each system (and calibrator lots), reagent lots,
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **What does a slope of 1.08 mean?**
    **Answer:** The new method reads about 8% higher, proportionally.
@@ -88,7 +88,7 @@ Things to check: calibration of each system (and calibrator lots), reagent lots,
    **Answer:** 0.95 × 200 + 2 = 192. Bias −8 (−4%).
 
 5. **How often must a lab compare the same test run on two analysers?**
-   **Answer:** At least twice a year (CLIA). **[CHECK]**
+   **Answer:** At least twice a year (CLIA).
 
 6. **Why estimate bias at medical decision points?**
    **Answer:** That's where a difference changes clinical decisions; average bias can hide differences at specific concentrations.
@@ -120,7 +120,7 @@ Your lab is bringing a second chemistry analyser into service. The glucose compa
 **Questions**
 1. Does R² = 0.998 mean the analysers agree?
 2. Calculate predicted bias at 70, 126 and 200 mg/dL.
-3. The lab's criterion is ±6 mg/dL or ±8%, whichever is greater. **[CHECK: confirm against the pilot lab's criterion.]** Does it pass?
+3. The lab's criterion is ±6 mg/dL or ±8%, whichever is greater. Does it pass?
 4. What should you investigate before accepting?
 5. What's your recommendation?
 

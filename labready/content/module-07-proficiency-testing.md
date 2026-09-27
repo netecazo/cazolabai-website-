@@ -1,11 +1,11 @@
 # Module 7 — Proficiency Testing
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~15 min
 **Prerequisites:** Modules 1–3
 **Competency methods covered:** 3 (PT records review), 5 (PT samples), 6 (problem solving)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -39,7 +39,7 @@ The laboratory director and the testing personnel sign an **attestation** that t
 
 - **No inter-laboratory communication** about PT results before the provider's reporting deadline.
 - **No referral** of PT samples, or any part of them, to another lab for testing, even if you'd normally send that test out. Intentional referral can lead to revocation of the lab's CLIA certificate.
-- Don't run PT samples more times than you'd run a patient to "get it right". **[CHECK: confirm current wording against 42 CFR 493.801 and the pilot lab's accreditor.]**
+- Don't run PT samples more times than you'd run a patient to "get it right".
 
 If a PT sample is for a test you normally refer out, follow the provider's and your accreditor's instructions; usually you don't test it.
 
@@ -49,7 +49,7 @@ If a PT sample is for a test you normally refer out, follow the provider's and y
 - **Unacceptable:** outside the limits. Must be investigated and documented, even if the overall event score passes.
 - **Ungraded / not evaluated:** e.g. no peer consensus, or result not received. The lab must still evaluate its own performance, for instance by comparing with peer data, and document it.
 
-For most regulated analytes, an event score of at least 80% is satisfactory. Failing an event is **unsatisfactory**; failing the same analyte in two consecutive events, or two out of three, is **unsuccessful** performance and can lead to sanctions, including having to stop testing that analyte. **[CHECK: scoring thresholds and definitions against current CLIA and the pilot lab's provider.]**
+For most regulated analytes, an event score of at least 80% is satisfactory. Failing an event is **unsatisfactory**; failing the same analyte in two consecutive events, or two out of three, is **unsuccessful** performance and can lead to sanctions, including having to stop testing that analyte.
 
 ### 5. Investigating an unacceptable result
 
@@ -72,13 +72,13 @@ Steps:
 
 ### 6. Records
 
-Keep PT records (worksheets, instrument printouts, attestations, evaluations and corrective actions) per regulation and your accreditor, typically at least two years. **[CHECK: retention period in the pilot lab's policy.]**
+Keep PT records (worksheets, instrument printouts, attestations, evaluations and corrective actions) per regulation and your accreditor, typically at least two years. **[CHECK: retention period in your lab's policy.]**
 
 ---
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **Who should run PT samples?**
    **Answer:** The personnel who routinely perform the testing, rotated among them, as part of normal workflow.
@@ -133,8 +133,6 @@ The PT evaluation arrives. Four of five magnesium samples are acceptable. Sample
 2. Confirm which sample 1.2 belongs to (another analyte? another sample?), check the QC and calibration records for that day to rule out a technical cause, and check the other analytes on the same form.
 3. Unlikely: the instrument result was correct, so patient testing wasn't affected.
 4. Cause (transcription error), evidence (printout vs submitted), second-person verification of PT results before submission, staff reminder, director review and signature.
-
-**[CHECK: realistic Mg target values for the pilot lab's PT provider.]**
 
 ---
 

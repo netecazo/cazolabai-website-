@@ -1,11 +1,11 @@
 # Module 8 — Critical Values, Delta Checks & Result Review
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~15 min
 **Prerequisites:** Module 1
 **Competency methods covered:** 1 (direct observation), 2 (recording and reporting, including critical values), 6 (problem solving)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### 1. Critical values
 
-A critical (panic) value is a result that suggests a life-threatening condition needing prompt action. Each lab sets its own list and limits with its medical staff. **[CHECK: add the pilot lab's chemistry critical value table.]**
+A critical (panic) value is a result that suggests a life-threatening condition needing prompt action. Each lab sets its own list and limits with its medical staff. **[CHECK: add your lab's chemistry critical value table.]**
 
 When you get one:
 
@@ -33,7 +33,7 @@ When you get one:
 4. **Document:** result, patient, who you notified (name and role), date and time, that read-back was done, and your identity.
 5. **Escalate** if you can't reach anyone within the time limit, per the escalation path in your policy.
 
-**[CHECK: pilot lab's notification time limit and escalation path; accreditor requirements for critical result communication.]**
+**[CHECK: your lab's notification time limit and escalation path; accreditor requirements for critical result communication.]**
 
 ### 2. Delta checks
 
@@ -62,7 +62,7 @@ Learn the patterns that tell you the specimen is wrong, not the patient:
 | High K with normal haemolysis index, high platelet or WBC count | **Pseudohyperkalaemia** (cell release in clotting); consider plasma or whole-blood K |
 | Glucose falling in a sample that sat unspun for hours | **Glycolysis** |
 
-**[CHECK: add the pilot lab's own common patterns and how its LIS flags them.]**
+**[CHECK: add your lab's own common patterns and how its LIS flags them.]**
 
 ### 4. Before you release
 
@@ -77,7 +77,7 @@ Learn the patterns that tell you the specimen is wrong, not the patient:
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **What must happen during a critical value phone call besides giving the result?**
    **Answer:** Read-back of patient identifiers and result by the receiver, confirmed by you.

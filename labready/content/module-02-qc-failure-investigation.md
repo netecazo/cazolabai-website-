@@ -1,12 +1,12 @@
 # Module 2 — QC Failure Investigation
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~15 min
 **Prerequisite:** Module 1
 **Competency methods covered:** 3 (QC and corrective-action records), 6 (problem solving)
 **Tool:** [QC Troubleshooting Assistant](../qc-assistant/) · [printable checklist](../resources/qc-failure-checklist.html)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -96,7 +96,7 @@ The QC Troubleshooting Assistant produces exactly this record.
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **QC is rejected at 03:00 with the ER waiting on results. What is your first action?**
    **Answer:** Stop reporting and hold patient results from the failed run, then notify the charge tech/supervisor and move stats to a backup if available. Investigation comes after patients are protected.
@@ -150,7 +150,6 @@ The QC Troubleshooting Assistant produces exactly this record.
 ## Case: 03:40, glucose, Cobas Pure 1
 
 **Scenario.** You're on nights. MultiQual Level 3 glucose reads 318 mg/dL (+2.4 SD). Level 1 is 92 mg/dL (+0.4 SD). The ER has a DKA patient waiting. The glucose reagent pack was opened a week ago and glucose was last calibrated six days ago. The LJ chart shows Level 3 was at +0.2 SD at 00:15. You notice the Level 3 vial on the bench without its cap.
-**[CHECK: example values are illustrative. Replace with realistic ranges for the pilot lab's control lot.]**
 
 **Questions**
 1. Which rule fired, and is the run rejected under a standard multirule procedure?

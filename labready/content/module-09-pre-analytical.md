@@ -1,11 +1,11 @@
 # Module 9 — Pre-Analytical Quality & Specimen Integrity
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~10 min
 **Prerequisite:** Module 8
 **Competency methods covered:** 1 (direct observation: patient ID, specimen handling and processing), 6 (problem solving)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -27,7 +27,7 @@ Most laboratory errors happen in the pre-analytical phase: identification, colle
 ### 2. Identification
 
 - Every specimen needs at least **two patient identifiers** that match the requisition or order.
-- Unlabelled, mislabelled or mismatched specimens are handled per your procedure, usually rejected and recollected. Irreplaceable specimens (e.g. CSF) may follow a special process with documented accountability. **[CHECK: the pilot lab's mislabel and irreplaceable specimen policy.]**
+- Unlabelled, mislabelled or mismatched specimens are handled per your procedure, usually rejected and recollected. Irreplaceable specimens (e.g. CSF) may follow a special process with documented accountability. **[CHECK: your lab's mislabel and irreplaceable specimen policy.]**
 - Never relabel a specimen yourself unless your procedure explicitly allows it.
 
 ### 3. Serum indices (HIL)
@@ -40,14 +40,14 @@ Most modern analysers measure haemolysis (H), icterus (I) and lipaemia (L) indic
 | **Icterus** | Spectral and chemical interference, e.g. can falsely lower some creatinine and cholesterol methods |
 | **Lipaemia** | Light scatter affects photometric assays; volume displacement causes **pseudohyponatraemia** with indirect ISE |
 
-Follow your procedure: suppress the affected result, report with a comment, or treat the specimen (e.g. ultracentrifugation for lipaemia, if validated). **[CHECK: the pilot lab's HIL limits and actions per assay, from the manufacturer's inserts.]**
+Follow your procedure: suppress the affected result, report with a comment, or treat the specimen (e.g. ultracentrifugation for lipaemia, if validated). **[CHECK: your lab's HIL limits and actions per assay, from the manufacturer's inserts.]**
 
 In-vivo haemolysis (true patient haemolysis) is clinically important. Repeated haemolysed samples from the same patient despite good collection technique should be raised with the clinical team.
 
 ### 4. Tubes and order of draw
 
 - Wrong tube for the test: e.g. K from a potassium EDTA tube, glucose from a tube without a glycolysis inhibitor left unspun.
-- **Order of draw** prevents additive carryover. A common sequence: blood cultures → citrate → serum (with or without clot activator/gel) → heparin → EDTA → fluoride/oxalate. **[CHECK: match to the pilot lab's collection manual.]**
+- **Order of draw** prevents additive carryover. A common sequence: blood cultures → citrate → serum (with or without clot activator/gel) → heparin → EDTA → fluoride/oxalate. **[CHECK: match to your lab's collection manual.]**
 - EDTA carryover pattern: high K, low Ca, low ALP (Module 8).
 
 ### 5. IV contamination
@@ -63,7 +63,7 @@ Recollect from the opposite arm or below the site, per policy.
 ### 6. Processing and stability
 
 - **Unspun samples:** glucose falls (glycolysis) at room temperature; potassium can rise over time, and cold storage of unspun blood also raises K by inhibiting the cell membrane pump.
-- Separate serum/plasma within the time your procedure sets. **[CHECK]**
+- Separate serum/plasma within the time your procedure sets.
 - Check clotting in plasma tubes and fibrin in serum. Clots and fibrin cause short sampling (falsely low results) and probe alarms.
 - Respect analyte stability for add-on requests: some analytes aren't stable long enough to add on.
 
@@ -75,7 +75,7 @@ When you reject or qualify a specimen, document: reason, who you notified, time,
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **How many patient identifiers must a specimen have?**
    **Answer:** At least two, matching the order.
@@ -128,8 +128,6 @@ An ED sample: glucose 900 mg/dL, sodium 131, chloride 92, calcium 7.1 mg/dL, tot
 1. Contamination with dextrose IV fluid: very high glucose with everything else diluted, and a sharp delta from two hours ago.
 2. Don't report the panel. Call the ED, explain the likely contamination, request a recollection from the opposite arm or with the infusion paused per policy. Document the call, the reason and the recollection.
 3. Explain the evidence (the dilution pattern, the delta). A recollection settles it quickly. If there's disagreement, escalate to the supervisor or pathologist.
-
-**[CHECK: realistic numbers for the pilot lab's reference ranges.]**
 
 ---
 

@@ -1,11 +1,11 @@
 # Module 3 — Calibration & Calibration Verification
 
-**LabReady Chemistry Competency System** · Draft v0.1 for founding-lab pilots
+**LabReady Chemistry Competency System** · Version 1.0 for founding-lab pilots
 **Time:** lesson ~20 min · quiz ~15 min · case ~10 min
 **Prerequisites:** Modules 1–2
 **Competency methods covered:** 3 (calibration records), 4 (instrument function checks), 6 (problem solving)
 
-> Author's note (Elie): review everything marked **[CHECK]** against your experience and the pilot lab's procedures.
+> For your lab: anything marked **[CHECK]** is a setting your lab supplies (its own numbers, limits or procedures). Fill those in before using this module for a competency record.
 
 ---
 
@@ -37,8 +37,6 @@ Follow the manufacturer's instructions first. Typical triggers:
 - After major maintenance or replacement of a critical part (lamp, electrode, probe)
 - QC shows a shift or trend and the investigation points to calibration
 - The analyser prompts or flags a calibration as required
-
-**[CHECK: which of these apply on the pilot lab's analysers, e.g. lot-level vs pack-level calibration on Cobas Pure and ARCHITECT.]**
 
 ### 3. Reading a calibration
 
@@ -76,7 +74,7 @@ It's required **at least every six months** and whenever:
 
 If the lab calibrates with at least three levels covering the reportable range at least every six months, that calibration can meet the requirement.
 
-**[CHECK: confirm wording and frequency against 42 CFR 493.1255 and the pilot lab's accreditor checklist before release. Add the lab's acceptance limits.]**
+**[CHECK: add your lab's acceptance limits for calibration verification.]**
 
 Calibration verification material is often the same set used to verify the analytical measurement range (Module 4).
 
@@ -88,7 +86,7 @@ Record for every calibration: test, instrument, date/time, calibrator lot and ex
 
 ## Question bank
 
-**Pass mark: 80%. [CHECK]**
+**Pass mark: 80%.**
 
 1. **What's the difference between calibration and QC?**
    **Answer:** Calibration sets the signal-to-concentration relationship. QC checks that it still holds.
@@ -145,8 +143,6 @@ A new creatinine reagent pack was loaded at 22:00 and the analyser required a pa
 3. Calibrator lot and expiry; reconstitution volume and diluent (a diluted calibrator makes patients read high); time allowed to stand; whether values were entered or read correctly; reagent pack condition.
 4. Reconstitute a fresh calibrator correctly, recalibrate, confirm the factor is back in line with history, run all QC levels. Look back from the calibration at 22:00 and rerun released creatinine results per policy.
 5. Event, factor comparison, cause found (e.g. calibrator reconstituted with the wrong volume), fresh calibrator and recalibration, post-calibration QC, look-back outcome, notification, follow-up (e.g. reconstitution double-check at shift change).
-
-**[CHECK: is 12% a realistic factor change on your systems? Adjust to what you'd actually see.]**
 
 ---
 
