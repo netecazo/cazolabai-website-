@@ -7,7 +7,8 @@
 - `.btn` has no disabled style in the site CSS, so a disabled Button looks identical to an enabled one. No Disabled story for that reason; add one if the site CSS gains a `:disabled` rule.
 - Modal's backdrop is `position: fixed`; its preview wraps it in a `transform: translateZ(0)` box so it stays inside the card (`cardMode: single`).
 - Most components render full-width content, so they use `cardMode: column`; contact-sheet thumbnails crop at the right edge, but the full-size review sheets are complete.
-- Upload not yet done (as of the first build): Claude Design access wasn't authorised in the claude.ai/code session. Once a project is available, this is a first sync into it.
+- Synced to the Claude Design project "LabReady Pro" (projectId in config.json). First sync: 16 components, 88 files, `_ds_sync.json` anchor uploaded last. Access from claude.ai/code needs Claude Design's "Send to Claude Code Web" first; without it DesignSync returns an authorization error.
+- Re-sync: fetch the project's `_ds_sync.json` to `.design-sync/.cache/remote-sync.json`, then `node .ds-sync/resync.mjs --config .design-sync/config.json --node-modules ./node_modules --entry ./dist/index.js --out ./ds-bundle --remote .design-sync/.cache/remote-sync.json`.
 
 ## Known render warns
 - none
