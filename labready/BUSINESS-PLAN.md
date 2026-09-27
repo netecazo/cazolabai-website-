@@ -27,6 +27,7 @@ The course is the entry product. The competency system is the recurring product.
 | Study worksheets: lot-to-lot, method comparison (Deming and least squares, bias at decision levels, scatter and difference plots) and AMR / calibration verification, judged against limits the lab enters, printable with sign-off lines | `labready/worksheets/` | Built; calculations unit-tested (`node --test labready/worksheets/stats.test.mjs`). Standalone drafts stay in the browser |
 | Studies in the app: worksheets saved to the lab, Studies tab with result and review status, director/supervisor sign-off stamped by the database and locking the study | `labready/app/` (Studies tab), `labready/worksheets/?study=…` | Live on the LabReady Pro database. Signed-off studies print in the inspection packet (Reports tab), one page each, with results recalculated from the saved data |
 | QC investigations in the app: the QC Troubleshooting Assistant saves to the lab (`?record=…`), QC tab lists open and closed events, supervisor sign-off stamped by the database, signed investigations print in the inspection packet | `labready/qc-assistant/`, `labready/app/` (QC tab), `labready/assets/records.js` | Live on the LabReady Pro database (stored in `studies` with kind `qc`). The standalone assistant still saves to the browser |
+| Dashboard sign-off queue: competency records, studies and QC investigations that are filled in and waiting only for a signature, oldest first | `labready/app/` (Dashboard) | Built |
 
 ---
 
