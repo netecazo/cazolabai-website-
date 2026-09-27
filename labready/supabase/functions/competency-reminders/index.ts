@@ -1,11 +1,13 @@
 // Supabase Edge Function: weekly competency reminder emails for LabReady Pro.
 // Triggered by pg_cron (see ../../reminders-cron.sql). Sends through Resend.
 //
-// Secrets (supabase secrets set ...):
-//   CRON_SECRET     shared secret the cron job sends in the x-cron-secret header
-//   RESEND_API_KEY  API key from resend.com
-//   FROM_EMAIL      verified sender, e.g. "LabReady Pro <reminders@labreadypro.com>"
-//   APP_URL         e.g. https://yourdomain.com/labready/app/
+// Settings. Each is read from the function's environment (Edge Functions > Secrets)
+// first, then from Supabase Vault through public.reminder_settings(), which only the
+// service role can call. The cron secret is created in Vault by reminders-cron.sql.
+//   CRON_SECRET     shared secret the cron job sends in the x-cron-secret header (Vault: labready_cron_secret)
+//   RESEND_API_KEY  API key from resend.com (Vault: labready_resend_key)
+//   FROM_EMAIL      verified sender; default "LabReady Pro <reminders@labreadypro.com>"
+//   APP_URL         default https://labreadypro.com/labready/app/
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase automatically.
 //
 // Call with ?dry_run=1 to get the emails back as JSON without sending them.
@@ -15,16 +17,28 @@ import { buildDigests } from "./digest.js";
 
 const env = (k: string) => Deno.env.get(k) ?? "";
 
+const DEFAULT_FROM = "LabReady Pro <reminders@labreadypro.com>";
+const DEFAULT_APP_URL = "https://labreadypro.com/labready/app/";
+
 Deno.serve(async (req) => {
-    const secret = env("CRON_SECRET");
+    const sb = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), {
+        auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    let vault: Record<string, string | null> = {};
+    if (!env("CRON_SECRET") || !env("RESEND_API_KEY")) {
+        const { data } = await sb.rpc("reminder_settings");
+        vault = (data ?? {}) as Record<string, string | null>;
+    }
+    const secret = env("CRON_SECRET") || vault.cron_secret || "";
+    const resendKey = env("RESEND_API_KEY") || vault.resend_key || "";
+    const fromEmail = env("FROM_EMAIL") || DEFAULT_FROM;
+    const appUrl = env("APP_URL") || DEFAULT_APP_URL;
+
     if (!secret || req.headers.get("x-cron-secret") !== secret) {
         return new Response("Unauthorized", { status: 401 });
     }
     const dryRun = new URL(req.url).searchParams.get("dry_run") === "1";
-
-    const sb = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), {
-        auth: { persistSession: false, autoRefreshToken: false },
-    });
 
     const today = new Date().toISOString().slice(0, 10);
     const horizon = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
@@ -55,7 +69,7 @@ Deno.serve(async (req) => {
 
         const digests = buildDigests({
             today,
-            appUrl: env("APP_URL"),
+            appUrl,
             labs,
             members: members.map((m) => ({ ...m, email: emails.get(m.user_id) })),
             staff,
@@ -63,14 +77,15 @@ Deno.serve(async (req) => {
             competencies,
         });
 
-        if (dryRun) return Response.json({ today, digests });
+        if (dryRun) return Response.json({ today, emailReady: !!resendKey, digests });
+        if (!resendKey && digests.length) return Response.json({ today, error: "No Resend API key set; nothing sent", wouldSend: digests.length }, { status: 503 });
 
         const results = [];
         for (const d of digests) {
             const res = await fetch("https://api.resend.com/emails", {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${env("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ from: env("FROM_EMAIL"), to: d.to, subject: d.subject, html: d.html, text: d.text }),
+                headers: { "Authorization": `Bearer ${resendKey}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ from: fromEmail, to: d.to, subject: d.subject, html: d.html, text: d.text }),
             });
             results.push({ lab: d.labName, recipients: d.to.length, ok: res.ok, status: res.status });
         }

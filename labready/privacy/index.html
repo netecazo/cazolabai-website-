@@ -51,6 +51,7 @@
                     <tr><td>Lab name, the people in your lab and their roles, and the display name you choose</td><td>You create or join a lab</td><td>To control who can see and sign what</td></tr>
                     <tr><td>Staff names, job titles, optional work emails, test systems, competency records, schedules, studies, QC investigations, sign-offs and their history</td><td>Your lab uses the app</td><td>This is the service: keeping your lab's training and competency records</td></tr>
                     <tr><td>The name a technologist types and their quiz answers and score</td><td>A technologist completes a quiz link</td><td>To mark the quiz and add the result to their competency record</td></tr>
+                    <tr><td>Your email address, your lab's name and the staff names and due dates in the weekly reminder</td><td>You're a lab admin or supervisor with reminders on</td><td>To send the weekly competency reminder email</td></tr>
                     <tr><td>Standard web server logs (such as IP address, browser type and the page requested)</td><td>Any visit</td><td>To keep the site running and secure. Kept by our hosting provider</td></tr>
                 </tbody>
             </table>
@@ -64,7 +65,7 @@
             <ul>
                 <li><b>Database and sign-in:</b> Supabase, in the United States (US East). Data is encrypted in transit, and database rules make sure one lab can't read another lab's records.</li>
                 <li><b>Website hosting:</b> Vercel.</li>
-                <li><b>Email:</b> if your lab turns on reminder emails, we'll use an email delivery provider to send them. We'll name it here before reminders are switched on.</li>
+                <li><b>Email:</b> weekly reminder emails to lab admins and supervisors are sent through Resend. They contain your lab's name and the names, test systems and due dates of overdue or upcoming competencies. Anyone can turn them off for themselves in the app's Settings.</li>
             </ul>
             <p>These providers process data for us to run the service. They don't get to use it for their own purposes.</p>
 
