@@ -1,0 +1,50 @@
+{
+  "shape": "package",
+  "pkg": "@labready/ui",
+  "globalName": "LabReadyUI",
+  "buildCmd": "npm run build",
+  "cssEntry": "dist/labready.css",
+  "overrides": {
+    "Modal": {
+      "cardMode": "single",
+      "viewport": "760x440"
+    },
+    "Table": {
+      "cardMode": "column"
+    },
+    "Callout": {
+      "cardMode": "column"
+    },
+    "Card": {
+      "cardMode": "column"
+    },
+    "Field": {
+      "cardMode": "column"
+    },
+    "FieldGrid": {
+      "cardMode": "column"
+    },
+    "EmptyState": {
+      "cardMode": "column"
+    },
+    "PageHeader": {
+      "cardMode": "column"
+    },
+    "Pill": {
+      "cardMode": "column"
+    },
+    "Progress": {
+      "cardMode": "column"
+    },
+    "RadioPills": {
+      "cardMode": "column"
+    },
+    "StatGrid": {
+      "cardMode": "column"
+    },
+    "Tabs": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}
