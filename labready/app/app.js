@@ -236,6 +236,35 @@
                     .map((x, i) => 'S' + (i + 1) + '\t' + x + '\t' + (x * 1.035 + 0.02 + ((i * 7) % 5 - 2) * 0.012).toFixed(2)).join('\n'),
                 review: {}
             }
+        }, {
+            id: uid(), kind: 'qc', verdict: 'pass', created_by: 'demo-user', created_at: at(1), updated_at: at(0.5),
+            signoff: { name: 'Demo Supervisor', role: 'admin', user_id: 'demo-user', at: at(0.5) },
+            content: {
+                fields: {
+                    analyte: 'Glucose', instrument: 'Cobas Pure 1 (c303)', evDate: addDays(t, -1), evTime: '03:40',
+                    ctrlMaterial: 'MultiQual lot 45870', reagentLot: 'GLU3 lot 7712, pack opened 8 days ago', lastCal: addDays(t, -7), tech: 'EC',
+                    lv0: '92', lv0sd: '0.4', lv0st: 'In', lv2: '318', lv2sd: '2.4', lv2st: 'Out',
+                    rule: '1-2s', levels: 'One level only', dir: 'High', im_hold: true, im_flag: true, im_notify: true, im_lj: true,
+                    inv_control_4: true, invn_control_4: 'Level 3 vial found uncapped on bench since 00:15',
+                    inv_control_5: true, invn_control_5: 'Fresh Level 3 vial: 291 mg/dL (+0.3 SD)',
+                    rootCause: 'Control material (deteriorated, mis-reconstituted, evaporated, wrong level)',
+                    actionTaken: 'Level 3 vial had been left uncapped on the bench. Opened fresh Level 3 vial, reran both levels.',
+                    repeatQc: 'Acceptable, all levels', resumeTime: '04:05', lastGoodQc: '00:15', nPatients: '0', nRerun: '0',
+                    lookbackOutcome: 'No patient results released in window', notified: 'Charge tech (JM)',
+                    followUp: 'Reminder to night shift on capping controls between runs. Watch Level 3 on LJ chart for 5 days.'
+                },
+                review: { decision: 'Corrective action adequate', comments: 'Good catch. Added to the next night-shift huddle.' }
+            }
+        }, {
+            id: uid(), kind: 'qc', verdict: 'incomplete', created_by: 'demo-user', created_at: at(0.2), updated_at: at(0.2), signoff: null,
+            content: {
+                fields: {
+                    analyte: 'Potassium', instrument: 'Cobas Pure 1 (c303)', evDate: t, evTime: '09:15', ctrlMaterial: 'MultiQual lot 45870', tech: 'DN',
+                    lv0: '4.5', lv0sd: '2.2', lv0st: 'Out', lv1: '6.4', lv1sd: '2.3', lv1st: 'Out', rule: '2-2s', levels: 'All levels', dir: 'High',
+                    im_hold: true, im_flag: true, im_notify: true
+                },
+                review: {}
+            }
         }];
     }
 
@@ -566,6 +595,7 @@
             systems: () => viewSystems(view),
             schedule: () => viewSchedule(view, parts[1]),
             studies: () => viewStudies(view),
+            qc: () => viewQc(view),
             competency: () => viewCompetency(view, parts[1]),
             reports: () => viewReports(view),
             settings: () => viewSettings(view)
@@ -879,13 +909,13 @@
 
     // ---------------------------------------------------------------- studies (worksheets saved to the lab)
 
-    const STUDY_KINDS = { lot: 'Lot-to-lot', method: 'Method comparison', amr: 'AMR / calibration verification' };
+    const STUDY_KINDS = { lot: 'Lot-to-lot', method: 'Method comparison', amr: 'AMR / calibration verification', qc: 'QC investigation' };
     const VERDICTS = { pass: ['complete', 'Meets criteria'], fail: ['overdue', 'Does not meet'], incomplete: ['scheduled', 'Not yet judged'] };
     const studyUrl = id => '../worksheets/?study=' + encodeURIComponent(id);
 
     async function viewStudies(view) {
         view.innerHTML = head('Studies', 'Lot-to-lot, method comparison and AMR / calibration verification, saved to ' + esc(S.lab.name) + '.',
-            '<select id="newKind" aria-label="Study type">' + Object.keys(STUDY_KINDS).map(k => '<option value="' + k + '">' + STUDY_KINDS[k] + '</option>').join('') + '</select>' +
+            '<select id="newKind" aria-label="Study type">' + Object.keys(STUDY_KINDS).filter(k => k !== 'qc').map(k => '<option value="' + k + '">' + STUDY_KINDS[k] + '</option>').join('') + '</select>' +
             '<button class="btn primary" type="button" id="newStudy">New study</button>') +
             '<div id="studyList"><p class="muted">Loading…</p></div>';
         $('#newStudy').onclick = async () => {
@@ -895,7 +925,7 @@
             location.href = studyUrl(r.id);
         };
         let studies;
-        try { studies = await S.backend.list('studies'); } catch (e) { $('#studyList').innerHTML = '<p class="error">Couldn\'t load studies: ' + esc(e.message) + '</p>'; return; }
+        try { studies = (await S.backend.list('studies')).filter(x => x.kind !== 'qc'); } catch (e) { $('#studyList').innerHTML = '<p class="error">Couldn\'t load studies: ' + esc(e.message) + '</p>'; return; }
         if (!$('#studyList')) return;
         studies.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
         const waiting = studies.filter(x => !x.signoff).length;
@@ -921,6 +951,69 @@
             try { await run(() => S.backend.remove('studies', b.dataset.del), 'Study deleted'); } catch (e) { return; }
             viewStudies(view);
         });
+    }
+
+    // ---------------------------------------------------------------- QC investigations (QC assistant saved to the lab)
+
+    const QC_STATE = { pass: ['complete', 'QC acceptable'], fail: ['overdue', 'Escalated'], incomplete: ['due', 'Open'] };
+    const qcUrl = id => '../qc-assistant/?record=' + encodeURIComponent(id);
+
+    async function viewQc(view) {
+        view.innerHTML = head('QC investigations', 'QC failures worked through with the QC Troubleshooting Assistant, with corrective action and supervisor sign-off.',
+            '<button class="btn primary" type="button" id="newQc">New QC investigation</button>') +
+            '<div id="qcList"><p class="muted">Loading…</p></div>';
+        $('#newQc').onclick = async () => {
+            let r;
+            try { r = await run(() => S.backend.insert('studies', { kind: 'qc', content: { fields: { evDate: todayIso() }, review: {} }, verdict: 'incomplete' })); } catch (e) { return; }
+            location.href = qcUrl(r.id);
+        };
+        let recs;
+        try { recs = (await S.backend.list('studies')).filter(x => x.kind === 'qc'); } catch (e) { $('#qcList').innerHTML = '<p class="error">Couldn\'t load investigations: ' + esc(e.message) + '</p>'; return; }
+        if (!$('#qcList')) return;
+        const when = x => { const fl = (x.content && x.content.fields) || {}; return (fl.evDate || '') + ' ' + (fl.evTime || '') || x.created_at; };
+        recs.sort((a, b) => when(b).localeCompare(when(a)) || String(b.created_at).localeCompare(String(a.created_at)));
+        if (!recs.length) { $('#qcList').innerHTML = '<div class="empty">No QC investigations yet. Click <b>New QC investigation</b> when a control fails.</div>'; return; }
+        const open = recs.filter(x => x.verdict !== 'pass').length, waiting = recs.filter(x => !x.signoff).length;
+        $('#qcList').innerHTML = '<p class="muted" style="margin-bottom:0.6rem">' + open + ' open · ' + waiting + ' waiting for sign-off</p>' +
+            '<div class="list-wrap"><table class="list"><thead><tr><th>Event</th><th class="hide-sm">Instrument</th><th>When</th><th class="hide-sm">Root cause</th><th>Status</th><th>Review</th><th></th></tr></thead><tbody>' +
+            recs.map(x => {
+                const fl = (x.content && x.content.fields) || {}, st = QC_STATE[x.verdict] || QC_STATE.incomplete;
+                return '<tr class="clickable" data-open="' + x.id + '"><td><b>' + esc(fl.analyte || 'Untitled') + '</b><span class="sub">' + esc(fl.rule ? fl.rule + (fl.levels ? ' · ' + fl.levels : '') : 'Rule not recorded') + '</span></td>' +
+                    '<td class="hide-sm">' + esc(fl.instrument || '—') + '</td>' +
+                    '<td>' + (fl.evDate ? fmtDate(fl.evDate) : '—') + (fl.evTime ? '<span class="sub">' + esc(fl.evTime) + (fl.tech ? ' · ' + esc(fl.tech) : '') + '</span>' : '') + '</td>' +
+                    '<td class="hide-sm">' + esc(fl.rootCause ? fl.rootCause.split(' (')[0] : '—') + '</td>' +
+                    '<td><span class="pill ' + st[0] + '">' + st[1] + '</span></td>' +
+                    '<td>' + (x.signoff ? '✓ ' + esc(x.signoff.name) + '<span class="sub">' + fmtStamp(x.signoff.at) + '</span>' : '<span class="muted">Awaiting sign-off</span>') + '</td>' +
+                    '<td class="row-actions">' + (x.signoff ? '' : '<button class="btn danger small" type="button" data-del="' + x.id + '">Delete</button>') + '</td></tr>';
+            }).join('') + '</tbody></table></div>';
+        $$('[data-open]').forEach(tr => tr.onclick = e => { if (!e.target.closest('button')) location.href = qcUrl(tr.dataset.open); });
+        $$('[data-del]').forEach(b => b.onclick = async () => {
+            if (!confirm('Delete this QC investigation? This can\'t be undone.')) return;
+            try { await run(() => S.backend.remove('studies', b.dataset.del), 'Investigation deleted'); } catch (e) { return; }
+            viewQc(view);
+        });
+    }
+
+    function qcPage(x) {
+        const fl = (x.content && x.content.fields) || {}, rv = (x.content && x.content.review) || {}, so = x.signoff || {};
+        const row = (k, v) => '<tr><th>' + esc(k) + '</th><td class="pre">' + esc(v || '—') + '</td></tr>';
+        const levels = [0, 1, 2].filter(i => fl['lv' + i + 'st'] || fl['lv' + i])
+            .map(i => 'Level ' + (i + 1) + ': ' + (fl['lv' + i] || '—') + (fl['lv' + i + 'sd'] ? ' (' + fl['lv' + i + 'sd'] + ' SD)' : '') + (fl['lv' + i + 'st'] ? ', ' + fl['lv' + i + 'st'] : '')).join('\n');
+        const findings = Object.keys(fl).filter(k => /^invn_/.test(k) && fl[k]).map(k => fl[k]).join('\n');
+        return '<section class="packet-page">' +
+            '<h2>QC investigation: ' + esc(fl.analyte || 'Untitled') + ' · ' + (fl.evDate ? fmtDate(fl.evDate) : '') + ' ' + esc(fl.evTime || '') + '</h2>' +
+            '<table class="doc kv"><tbody>' +
+            row('Instrument', fl.instrument) + row('Control material and lot', fl.ctrlMaterial) + row('Reagent lot', fl.reagentLot) +
+            row('Last calibration', fl.lastCal ? fmtDate(fl.lastCal) : '') + row('Performed by', fl.tech) + row('Control results', levels) +
+            row('Rule / levels / direction', [fl.rule, fl.levels, fl.dir].filter(Boolean).join(' · ')) +
+            row('Investigation findings', findings) + row('Root cause', fl.rootCause) + row('Corrective action', fl.actionTaken) +
+            row('Repeat QC', fl.repeatQc) + row('Patient testing resumed', fl.resumeTime) +
+            row('Look-back', (fl.lastGoodQc ? 'Since ' + fl.lastGoodQc + ': ' : '') + (fl.nPatients || '0') + ' samples, ' + (fl.nRerun || '0') + ' rerun' + (fl.lookbackOutcome ? '. ' + fl.lookbackOutcome : '')) +
+            row('Notified', fl.notified) + row('Follow-up', fl.followUp) +
+            '</tbody></table><h3>Supervisor review</h3><table class="doc kv"><tbody>' +
+            row('Decision', rv.decision) + (rv.comments ? row('Comments', rv.comments) : '') +
+            '<tr><th>Signed off</th><td>' + esc(so.name || '—') + (so.role ? ' (' + esc(ROLES[so.role] || so.role) + ')' : '') + ' · ' + fmtStamp(so.at) + '</td></tr>' +
+            '</tbody></table></section>';
     }
 
     // ---------------------------------------------------------------- scheduling
@@ -1490,7 +1583,7 @@
             '<div><label class="lbl" for="pFrom">Completed from</label><input type="date" id="pFrom" value="' + yearAgo + '"></div>' +
             '<div><label class="lbl" for="pTo">to</label><input type="date" id="pTo" value="' + todayIso() + '"></div>' +
             '<button class="btn" type="submit">Build packet</button></div>' +
-            '<label class="inline-check"><input type="checkbox" id="pStudies" checked> Include signed-off studies (when the packet is for everyone)</label></form>' +
+            '<label class="inline-check"><input type="checkbox" id="pStudies" checked> Include signed-off studies and QC investigations (when the packet is for everyone)</label></form>' +
             '<div id="reportOut"></div>';
 
         $('#showMatrix').onclick = () => renderMatrix($('#reportOut'), staff, systems);
@@ -1565,16 +1658,16 @@
             '<tr><th>Staff</th><td>' + esc(who) + '</td></tr>' +
             '<tr><th>Completed between</th><td>' + (fmtDate(f.from) || 'the start') + ' and ' + (fmtDate(f.to) || 'today') + '</td></tr>' +
             '<tr><th>Records</th><td>' + recs.length + ' signed-off competency record' + (recs.length === 1 ? '' : 's') + ' for ' + people + (people === 1 ? ' person' : ' people') +
-                (studies.length ? '; ' + studies.length + ' signed-off stud' + (studies.length === 1 ? 'y' : 'ies') : '') + '</td></tr>' +
+                (studies.length ? '; ' + studies.length + ' signed-off stud' + (studies.length === 1 ? 'y or QC investigation' : 'ies and QC investigations') : '') + '</td></tr>' +
             '<tr><th>Generated</th><td>' + fmtStamp(new Date().toISOString()) + ' by ' + esc(S.member.display_name || S.user.email) + '</td></tr>' +
             '</tbody></table>' +
             '<h3>Contents</h3>' + (recs.length ? '<ol class="packet-toc">' + recs.map(c => {
                 const s = staffById(c.staff_id) || {}, sy = systemById(c.test_system_id) || {};
                 return '<li>' + esc(s.name || '—') + ' · ' + esc(sy.name || '—') + ' · ' + esc(KINDS[c.kind] || c.kind) + ' · ' + fmtDate(c.completed_at.slice(0, 10)) + '</li>';
             }).join('') + '</ol>' : '') +
-            (studies.length ? '<h3>Studies</h3><ol class="packet-toc" start="' + (recs.length + 1) + '">' + studies.map(x => {
+            (studies.length ? '<h3>Studies and QC investigations</h3><ol class="packet-toc" start="' + (recs.length + 1) + '">' + studies.map(x => {
                 const fl = (x.content && x.content.fields) || {};
-                return '<li>' + esc(fl.analyte || 'Untitled') + ' · ' + esc(STUDY_KINDS[x.kind] || x.kind) + ' · ' + esc(fl.system || '—') + ' · signed ' + fmtDate(x.signoff.at.slice(0, 10)) + '</li>';
+                return '<li>' + esc(fl.analyte || 'Untitled') + ' · ' + esc(STUDY_KINDS[x.kind] || x.kind) + ' · ' + esc(fl.system || fl.instrument || '—') + ' · signed ' + fmtDate(x.signoff.at.slice(0, 10)) + '</li>';
             }).join('') + '</ol>' : '') +
             '<p class="muted packet-note">Signatures and times are recorded by the system at signing. History entries are written by the database and can\'t be edited. Generated with LabReady Pro; follow your accrediting body\'s requirements for record retention.</p>' +
             '</section>';
@@ -1610,7 +1703,7 @@
         out.innerHTML = '<div class="report" id="packetReport">' +
             '<div class="report-head no-print"><div><h2>Inspection packet</h2><p class="muted">' + recs.length + ' records' + (studies.length ? ' and ' + studies.length + ' stud' + (studies.length === 1 ? 'y' : 'ies') : '') + ' · cover page + one page each</p></div>' +
             '<button class="btn primary" type="button" id="printPacket">Print / Save as PDF</button></div>' +
-            cover + recs.map(page).join('') + studies.map(studyPage).join('') + '</div>';
+            cover + recs.map(page).join('') + studies.map(x => x.kind === 'qc' ? qcPage(x) : studyPage(x)).join('') + '</div>';
         $('#printPacket').onclick = () => printOnly('packetReport');
         out.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }

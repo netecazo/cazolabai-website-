@@ -15,6 +15,12 @@
         .group-title { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1.2rem; }
         .group-title h3 { margin: 0; }
         .prio { font-size: 0.72rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; background: var(--brand-soft); color: var(--brand); }
+        .signoff-box { display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem; align-items: center; margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 10px; background: var(--bg); font-size: 0.88rem; color: var(--slate); }
+        .signoff-box.signed { background: #f0fdf4; border: 1px solid #86efac; }
+        .signoff-box.signed b { color: var(--accent-dark); }
+        .linkish { background: none; border: none; color: var(--brand); cursor: pointer; font: inherit; font-size: 0.88rem; padding: 0; }
+        .save-state { font-size: 0.82rem; color: var(--muted); align-self: center; }
+        .save-state.bad { color: var(--danger); }
         #record { display: none; }
         #record.show { display: block; }
         #record h2 { font-size: 1.3rem; margin-bottom: 0.2rem; }
@@ -154,10 +160,12 @@
             <div class="card">
                 <h2>Your investigation record</h2>
                 <p class="hint">Check it, print it or save it as PDF, then pass it to your supervisor for review.</p>
+                <div id="reviewBox"></div>
                 <div class="actions" style="margin-bottom:0">
                     <button class="btn primary" id="printBtn" type="button">Print / Save as PDF</button>
                     <button class="btn ghost" id="loadExample" type="button">Load the example case</button>
                     <button class="btn ghost" id="resetBtn" type="button">Start a new investigation</button>
+                    <span class="save-state" id="saveState"></span>
                 </div>
             </div>
         </section>
@@ -174,6 +182,9 @@
 
     <footer class="site">LabReady Pro · Clinical Laboratory Training. Competency. Compliance. · <a href="/">labready</a></footer>
 
+    <script src="../app/config.js"></script>
+    <script src="../assets/supabase-2.117.1.min.js"></script>
+    <script src="../assets/records.js"></script>
     <script>
     (function () {
         const LEVELS = ["Level 1", "Level 2", "Level 3"];
@@ -267,7 +278,22 @@
         let current = 0;
         const steps = Array.from(document.querySelectorAll(".step"));
 
-        function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+        // Opened from the app (?record=<id>), the investigation saves to the lab instead of this browser.
+        const R = window.LabReadyRecords;
+        const recordId = new URLSearchParams(location.search).get("record");
+        let linked = null, saver = null, review = {};
+        const DECISIONS = ["Corrective action adequate", "Further action required (see comments)"];
+        const verdictOf = () => state.repeatQc === "Acceptable, all levels" ? "pass" : state.repeatQc === "Still unacceptable, escalated" ? "fail" : "incomplete";
+        const payload = () => ({ content: { fields: JSON.parse(JSON.stringify(state)), review: Object.assign({}, review) }, verdict: verdictOf() });
+        function setSaveState(text, bad) {
+            const el = document.getElementById("saveState");
+            el.textContent = text; el.classList.toggle("bad", !!bad);
+        }
+
+        function save() {
+            if (linked) { saver.schedule(); return; }
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+        }
         function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch (e) { return {}; } }
         function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
@@ -388,12 +414,75 @@
                     <tr><th>Notified</th><td>${esc(s.notified)}</td></tr>
                     <tr><th>Follow-up</th><td>${esc(s.followUp)}</td></tr>
                 </table></div>
+                ${linked && linked.record.signoff ? `<h3>Supervisor review</h3><div class="table-wrap"><table class="doc">
+                    <tr><th>Decision</th><td>${esc(review.decision)}</td></tr>
+                    ${review.comments ? `<tr><th>Comments</th><td>${esc(review.comments)}</td></tr>` : ""}
+                    <tr><th>Signed off</th><td>${esc(linked.record.signoff.name)} (${esc(R.ROLE_NAMES[linked.record.signoff.role] || linked.record.signoff.role || "")}) · ${new Date(linked.record.signoff.at).toLocaleString()}</td></tr>
+                </table></div>` : ""}
                 <div class="sig"><div>Performed by / date</div><div>Supervisor review / date</div></div>
                 <p class="disclaimer">Generated with LabReady Pro. Follow your laboratory's procedures and the manufacturer's instructions.</p>`;
         }
 
-        function init() {
-            state = load();
+        function renderReview() {
+            if (!linked) return;
+            const so = linked.record.signoff, me = linked.member, can = R.SIGNERS.includes(me.role);
+            const box = document.getElementById("reviewBox");
+            box.innerHTML = `<h3>Supervisor review</h3><div class="field-grid">
+                <div><label class="lbl" for="rvDecision">Decision</label><select id="rvDecision"><option value=""></option>${DECISIONS.map(d => `<option${review.decision === d ? " selected" : ""}>${d}</option>`).join("")}</select></div>
+                <div class="full"><label class="lbl" for="rvComments">Comments</label><textarea id="rvComments" rows="2">${esc(review.comments || "")}</textarea></div></div>` +
+                (so ? `<div class="signoff-box signed"><b>✓ Signed off by ${esc(so.name)}</b><span>${esc(R.ROLE_NAMES[so.role] || so.role || "")} · ${new Date(so.at).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</span>${can ? '<button class="linkish" type="button" id="unsignBtn">Remove sign-off</button>' : ""}</div>`
+                    : `<div class="signoff-box">${can ? `<button class="btn" type="button" id="signBtn">Sign off as ${esc(me.display_name)}</button><span>Your name, role and the time are recorded, and the investigation locks.</span>` : "<span>A supervisor, director or admin signs off QC investigations.</span>"}</div>`);
+            const d = document.getElementById("rvDecision"), c = document.getElementById("rvComments");
+            d.onchange = () => { review.decision = d.value; save(); };
+            c.oninput = () => { review.comments = c.value; save(); };
+            const sb = document.getElementById("signBtn"), ub = document.getElementById("unsignBtn");
+            if (sb) sb.onclick = async () => {
+                if (!review.decision) { alert("Choose a decision before signing off."); d.focus(); return; }
+                await saver.settled();
+                const p = payload();
+                try { linked.record = await linked.backend.sign(linked.record.id, p.content, p.verdict); } catch (e) { alert(e.message); return; }
+                saver.cancel(); applyLock(); renderReview(); renderRecord();
+            };
+            if (ub) ub.onclick = async () => {
+                if (!confirm("Remove the sign-off? The investigation unlocks for changes and will need signing again.")) return;
+                try { linked.record = await linked.backend.unsign(linked.record.id); } catch (e) { alert(e.message); return; }
+                applyLock(); renderReview(); renderRecord();
+            };
+            if (so) { d.disabled = true; c.disabled = true; }
+        }
+
+        function applyLock() {
+            const locked = !!(linked && linked.record.signoff);
+            document.querySelectorAll(".step input, .step select, .step textarea").forEach(el => { if (!el.closest("#reviewBox")) el.disabled = locked; });
+            document.getElementById("loadExample").hidden = locked;
+            setSaveState(locked ? "Signed off and locked." : "Saved to " + linked.labName + ".");
+        }
+
+        async function openRecord() {
+            const back = '<a href="../app/#/qc">Back to QC investigations</a>';
+            const head = document.querySelector(".page-head");
+            let got;
+            try { got = await R.backend().open(recordId); } catch (e) { head.innerHTML = `<h1>Couldn't open this investigation</h1><p>${esc(e.message)}</p><p>${back}</p>`; return false; }
+            if (got && got.signedOut) { head.innerHTML = '<h1>Sign in to open this investigation</h1><p>It\'s saved to your lab. <a href="../app/">Sign in to LabReady Pro</a>, then open it from the QC tab.</p>'; return false; }
+            if (!got || got.record.kind !== "qc") { head.innerHTML = `<h1>Investigation not found</h1><p>It may have been deleted, or it belongs to a lab you're not a member of.</p><p>${back}</p>`; return false; }
+            linked = Object.assign({ backend: R.backend() }, got);
+            state = Object.assign({}, (got.record.content || {}).fields || {});
+            review = Object.assign({}, (got.record.content || {}).review || {});
+            saver = R.autosaver(linked.backend, () => linked.record, r => { linked.record = r; }, payload, setSaveState, linked.labName);
+            head.innerHTML = `<span class="tag">QC investigation · ${esc(linked.labName)}${linked.backend.mode === "demo" ? " (demo)" : ""}</span>
+                <h1>Work through a QC failure, step by step</h1><p>Saved to your lab as you go. ${back}</p>`;
+            document.getElementById("resetBtn").hidden = true;
+            return true;
+        }
+
+        async function init() {
+            if (recordId) {
+                document.querySelectorAll(".step, #stepsNav, .actions.no-print").forEach(el => { el.style.visibility = "hidden"; });
+                if (!(await openRecord())) return;
+                document.querySelectorAll(".step, #stepsNav, .actions.no-print").forEach(el => { el.style.visibility = ""; });
+            } else {
+                state = load();
+            }
             buildLevels();
             radios("ruleRow", "rule", Object.keys(RULES));
             radios("levelsRow", "levels", Object.keys(LEVEL_PATTERNS));
@@ -406,6 +495,7 @@
             document.getElementById("nextBtn").onclick = () => go(current + 1);
             document.getElementById("printBtn").onclick = () => { renderRecord(); window.print(); };
             document.getElementById("loadExample").onclick = () => {
+                if (linked && (state.analyte || state.rule) && !confirm("Replace what's on this investigation with the example case?")) return;
                 state = Object.assign({}, EXAMPLE, { im_hold: true, im_flag: true, im_notify: true, im_lj: true,
                     inv_control_0: true, inv_control_2: true, inv_control_4: true, invn_control_4: "Level 3 vial found uncapped on bench since 00:15",
                     inv_control_5: true, invn_control_5: "Fresh Level 3 vial: 291 mg/dL (+0.3 SD)" });
@@ -419,7 +509,9 @@
                 });
                 renderInterpretation(); go(0);
             };
-            go(0);
+            if (linked) { renderReview(); applyLock(); }
+            // A signed investigation opens on its record; anything else starts at step 1.
+            go(linked && linked.record.signoff ? steps.length - 1 : 0);
         }
 
         init();
