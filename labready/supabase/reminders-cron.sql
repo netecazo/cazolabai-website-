@@ -9,7 +9,7 @@
 --   select vault.update_secret((select id from vault.secrets where name = 'labready_resend_key'), 're_...');
 
 create extension if not exists pg_cron;
-create extension if not exists pg_net;
+create extension if not exists pg_net schema extensions;
 
 -- A random shared secret between the cron job and the function, created once.
 do $$
