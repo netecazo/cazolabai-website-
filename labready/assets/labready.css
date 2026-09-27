@@ -60,7 +60,7 @@ header.site a.back:hover { color: var(--brand); }
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .field-grid .full { grid-column: 1 / -1; }
 label.lbl { font-size: 0.82rem; font-weight: 600; color: var(--slate); display: block; margin-bottom: 0.25rem; }
-input[type=text], input[type=date], input[type=time], input[type=number], select, textarea {
+input[type=text], input[type=email], input[type=password], input[type=date], input[type=time], input[type=number], select, textarea {
     width: 100%; padding: 0.65rem 0.8rem; border-radius: 8px; border: 1px solid var(--line);
     font-size: 0.95rem; font-family: inherit; background: white; color: var(--ink);
 }
