@@ -650,6 +650,8 @@
             return { text: 'That doesn\'t look like a valid email address. Please check it.' };
         if (/failed to fetch|network/.test(msg))
             return { text: 'We couldn\'t reach LabReady Pro. Check your internet connection and try again.' };
+        if (code === 'unexpected_failure' || /error sending/.test(msg))
+            return { text: 'We couldn\'t send the email just now. Please try again in a few minutes. If it keeps happening, email elie.c@flowmaxpros.com and we\'ll sort it out.' };
         return { text: 'Something went wrong (' + (ex && ex.message || 'unknown error') + '). Please try again in a moment.' };
     }
 
