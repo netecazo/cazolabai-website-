@@ -1,0 +1,13 @@
+pay_period,pay_date,employee,role,hours,hourly_rate,base_pay,commission,gross_pay,employer_taxes
+2026-09-01 to 2026-09-15,2026-09-15,Dana Whitfield,Nurse Practitioner (injector),72,62,4464,2226.0,6690.0,551.92
+2026-09-01 to 2026-09-15,2026-09-15,Marisol Vega,RN Injector,66,48,3168,1276.6,4444.6,366.68
+2026-09-01 to 2026-09-15,2026-09-15,Kelsey Tran,Lead Aesthetician,78,28,2184,699.5,2883.5,237.89
+2026-09-01 to 2026-09-15,2026-09-15,Brooke Adler,Aesthetician,68,24,1632,761.8,2393.8,197.49
+2026-09-01 to 2026-09-15,2026-09-15,Tyler Moss,Laser Technician,62,30,1860,470.0,2330.0,192.22
+2026-09-01 to 2026-09-15,2026-09-15,Jenna Ruiz,Front Desk / Patient Coordinator,83,19,1577,0.0,1577.0,130.1
+2026-09-16 to 2026-09-30,2026-09-30,Dana Whitfield,Nurse Practitioner (injector),73,62,4526,2226.0,6752.0,557.04
+2026-09-16 to 2026-09-30,2026-09-30,Marisol Vega,RN Injector,64,48,3072,1276.6,4348.6,358.76
+2026-09-16 to 2026-09-30,2026-09-30,Kelsey Tran,Lead Aesthetician,79,28,2212,699.5,2911.5,240.2
+2026-09-16 to 2026-09-30,2026-09-30,Brooke Adler,Aesthetician,72,24,1728,761.8,2489.8,205.41
+2026-09-16 to 2026-09-30,2026-09-30,Tyler Moss,Laser Technician,64,30,1920,470.0,2390.0,197.18
+2026-09-16 to 2026-09-30,2026-09-30,Jenna Ruiz,Front Desk / Patient Coordinator,82,19,1558,0.0,1558.0,128.53

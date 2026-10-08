@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Dashboard - CazoLabAI</title>
+    <meta name="description" content="Turn one month of sales, payroll, bank and ad exports into a one-page dashboard any owner can read on a phone in two minutes. Your files never leave your device.">
+    <meta property="og:title" content="Business Dashboard - CazoLabAI">
+    <meta property="og:description" content="Money in, money out, what's left, what's paying off, and the one leak to fix this month.">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --ink: #0b1f2e;
+            --slate: #3f5566;
+            --muted: #5f7482;
+            --line: #dde6ec;
+            --bg: #f5f8fa;
+            --panel: #ffffff;
+            --good: #15803d;
+            --warn: #b45309;
+            --bad: #b91c1c;
+            /* The business's own colours; set from the setup panel. */
+            --brand: #0e7490;
+            --accent: #c2410c;
+            --brand-soft: color-mix(in srgb, var(--brand) 9%, white);
+            --accent-soft: color-mix(in srgb, var(--accent) 10%, white);
+            --track: color-mix(in srgb, var(--brand) 10%, #eef2f4);
+            --display: Georgia, 'Times New Roman', serif;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.55;
+            color: var(--ink);
+            background: var(--bg);
+            -webkit-text-size-adjust: 100%;
+        }
+        .wrap { max-width: 760px; margin: 0 auto; padding-inline: 16px; }
+        a { color: var(--brand); }
+        button, input, select { font: inherit; color: inherit; }
+        :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+        .site { background: #fff; border-bottom: 1px solid var(--line); }
+        .site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px; }
+        .site a.home { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #0b1f2e; font-weight: 700; }
+        .site a.home img { width: 32px; height: 32px; border-radius: 50%; }
+        .site span { color: var(--muted); font-size: 0.9rem; }
+
+        /* ---------- setup ---------- */
+        .setup { margin-block: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+        .setup > summary { cursor: pointer; padding: 16px 18px; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+        .setup > summary::-webkit-details-marker { display: none; }
+        .setup > summary::after { content: 'Show'; font-weight: 500; color: var(--brand); font-size: 0.9rem; }
+        .setup[open] > summary::after { content: 'Hide'; }
+        .setup-body { padding: 0 18px 18px; display: grid; gap: 18px; }
+        .intro { color: var(--slate); max-width: 60ch; }
+        .privacy { font-size: 0.85rem; color: var(--muted); }
+        .fields { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+        .field { display: grid; gap: 4px; font-size: 0.85rem; color: var(--slate); min-width: 0; }
+        .field input[type=text], .field input[type=number] { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: #fff; width: 100%; }
+        .field input[type=color] { width: 100%; height: 40px; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 3px; }
+        .field input[type=file] { width: 100%; min-width: 0; font-size: 0.8rem; overflow: hidden; }
+        .field.wide { grid-column: 1 / -1; }
+        .slots { display: grid; gap: 10px; }
+        .slot { border: 1px dashed #c3d2dc; border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
+        .slot.ok { border-style: solid; border-color: color-mix(in srgb, var(--good) 45%, white); }
+        .slot.err { border-style: solid; border-color: var(--bad); }
+        .slot-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+        .slot-head b { font-size: 0.95rem; }
+        .slot-head small { color: var(--muted); }
+        .slot input[type=file] { font-size: 0.85rem; max-width: 100%; }
+        .slot .status { font-size: 0.85rem; color: var(--muted); }
+        .slot.ok .status { color: var(--good); }
+        .slot.err .status { color: var(--bad); }
+        .map { font-size: 0.85rem; }
+        .map summary { cursor: pointer; color: var(--brand); }
+        .map-grid { display: grid; gap: 6px 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); margin-top: 8px; }
+        .map-grid label { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center; gap: 6px; }
+        .map-grid select { border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; background: #fff; min-width: 0; }
+        .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        .btn { border: 1px solid var(--brand); background: var(--brand); color: #fff; border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer; }
+        .btn.ghost { background: #fff; color: var(--brand); }
+        .btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+        /* ---------- report ---------- */
+        .report { display: grid; gap: 28px; padding-bottom: 48px; }
+        .r-head { display: grid; gap: 8px; padding-top: 8px; }
+        .r-brand { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .r-brand img { max-height: 44px; max-width: 140px; object-fit: contain; }
+        .r-brand .name { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+        .r-brand .period { font-size: 0.8rem; color: var(--muted); }
+        .pill { font-size: 0.72rem; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 1px 8px; letter-spacing: 0.04em; }
+        .report h1 { font-family: var(--display); font-weight: 400; font-size: 2rem; line-height: 1.15; color: var(--brand); text-wrap: balance; }
+        .take { font-size: 1.02rem; max-width: 62ch; }
+        .report h2 { font-family: var(--display); font-weight: 400; font-size: 1.45rem; color: var(--brand); }
+        .report h3 { font-size: 1rem; font-weight: 600; }
+        .sec { display: grid; gap: 12px; }
+        .note { color: var(--muted); font-size: 0.85rem; }
+        .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+        .grid2 { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+        .money { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        @media (max-width: 520px) { .money { grid-template-columns: 1fr; } }
+        .fig { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
+        .fig.left { background: var(--brand-soft); border-color: transparent; }
+        .lbl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+        .big { font-family: var(--display); font-size: 2rem; line-height: 1.15; font-variant-numeric: tabular-nums; }
+        .fig.left .big { color: var(--brand); }
+        .fig.left .big.neg { color: var(--bad); }
+        .bars { display: grid; gap: 9px; }
+        .bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; font-size: 0.93rem; }
+        .bar .v { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .bar .v small { color: var(--muted); margin-left: 6px; }
+        .track { grid-column: 1 / -1; height: 8px; background: var(--track); border-radius: 999px; overflow: hidden; }
+        .track i { display: block; height: 100%; border-radius: 999px; background: var(--brand); }
+        .bars.out .track i { background: var(--accent); }
+        .tbl { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+        th { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+        td { text-align: right; padding: 9px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+        th:first-child, td:first-child { text-align: left; padding-left: 0; white-space: normal; }
+        td .sub { display: block; font-size: 0.78rem; color: var(--muted); }
+        .good { color: var(--good); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+        .tax { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+        .leak { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 12px; padding: 18px; display: grid; gap: 10px; }
+        .leak .lbl { color: var(--accent); font-weight: 700; }
+        .leak .amt { font-family: var(--display); font-size: 1.6rem; color: var(--accent); }
+        .leak .act { border-top: 1px solid color-mix(in srgb, var(--accent) 40%, white); padding-top: 10px; }
+        .checks { list-style: none; display: grid; gap: 10px; }
+        .checks li { padding-left: 16px; position: relative; font-size: 0.93rem; }
+        .checks li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+        .checks li.good::before { background: var(--good); } .checks li.warn::before { background: var(--warn); } .checks li.bad::before { background: var(--bad); }
+        .checks li span { color: var(--ink); }
+        .empty { text-align: center; color: var(--muted); padding: 40px 16px 60px; }
+        .foot { color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+        @media print {
+            .site, .setup, .no-print { display: none !important; }
+            body { background: #fff; }
+            .card, .fig, .leak { break-inside: avoid; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site">
+        <div class="wrap">
+            <a class="home" href="/"><img src="/cazolabai-logo.png" alt="">CazoLabAI</a>
+            <span>Business dashboard</span>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <details class="setup" id="setup" open>
+            <summary>Set up the dashboard</summary>
+            <div class="setup-body">
+                <p class="intro">Add one month of exports from any business: a salon, gym, clinic, restaurant, shop or agency. The dashboard shows money in, money out, what's left, what's paying off, and the one leak to fix this month. Column names are picked up automatically, and you can change any of them under "Columns".</p>
+                <p class="privacy">Your files are read on this device only. Nothing is uploaded or stored on a server.</p>
+
+                <div class="fields">
+                    <label class="field wide">Business name<input type="text" id="bizName" placeholder="e.g. Harbor Street Barbers" autocomplete="organization"></label>
+                    <label class="field">Main brand colour<input type="color" id="brandColor" value="#0e7490"></label>
+                    <label class="field">Accent colour<input type="color" id="accentColor" value="#c2410c"></label>
+                    <label class="field">Tax set-aside rate (%)<input type="number" id="taxRate" min="0" max="60" step="0.5" value="24"></label>
+                    <label class="field">Logo (optional)<input type="file" id="logo" accept="image/*"></label>
+                </div>
+
+                <div class="slots" id="slots"></div>
+
+                <div class="actions">
+                    <button class="btn ghost" type="button" id="sample">Try it with sample files</button>
+                    <button class="btn ghost" type="button" id="clear">Clear files</button>
+                    <button class="btn" type="button" id="print" disabled>Save as PDF</button>
+                </div>
+            </div>
+        </details>
+
+        <div id="out"><p class="empty">Add a sales export, or try the sample files, to see the dashboard.</p></div>
+    </main>
+
+    <script src="engine.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
