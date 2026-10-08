@@ -1,4 +1,4 @@
-// Run: node --test business-dashboard/engine.test.mjs
+// Run: node --test margin/engine.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -85,4 +85,20 @@ test('a different business with different exports', () => {
 test('sales alone is enough', () => {
     const r = B.analyze({ sales: load('amount\n100\n50', 'sales') });
     assert.equal(r.moneyIn, 150); assert.equal(r.moneyOut, 0); assert.equal(r.leak, null);
+});
+
+test('files are recognised by their headers', () => {
+    const kind = f => B.classify(B.parseCSV(fs.readFileSync(new URL(`samples/${f}.csv`, here), 'utf8')).headers)?.kind;
+    for (const f of ['sales', 'payroll', 'bank', 'ads']) assert.equal(kind(f), f);
+    assert.equal(B.classify(['Receipt', 'Day', 'Product', 'Coach', 'How Heard', 'Net Sales', 'Tender']).kind, 'sales');
+    assert.equal(B.classify(['Posted Date', 'Payee', 'Withdrawals', 'Deposits']).kind, 'bank');
+    assert.equal(B.classify(['Name', 'Title', 'Total Pay']).kind, 'payroll');
+    assert.equal(B.classify(['Platform', 'Cost']).kind, 'ads');
+    assert.equal(B.classify(['Foo', 'Bar']), null);
+});
+
+test('period key', () => {
+    assert.equal(B.periodKey({ from: '2026-09-01' }), '2026-09');
+    assert.equal(B.periodKey({ from: '3/2/2026' }), '2026-03');
+    assert.equal(B.periodKey(null), null);
 });

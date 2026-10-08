@@ -315,7 +315,28 @@
     const money = v => (v < 0 ? '-' : '') + '$' + Math.round(Math.abs(v)).toLocaleString('en-US');
     const money2 = v => '$' + Number(v).toFixed(2);
 
-    const api = { num, parseCSV, detectColumns, missing, bucketOf, analyze, FIELDS, money, money2 };
+    // Which export a file is, from its headers: the kind whose required columns are all there
+    // and whose fields are best covered. Returns null when nothing fits.
+    function classify(headers) {
+        let best = null;
+        for (const kind of Object.keys(FIELDS)) {
+            const map = detectColumns(headers, kind);
+            if (missing(map, kind).length) continue;
+            const score = Object.values(map).filter(Boolean).length / Object.keys(FIELDS[kind]).length;
+            if (!best || score > best.score) best = { kind, map, score };
+        }
+        return best;
+    }
+
+    // "2026-09" for the month the period starts in.
+    function periodKey(period) {
+        if (!period) return null;
+        const m = /^(\d{4})-(\d{2})/.exec(period.from) || /^(\d{1,2})\/\d{1,2}\/(\d{4})/.exec(period.from);
+        if (!m) return null;
+        return m[1].length === 4 ? `${m[1]}-${m[2]}` : `${m[2]}-${m[1].padStart(2, '0')}`;
+    }
+
+    const api = { num, parseCSV, detectColumns, missing, classify, periodKey, bucketOf, analyze, FIELDS, money, money2 };
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.BizDash = api;
 })(typeof self !== 'undefined' ? self : this);
