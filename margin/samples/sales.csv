@@ -1,0 +1,365 @@
+date,invoice,client_id,new_client,service,provider,lead_source,amount,tip,payment_method
+2026-09-01,INV-10401,C5001,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Google Ads,415,83,Card
+2026-09-01,INV-10402,C5002,Y,Chemical Peel,Kelsey Tran,Instagram Ads,200,0,Cash
+2026-09-01,INV-10403,C5003,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Google Ads,655,0,Card
+2026-09-01,INV-10404,C5004,Y,Microneedling,Brooke Adler,Google Ads,420,0,Card
+2026-09-01,INV-10405,C4305,N,HydraFacial,Brooke Adler,Returning Client,255,0,CareCredit
+2026-09-01,INV-10406,C5006,Y,HydraFacial,Kelsey Tran,Walk-in / Organic,250,50,Card
+2026-09-01,INV-10407,C5007,Y,Chemical Peel,Kelsey Tran,Instagram Ads,180,0,Card
+2026-09-01,INV-10408,C5008,Y,IPL Photofacial,Tyler Moss,Google Ads,385,38,Card
+2026-09-01,INV-10409,C1292,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,610,122,CareCredit
+2026-09-01,INV-10410,C5010,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,715,143,Card
+2026-09-01,INV-10411,C5011,Y,Microneedling,Kelsey Tran,Google Ads,365,36,Card
+2026-09-01,INV-10412,C5012,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Google Ads,680,102,Card
+2026-09-01,INV-10413,C4059,N,Dermal Filler,Dana Whitfield,Returning Client,1105,221,Card
+2026-09-01,INV-10414,C3021,N,IPL Photofacial,Tyler Moss,Facebook Ads,365,0,Card
+2026-09-01,INV-10720,C2099,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10721,C2544,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10722,C3759,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10723,C3477,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10724,C3469,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10725,C1161,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10726,C4578,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10727,C1298,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10728,C1770,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10729,C4295,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10730,C4119,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10731,C3406,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10732,C3966,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10733,C3750,N,Glow Membership (monthly),Jenna Ruiz,,149,0,Card
+2026-09-01,INV-10734,C3289,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10735,C1888,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10736,C2963,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10737,C1855,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10738,C4561,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10739,C4715,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10740,C2363,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10741,C2241,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10742,C4919,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10743,C4723,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10744,C1062,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10745,C1867,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10746,C4838,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10747,C1778,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10748,C4940,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10749,C4037,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10750,C1480,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10751,C4059,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10752,C4089,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10753,C2961,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10754,C4745,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10755,C1993,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10756,C3849,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-01,INV-10757,C3475,N,Glow Membership (monthly),Jenna Ruiz,Membership,149,0,Card
+2026-09-02,INV-10415,C1260,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Returning Client,525,79,Card
+2026-09-02,INV-10416,C1047,N,Chemical Peel,Brooke Adler,Groupon,105,0,CareCredit
+2026-09-02,INV-10417,C2202,N,IPL Photofacial,Tyler Moss,Returning Client,385,58,Card
+2026-09-02,INV-10418,C5018,Y,HydraFacial,Brooke Adler,Walk-in / Organic,245,0,CareCredit
+2026-09-02,INV-10419,C5019,Y,Dermal Filler,Dana Whitfield,Google Ads,1105,221,Card
+2026-09-02,INV-10420,C4406,N,Chemical Peel,Brooke Adler,Instagram Ads,240,24,Card
+2026-09-02,INV-10420,C4406,N,Chemical Peel,Brooke Adler,Instagram Ads,240,24,Card
+2026-09-02,INV-10421,C5021,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Instagram Ads,405,81,Card
+2026-09-02,INV-10422,C5022,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Walk-in / Organic,560,112,Card
+2026-09-02,INV-10423,C3751,N,Retail Skincare,Jenna Ruiz,Returning Client,130,0,CareCredit
+2026-09-02,INV-10424,C5024,Y,HydraFacial,Brooke Adler,Instagram Ads,230,46,Cash
+2026-09-02,INV-10425,C5025,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Instagram Ads,400,0,Card
+2026-09-02,INV-10426,C5026,Y,IPL Photofacial,Tyler Moss,Groupon,180,36,Card
+2026-09-02,INV-10427,C5027,Y,Laser Hair Removal,Tyler Moss,Google Ads,250,0,Card
+2026-09-02,INV-10428,C5028,Y,Microneedling,Brooke Adler,Facebook Ads,415,0,Card
+2026-09-02,INV-10429,C1784,N,HydraFacial,Brooke Adler,Returning Client,210,0,Cash
+2026-09-03,INV-10430,C5030,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,695,104,Cash
+2026-09-03,INV-10431,C1681,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Walk-in / Organic,670,100,Card
+2026-09-03,INV-10432,C1008,N,HydraFacial,Brooke Adler,Returning Client,215,32,Card
+2026-09-03,INV-10433,C5033,Y,Retail Skincare,Kelsey Tran,Google Ads,190,0,Cash
+2026-09-03,INV-10434,C5034,Y,Microneedling,Brooke Adler,Google Ads,445,89,CareCredit
+2026-09-03,INV-10435,C5035,Y,HydraFacial,Brooke Adler,Instagram Ads,245,49,Card
+2026-09-03,INV-10436,C1278,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Returning Client,405,0,Card
+2026-09-03,INV-10437,C5037,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Referral,410,82,Cash
+2026-09-03,INV-10438,C5038,Y,HydraFacial,Brooke Adler,Google Ads,220,33,Card
+2026-09-03,INV-10439,C1038,N,Microneedling,Brooke Adler,Groupon,200,30,Cash
+2026-09-03,INV-10440,C5040,Y,Retail Skincare,Jenna Ruiz,Instagram Ads,110,0,Card
+2026-09-03,INV-10441,C5041,Y,IPL Photofacial,Tyler Moss,Facebook Ads,435,44,Cash
+2026-09-04,INV-10442,C5042,Y,Microneedling,Kelsey Tran,Referral,440,0,Card
+2026-09-04,INV-10443,C2154,N,Dermal Filler,Dana Whitfield,Returning Client,815,163,Card
+2026-09-04,INV-10444,C3070,N,Laser Hair Removal,Tyler Moss,Returning Client,365,55,Card
+2026-09-04,INV-10445,C5045,Y,IPL Photofacial,Tyler Moss,Instagram Ads,380,0,Card
+2026-09-04,INV-10446,C5046,Y,Laser Hair Removal,Tyler Moss,Google Ads,325,65,Card
+2026-09-04,INV-10447,C5047,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Referral,580,0,Card
+2026-09-04,INV-10448,C1163,N,Neurotoxin (Botox/Dysport),Marisol Vega,Facebook Ads,710,71,Card
+2026-09-04,INV-10449,C5049,Y,Microneedling,Kelsey Tran,Facebook Ads,435,87,CareCredit
+2026-09-04,INV-10450,C4320,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Returning Client,710,0,Card
+2026-09-04,INV-10451,C3743,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,520,0,Card
+2026-09-04,INV-10452,C5052,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Facebook Ads,540,0,Card
+2026-09-04,INV-10453,C5053,Y,Dermal Filler,Dana Whitfield,Google Ads,1000,100,Card
+2026-09-04,INV-10454,C5054,Y,Retail Skincare,Kelsey Tran,Facebook Ads,180,0,Cash
+2026-09-04,INV-10455,C4942,N,Dermal Filler,Dana Whitfield,Instagram Ads,835,84,Card
+2026-09-04,INV-10456,C5056,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Facebook Ads,530,106,Card
+2026-09-05,INV-10457,C5057,Y,IPL Photofacial,Tyler Moss,Google Ads,350,70,CareCredit
+2026-09-05,INV-10458,C5058,Y,Laser Hair Removal,Tyler Moss,Facebook Ads,315,32,Cash
+2026-09-05,INV-10459,C2266,N,Dermal Filler,Dana Whitfield,Returning Client,925,139,Card
+2026-09-05,INV-10460,C5060,Y,HydraFacial,Brooke Adler,Referral,260,39,CareCredit
+2026-09-05,INV-10461,C5061,Y,Laser Hair Removal,Tyler Moss,Referral,285,0,Card
+2026-09-05,INV-10462,C2319,N,Dermal Filler,Marisol Vega,Returning Client,1155,173,Card
+2026-09-05,INV-10463,C5063,Y,HydraFacial,Kelsey Tran,Groupon,130,0,CareCredit
+2026-09-05,INV-10464,C2271,N,Neurotoxin (Botox/Dysport),Marisol Vega,Instagram Ads,460,0,Card
+2026-09-05,INV-10465,C5065,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,670,0,Card
+2026-09-05,INV-10466,C2636,N,HydraFacial,Kelsey Tran,Returning Client,235,0,Card
+2026-09-05,INV-10467,C4626,N,Microneedling,Kelsey Tran,Returning Client,435,0,Card
+2026-09-05,INV-10468,C5068,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Instagram Ads,670,100,Card
+2026-09-05,INV-10758,C3882,N,Gift Card Sale,Jenna Ruiz,Walk-in / Organic,200,0,Card
+2026-09-07,INV-10469,C3946,N,HydraFacial,Brooke Adler,Walk-in / Organic,255,51,Card
+2026-09-07,INV-10470,C2944,N,Laser Hair Removal,Tyler Moss,Returning Client,335,50,Card
+2026-09-07,INV-10471,C3567,N,Laser Hair Removal,Tyler Moss,Returning Client,280,0,Card
+2026-09-07,INV-10472,C5072,Y,HydraFacial,Brooke Adler,Google Ads,280,0,Card
+2026-09-07,INV-10473,C1263,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,620,93,Card
+2026-09-07,INV-10474,C5074,Y,Dermal Filler,Marisol Vega,Facebook Ads,1015,203,CareCredit
+2026-09-07,INV-10475,C2597,N,Neurotoxin (Botox/Dysport),Marisol Vega,Groupon,215,32,Cash
+2026-09-07,INV-10476,C5076,Y,Laser Hair Removal,Tyler Moss,Groupon,120,18,Card
+2026-09-07,INV-10477,C4766,N,Microneedling,Brooke Adler,Returning Client,430,0,Cash
+2026-09-07,INV-10478,C5078,Y,HydraFacial,Brooke Adler,Referral,205,31,Card
+2026-09-07,INV-10479,C5079,Y,IPL Photofacial,Tyler Moss,Instagram Ads,370,37,Card
+2026-09-07,INV-10480,C4419,N,Laser Hair Removal,Tyler Moss,Google Ads,255,0,Card
+2026-09-07,INV-10481,C5081,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Walk-in / Organic,600,0,Card
+2026-09-07,INV-10482,C1977,N,Retail Skincare,Jenna Ruiz,Returning Client,170,0,Card
+2026-09-07,INV-10483,C5083,Y,HydraFacial,Kelsey Tran,Referral,260,26,Card
+2026-09-08,INV-10484,C2274,N,Chemical Peel,Kelsey Tran,Returning Client,165,0,Cash
+2026-09-08,INV-10485,C4856,N,Neurotoxin (Botox/Dysport),Marisol Vega,Referral,510,0,Card
+2026-09-08,INV-10486,C5086,Y,Chemical Peel,Kelsey Tran,Instagram Ads,235,47,Card
+2026-09-08,INV-10487,C5087,Y,Laser Hair Removal,Tyler Moss,Facebook Ads,245,49,CareCredit
+2026-09-08,INV-10488,C4935,N,Dermal Filler,Marisol Vega,Returning Client,780,78,CareCredit
+2026-09-08,INV-10489,C4005,N,IPL Photofacial,Tyler Moss,Returning Client,395,79,CareCredit
+2026-09-08,INV-10490,C5090,Y,Dermal Filler,Marisol Vega,Groupon,515,52,Card
+2026-09-08,INV-10491,C5091,Y,Laser Hair Removal,Tyler Moss,Google Ads,340,68,Cash
+2026-09-08,INV-10492,C1868,N,Microneedling,Brooke Adler,Instagram Ads,350,35,Card
+2026-09-08,INV-10493,C5093,Y,Dermal Filler,Marisol Vega,Referral,845,0,CareCredit
+2026-09-08,INV-10494,C3010,N,HydraFacial,Kelsey Tran,Returning Client,255,38,Card
+2026-09-08,INV-10495,C5095,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Facebook Ads,605,60,Card
+2026-09-08,INV-10496,C5096,Y,Chemical Peel,Brooke Adler,Facebook Ads,185,28,Card
+2026-09-09,INV-10497,C4042,N,Dermal Filler,Dana Whitfield,Returning Client,935,187,CareCredit
+2026-09-09,INV-10498,C3414,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Returning Client,475,95,Cash
+2026-09-09,INV-10499,C2478,N,Dermal Filler,Dana Whitfield,Returning Client,920,0,Card
+2026-09-09,INV-10500,C3856,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,570,0,CareCredit
+2026-09-09,INV-10501,C5101,Y,IPL Photofacial,Tyler Moss,Instagram Ads,380,57,Card
+2026-09-09,INV-10502,C1267,N,Dermal Filler,Dana Whitfield,Google Ads,785,118,Card
+2026-09-09,INV-10503,C5103,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,705,0,Card
+2026-09-09,INV-10504,C5104,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Referral,455,91,Card
+2026-09-09,INV-10505,C5105,Y,HydraFacial,Brooke Adler,Google Ads,240,48,Cash
+2026-09-09,INV-10506,C5106,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Walk-in / Organic,450,0,Card
+2026-09-09,INV-10507,C5107,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,615,92,Card
+2026-09-10,INV-10508,C3815,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,535,0,Card
+2026-09-10,INV-10509,C5109,Y,Laser Hair Removal,Tyler Moss,Facebook Ads,310,31,Card
+2026-09-10,INV-10510,C4376,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Returning Client,580,116,Card
+2026-09-10,INV-10511,C4861,N,HydraFacial,Brooke Adler,Returning Client,260,26,Cash
+2026-09-10,INV-10512,C5112,Y,HydraFacial,Brooke Adler,Instagram Ads,240,24,Cash
+2026-09-10,INV-10513,C5113,Y,Dermal Filler,Dana Whitfield,Google Ads,1345,269,Card
+2026-09-10,INV-10514,C5114,Y,Retail Skincare,Kelsey Tran,Referral,90,0,Cash
+2026-09-10,INV-10515,C5115,Y,Microneedling,Brooke Adler,Google Ads,405,61,Card
+2026-09-10,INV-10516,C5116,Y,HydraFacial,Brooke Adler,Facebook Ads,275,28,Card
+2026-09-10,INV-10759,C1837,N,Gift Card Sale,Jenna Ruiz,Walk-in / Organic,150,0,Card
+2026-09-11,INV-10517,C2862,N,HydraFacial,Brooke Adler,Returning Client,250,0,Card
+2026-09-11,INV-10518,C5118,Y,Dermal Filler,Dana Whitfield,Walk-in / Organic,1085,0,CareCredit
+2026-09-11,INV-10519,C5119,Y,IPL Photofacial,Tyler Moss,Facebook Ads,385,58,CareCredit
+2026-09-11,INV-10520,C5120,Y,HydraFacial,Kelsey Tran,Google Ads,280,42,CareCredit
+2026-09-11,INV-10521,C5121,Y,HydraFacial,Kelsey Tran,Walk-in / Organic,220,0,Card
+2026-09-11,INV-10522,C2890,N,Chemical Peel,Brooke Adler,Instagram Ads,240,0,CareCredit
+2026-09-11,INV-10523,C3889,N,Laser Hair Removal,Tyler Moss,Returning Client,225,22,Card
+2026-09-11,INV-10524,C5124,Y,Laser Hair Removal,Tyler Moss,Google Ads,245,49,Cash
+2026-09-11,INV-10525,C4235,N,Laser Hair Removal,Tyler Moss,Returning Client,220,33,Card
+2026-09-11,INV-10526,C2222,N,Retail Skincare,Kelsey Tran,Returning Client,110,0,Cash
+2026-09-11,INV-10527,C2983,N,Chemical Peel,Brooke Adler,Returning Client,195,20,Card
+2026-09-11,INV-10528,C5128,Y,Chemical Peel,Brooke Adler,Groupon,75,0,Cash
+2026-09-11,INV-10529,C5129,Y,HydraFacial,Brooke Adler,Instagram Ads,260,39,Card
+2026-09-11,INV-10530,C5130,Y,Retail Skincare,Jenna Ruiz,Groupon,150,0,Cash
+2026-09-12,INV-10531,C1590,N,IPL Photofacial,Tyler Moss,Instagram Ads,350,52,CareCredit
+2026-09-12,INV-10532,C3837,N,Retail Skincare,Jenna Ruiz,Groupon,120,0,Card
+2026-09-12,INV-10533,C2556,N,Microneedling,Brooke Adler,Returning Client,430,43,CareCredit
+2026-09-12,INV-10534,C1280,N,Laser Hair Removal,Tyler Moss,Returning Client,160,0,CareCredit
+2026-09-12,INV-10535,C5135,Y,Microneedling,Brooke Adler,Walk-in / Organic,380,0,CareCredit
+2026-09-12,INV-10536,C5136,Y,Microneedling,Kelsey Tran,Groupon,200,0,Card
+2026-09-12,INV-10537,C5137,Y,Laser Hair Removal,Tyler Moss,Facebook Ads,210,32,Cash
+2026-09-12,INV-10538,C5138,Y,Microneedling,Kelsey Tran,Google Ads,435,87,CareCredit
+2026-09-12,INV-10539,C5139,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,535,0,Card
+2026-09-12,INV-10540,C2225,N,IPL Photofacial,Tyler Moss,Instagram Ads,450,68,CareCredit
+2026-09-12,INV-10541,C5141,Y,Dermal Filler,Marisol Vega,Google Ads,1060,0,Card
+2026-09-14,INV-10542,C5142,Y,HydraFacial,Brooke Adler,Walk-in / Organic,285,43,Card
+2026-09-14,INV-10543,C4411,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Returning Client,635,64,Card
+2026-09-14,INV-10544,C5144,Y,Chemical Peel,Brooke Adler,Google Ads,175,0,CareCredit
+2026-09-14,INV-10545,C5145,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,,575,0,Card
+2026-09-14,INV-10546,C1541,N,Retail Skincare,Kelsey Tran,Returning Client,90,0,Cash
+2026-09-14,INV-10547,C2052,N,IPL Photofacial,Tyler Moss,Referral,435,65,Card
+2026-09-14,INV-10548,C1308,N,Laser Hair Removal,Tyler Moss,Returning Client,265,0,Card
+2026-09-14,INV-10549,C5149,Y,IPL Photofacial,Tyler Moss,Walk-in / Organic,385,58,Card
+2026-09-14,INV-10550,C5150,Y,Dermal Filler,Dana Whitfield,Groupon,540,108,Card
+2026-09-14,INV-10551,C5151,Y,Laser Hair Removal,Tyler Moss,Instagram Ads,155,31,Card
+2026-09-14,INV-10552,C5152,Y,Retail Skincare,Jenna Ruiz,Referral,145,0,CareCredit
+2026-09-14,INV-10553,C5153,Y,Dermal Filler,Marisol Vega,Instagram Ads,730,110,Card
+2026-09-14,INV-10554,C5154,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Facebook Ads,705,141,Card
+2026-09-15,INV-10555,C4414,N,Laser Hair Removal,Tyler Moss,Returning Client,315,47,Cash
+2026-09-15,INV-10556,C5156,Y,HydraFacial,Brooke Adler,Instagram Ads,240,0,Card
+2026-09-15,INV-10557,C2630,N,Neurotoxin (Botox/Dysport),Marisol Vega,Referral,500,50,Card
+2026-09-15,INV-10558,C5158,Y,Retail Skincare,Kelsey Tran,Instagram Ads,175,0,Card
+2026-09-15,INV-10559,C5159,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Google Ads,570,0,Cash
+2026-09-15,INV-10560,C4171,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Returning Client,460,0,Cash
+2026-09-15,INV-10561,C5161,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Walk-in / Organic,650,0,CareCredit
+2026-09-15,INV-10562,C5162,Y,IPL Photofacial,Tyler Moss,Instagram Ads,375,38,Card
+2026-09-15,INV-10563,C5163,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Instagram Ads,420,0,Card
+2026-09-15,INV-10564,C5164,Y,HydraFacial,Brooke Adler,Groupon,110,22,Card
+2026-09-15,INV-10565,C2961,N,Laser Hair Removal,Tyler Moss,,75,11,Card
+2026-09-15,INV-10566,C4683,N,Microneedling,Brooke Adler,Returning Client,380,0,Card
+2026-09-15,INV-10567,C5167,Y,Chemical Peel,Kelsey Tran,Instagram Ads,210,21,Card
+2026-09-15,INV-10760,C2624,N,Gift Card Sale,Jenna Ruiz,Walk-in / Organic,500,0,Card
+2026-09-16,INV-10568,C5168,Y,HydraFacial,Brooke Adler,Groupon,120,0,CareCredit
+2026-09-16,INV-10569,C4389,N,Microneedling,Kelsey Tran,Facebook Ads,375,56,Card
+2026-09-16,INV-10570,C5170,Y,HydraFacial,Kelsey Tran,Google Ads,220,0,CareCredit
+2026-09-16,INV-10571,C5171,Y,Retail Skincare,Jenna Ruiz,Instagram Ads,140,0,CareCredit
+2026-09-16,INV-10572,C5172,Y,Laser Hair Removal,Tyler Moss,Referral,290,29,CareCredit
+2026-09-16,INV-10573,C2732,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,700,0,Card
+2026-09-16,INV-10574,C5174,Y,Chemical Peel,Brooke Adler,Instagram Ads,165,25,Card
+2026-09-16,INV-10575,C4123,N,Laser Hair Removal,Tyler Moss,Returning Client,240,24,Cash
+2026-09-16,INV-10576,C4352,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,710,142,Cash
+2026-09-16,INV-10577,C5177,Y,Microneedling,Kelsey Tran,Referral,410,0,Card
+2026-09-16,INV-10578,C1743,N,Dermal Filler,Marisol Vega,Returning Client,965,0,Cash
+2026-09-16,INV-10579,C5179,Y,Microneedling,Kelsey Tran,Google Ads,330,66,Card
+2026-09-16,INV-10580,C5180,Y,HydraFacial,Brooke Adler,Facebook Ads,265,53,Cash
+2026-09-17,INV-10581,C5181,Y,IPL Photofacial,Tyler Moss,Google Ads,415,42,Card
+2026-09-17,INV-10582,C5182,Y,Microneedling,Brooke Adler,Referral,350,70,Card
+2026-09-17,INV-10583,C5183,Y,Dermal Filler,Dana Whitfield,Google Ads,1065,106,Card
+2026-09-17,INV-10584,C5184,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Instagram Ads,450,0,Card
+2026-09-17,INV-10585,C5185,Y,Dermal Filler,Dana Whitfield,Instagram Ads,830,124,Cash
+2026-09-17,INV-10586,C1076,N,Microneedling,Brooke Adler,Instagram Ads,330,50,Card
+2026-09-17,INV-10587,C5187,Y,IPL Photofacial,Tyler Moss,Referral,390,0,Card
+2026-09-17,INV-10588,C3824,N,Neurotoxin (Botox/Dysport),Marisol Vega,Google Ads,535,54,Card
+2026-09-17,INV-10589,C5189,Y,HydraFacial,Kelsey Tran,Google Ads,245,37,Card
+2026-09-18,INV-10590,C3593,N,Dermal Filler,Marisol Vega,Returning Client,755,0,Cash
+2026-09-18,INV-10591,C1604,N,HydraFacial,Brooke Adler,Facebook Ads,255,0,Card
+2026-09-18,INV-10592,C5192,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,640,0,Card
+2026-09-18,INV-10593,C5193,Y,Retail Skincare,Kelsey Tran,Groupon,165,0,CareCredit
+2026-09-18,INV-10594,C1618,N,Retail Skincare,Kelsey Tran,Returning Client,175,0,Card
+2026-09-18,INV-10595,C5195,Y,Neurotoxin (Botox/Dysport),Marisol Vega,,580,58,Cash
+2026-09-18,INV-10596,C5196,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Groupon,300,0,CareCredit
+2026-09-18,INV-10597,C5197,Y,IPL Photofacial,Tyler Moss,Referral,395,79,CareCredit
+2026-09-18,INV-10598,C1771,N,IPL Photofacial,Tyler Moss,Returning Client,405,40,Cash
+2026-09-18,INV-10599,C5199,Y,HydraFacial,Kelsey Tran,Walk-in / Organic,270,27,CareCredit
+2026-09-18,INV-10600,C5200,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Instagram Ads,715,143,Cash
+2026-09-18,INV-10601,C5201,Y,Chemical Peel,Brooke Adler,Facebook Ads,190,19,CareCredit
+2026-09-18,INV-10602,C5202,Y,Chemical Peel,Brooke Adler,Instagram Ads,220,22,Card
+2026-09-18,INV-10603,C5203,Y,Laser Hair Removal,Tyler Moss,Facebook Ads,185,18,Card
+2026-09-19,INV-10604,C5204,Y,Microneedling,Brooke Adler,Instagram Ads,335,67,Card
+2026-09-19,INV-10605,C4395,N,Microneedling,Brooke Adler,Returning Client,410,82,Card
+2026-09-19,INV-10606,C5206,Y,Microneedling,Brooke Adler,Groupon,165,0,Card
+2026-09-19,INV-10607,C2211,N,Retail Skincare,Kelsey Tran,Google Ads,90,0,Card
+2026-09-19,INV-10608,C3446,N,HydraFacial,Kelsey Tran,Referral,255,38,Card
+2026-09-19,INV-10609,C2492,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Returning Client,395,0,Card
+2026-09-19,INV-10610,C5210,Y,Chemical Peel,Brooke Adler,Google Ads,245,37,Card
+2026-09-19,INV-10611,C5211,Y,HydraFacial,Brooke Adler,Groupon,105,21,Card
+2026-09-19,INV-10612,C2024,N,Retail Skincare,Jenna Ruiz,Returning Client,85,0,Card
+2026-09-19,INV-10613,C5213,Y,Microneedling,Brooke Adler,Referral,430,0,Card
+2026-09-19,INV-10614,C2791,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,430,0,Card
+2026-09-19,INV-10615,C2623,N,Laser Hair Removal,Tyler Moss,Returning Client,255,51,Card
+2026-09-19,INV-10616,C5216,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Facebook Ads,695,70,Card
+2026-09-19,INV-10617,C4404,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,540,0,CareCredit
+2026-09-20,INV-10761,C4748,N,Gift Card Sale,Jenna Ruiz,Walk-in / Organic,100,0,Card
+2026-09-21,INV-10618,C1883,N,HydraFacial,Kelsey Tran,Returning Client,200,0,Cash
+2026-09-21,INV-10619,C5219,Y,Retail Skincare,Kelsey Tran,Instagram Ads,115,0,Card
+2026-09-21,INV-10620,C5220,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Instagram Ads,550,110,Card
+2026-09-21,INV-10621,C1006,N,Microneedling,Kelsey Tran,Returning Client,360,72,Card
+2026-09-21,INV-10622,C5222,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Google Ads,560,56,Card
+2026-09-21,INV-10623,C5223,Y,Retail Skincare,Jenna Ruiz,Facebook Ads,175,0,Card
+2026-09-21,INV-10624,C5224,Y,Dermal Filler,Dana Whitfield,Facebook Ads,880,0,Cash
+2026-09-21,INV-10625,C5225,Y,Laser Hair Removal,Tyler Moss,Instagram Ads,235,0,CareCredit
+2026-09-21,INV-10626,C5226,Y,HydraFacial,Brooke Adler,Referral,205,31,Card
+2026-09-21,INV-10627,C2292,N,Dermal Filler,Dana Whitfield,Returning Client,1365,136,Cash
+2026-09-21,INV-10628,C5228,Y,HydraFacial,Brooke Adler,Google Ads,215,22,Card
+2026-09-21,INV-10629,C5229,Y,IPL Photofacial,Tyler Moss,Google Ads,395,59,CareCredit
+2026-09-22,INV-10630,C5230,Y,IPL Photofacial,Tyler Moss,Facebook Ads,420,42,Cash
+2026-09-22,INV-10631,C3467,N,Dermal Filler,Dana Whitfield,Returning Client,760,0,Cash
+2026-09-22,INV-10632,C5232,Y,Dermal Filler,Dana Whitfield,Instagram Ads,930,186,CareCredit
+2026-09-22,INV-10633,C5233,Y,HydraFacial,Brooke Adler,Facebook Ads,275,28,Cash
+2026-09-22,INV-10634,C5234,Y,Retail Skincare,Kelsey Tran,Referral,70,0,CareCredit
+2026-09-22,INV-10635,C5235,Y,Microneedling,Brooke Adler,Groupon,155,0,Card
+2026-09-22,INV-10636,C5236,Y,Laser Hair Removal,Tyler Moss,Instagram Ads,345,34,Card
+2026-09-22,INV-10637,C5237,Y,HydraFacial,Kelsey Tran,Referral,285,28,Card
+2026-09-22,INV-10638,C5238,Y,Laser Hair Removal,Tyler Moss,Groupon,140,0,Card
+2026-09-22,INV-10639,C5239,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,,255,26,Card
+2026-09-22,INV-10640,C5240,Y,Microneedling,Kelsey Tran,Walk-in / Organic,440,66,Card
+2026-09-22,INV-10641,C1359,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Groupon,240,24,CareCredit
+2026-09-23,INV-10642,C3915,N,Laser Hair Removal,Tyler Moss,Returning Client,365,0,Card
+2026-09-23,INV-10643,C5243,Y,HydraFacial,Kelsey Tran,Walk-in / Organic,220,33,Card
+2026-09-23,INV-10644,C4621,N,HydraFacial,Brooke Adler,Groupon,95,0,Card
+2026-09-23,INV-10645,C5245,Y,Dermal Filler,Marisol Vega,Groupon,595,0,Card
+2026-09-23,INV-10646,C5246,Y,Retail Skincare,Jenna Ruiz,Groupon,120,0,Cash
+2026-09-23,INV-10647,C3059,N,Microneedling,Kelsey Tran,Returning Client,340,0,Card
+2026-09-23,INV-10648,C5248,Y,HydraFacial,Brooke Adler,Google Ads,265,26,Cash
+2026-09-23,INV-10649,C5249,Y,IPL Photofacial,Tyler Moss,Google Ads,405,0,CareCredit
+2026-09-23,INV-10650,C5250,Y,Dermal Filler,Dana Whitfield,Groupon,630,0,Card
+2026-09-23,INV-10651,C4380,N,Microneedling,Brooke Adler,Returning Client,395,0,Card
+2026-09-23,INV-10652,C5252,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Referral,520,0,Card
+2026-09-24,INV-10653,C5253,Y,HydraFacial,Brooke Adler,Groupon,115,12,Card
+2026-09-24,INV-10654,C5254,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,540,54,Cash
+2026-09-24,INV-10655,C4995,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,675,101,Card
+2026-09-24,INV-10656,C5256,Y,Laser Hair Removal,Tyler Moss,Google Ads,215,0,Card
+2026-09-24,INV-10657,C4943,N,Neurotoxin (Botox/Dysport),Marisol Vega,Walk-in / Organic,520,0,Card
+2026-09-24,INV-10658,C5258,Y,Retail Skincare,Kelsey Tran,Google Ads,240,0,Card
+2026-09-24,INV-10659,C5259,Y,HydraFacial,Brooke Adler,Groupon,105,16,Card
+2026-09-24,INV-10660,C5260,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Instagram Ads,585,88,Card
+2026-09-24,INV-10661,C4128,N,HydraFacial,Kelsey Tran,Facebook Ads,265,40,Card
+2026-09-24,INV-10662,C5262,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Referral,570,0,Card
+2026-09-24,INV-10663,C3502,N,HydraFacial,Brooke Adler,Returning Client,255,0,Card
+2026-09-24,INV-10664,C2497,N,Retail Skincare,Kelsey Tran,Facebook Ads,160,0,Card
+2026-09-24,INV-10665,C5265,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Groupon,190,19,Card
+2026-09-24,INV-10666,C5266,Y,HydraFacial,Kelsey Tran,Referral,230,46,Card
+2026-09-25,INV-10667,C5267,Y,HydraFacial,Brooke Adler,Referral,245,37,CareCredit
+2026-09-25,INV-10668,C3759,N,Chemical Peel,Brooke Adler,Returning Client,185,0,Card
+2026-09-25,INV-10669,C5269,Y,Chemical Peel,Kelsey Tran,Referral,215,43,Cash
+2026-09-25,INV-10670,C5270,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Referral,595,119,Card
+2026-09-25,INV-10671,C1077,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Instagram Ads,415,62,Card
+2026-09-25,INV-10672,C4174,N,HydraFacial,Brooke Adler,Returning Client,235,47,Card
+2026-09-25,INV-10673,C3297,N,IPL Photofacial,Tyler Moss,Returning Client,400,40,CareCredit
+2026-09-25,INV-10674,C5274,Y,HydraFacial,Brooke Adler,,280,28,Cash
+2026-09-25,INV-10675,C5275,Y,Dermal Filler,Marisol Vega,Referral,885,177,Card
+2026-09-25,INV-10676,C3827,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,620,93,Card
+2026-09-25,INV-10762,C1980,N,Gift Card Sale,Jenna Ruiz,Walk-in / Organic,250,0,Card
+2026-09-26,INV-10677,C5277,Y,Dermal Filler,Marisol Vega,Google Ads,1105,166,Card
+2026-09-26,INV-10678,C5278,Y,Retail Skincare,Jenna Ruiz,Google Ads,190,0,Card
+2026-09-26,INV-10679,C4391,N,Retail Skincare,Kelsey Tran,Returning Client,100,0,Cash
+2026-09-26,INV-10680,C5280,Y,Dermal Filler,Marisol Vega,Instagram Ads,1140,0,Card
+2026-09-26,INV-10681,C5281,Y,Microneedling,Kelsey Tran,Referral,375,56,Card
+2026-09-26,INV-10682,C5282,Y,Microneedling,Kelsey Tran,Instagram Ads,440,66,CareCredit
+2026-09-26,INV-10683,C5283,Y,Retail Skincare,Kelsey Tran,,235,0,Card
+2026-09-26,INV-10684,C3351,N,Dermal Filler,Dana Whitfield,Returning Client,765,0,Cash
+2026-09-26,INV-10685,C4613,N,Laser Hair Removal,Tyler Moss,Returning Client,195,0,Card
+2026-09-26,INV-10686,C4067,N,Retail Skincare,Kelsey Tran,Returning Client,95,0,Card
+2026-09-26,INV-10687,C5287,Y,IPL Photofacial,Tyler Moss,Google Ads,445,44,Card
+2026-09-26,INV-10688,C3065,N,HydraFacial,Brooke Adler,Returning Client,210,32,Card
+2026-09-28,INV-10689,C5289,Y,Laser Hair Removal,Tyler Moss,Google Ads,215,0,Card
+2026-09-28,INV-10690,C5290,Y,Laser Hair Removal,Tyler Moss,Referral,195,29,Card
+2026-09-28,INV-10691,C5291,Y,HydraFacial,Kelsey Tran,Facebook Ads,285,43,Card
+2026-09-28,INV-10692,C5292,Y,Retail Skincare,Jenna Ruiz,Google Ads,195,0,Card
+2026-09-28,INV-10693,C5293,Y,Dermal Filler,Dana Whitfield,Google Ads,875,0,Card
+2026-09-28,INV-10694,C4636,N,Dermal Filler,Marisol Vega,Returning Client,1390,139,CareCredit
+2026-09-28,INV-10695,C5295,Y,Neurotoxin (Botox/Dysport),Marisol Vega,Facebook Ads,705,106,Card
+2026-09-28,INV-10696,C5296,Y,HydraFacial,Brooke Adler,Facebook Ads,240,48,CareCredit
+2026-09-28,INV-10697,C4225,N,Laser Hair Removal,Tyler Moss,Returning Client,300,0,Cash
+2026-09-28,INV-10698,C5298,Y,HydraFacial,Brooke Adler,Instagram Ads,205,41,Cash
+2026-09-29,INV-10699,C3786,N,Chemical Peel,Kelsey Tran,Google Ads,195,0,CareCredit
+2026-09-29,INV-10700,C1227,N,Chemical Peel,Kelsey Tran,Returning Client,195,29,Card
+2026-09-29,INV-10701,C5301,Y,HydraFacial,Brooke Adler,Referral,260,26,CareCredit
+2026-09-29,INV-10702,C3368,N,Neurotoxin (Botox/Dysport),Marisol Vega,Returning Client,635,0,Card
+2026-09-29,INV-10703,C5303,Y,HydraFacial,Kelsey Tran,Referral,280,42,Card
+2026-09-29,INV-10704,C3987,N,Dermal Filler,Dana Whitfield,Returning Client,1275,191,Card
+2026-09-29,INV-10705,C1328,N,Retail Skincare,Kelsey Tran,Groupon,130,0,CareCredit
+2026-09-29,INV-10706,C5306,Y,Retail Skincare,Jenna Ruiz,Referral,90,0,Cash
+2026-09-29,INV-10707,C1014,N,HydraFacial,Kelsey Tran,Returning Client,220,0,Card
+2026-09-29,INV-10708,C5308,Y,HydraFacial,Brooke Adler,Referral,220,22,Card
+2026-09-30,INV-10709,C5309,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Instagram Ads,590,0,Card
+2026-09-30,INV-10710,C5310,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Referral,610,0,Card
+2026-09-30,INV-10711,C5311,Y,Laser Hair Removal,Tyler Moss,Facebook Ads,340,0,Card
+2026-09-30,INV-10712,C3365,N,HydraFacial,Brooke Adler,Google Ads,250,50,CareCredit
+2026-09-30,INV-10713,C5313,Y,Laser Hair Removal,Tyler Moss,Google Ads,315,0,Card
+2026-09-30,INV-10714,C5314,Y,Dermal Filler,Dana Whitfield,Referral,1250,0,CareCredit
+2026-09-30,INV-10715,C5315,Y,Microneedling,Brooke Adler,Instagram Ads,405,61,Cash
+2026-09-30,INV-10716,C5316,Y,Dermal Filler,Marisol Vega,Facebook Ads,840,168,Card
+2026-09-30,INV-10717,C5317,Y,Neurotoxin (Botox/Dysport),Dana Whitfield,Google Ads,655,0,Cash
+2026-09-30,INV-10718,C5318,Y,HydraFacial,Brooke Adler,Referral,220,0,Card
+2026-09-30,INV-10719,C3967,N,Microneedling,Brooke Adler,Returning Client,335,0,Card
+2026-09-22,INV-REF-01,C5081,N,Neurotoxin (Botox/Dysport),Dana Whitfield,Walk-in / Organic,-600,0,Card
